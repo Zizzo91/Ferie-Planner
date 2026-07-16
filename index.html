@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pianificazione Ferie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --ferie: #3b82f6;
+  --ferie-bg: #dbeafe;
+  --ferie-light: #eff6ff;
+  --permesso: #10b981;
+  --permesso-bg: #d1fae5;
+  --permesso-light: #ecfdf5;
+  --exfesta: #f59e0b;
+  --exfesta-bg: #fde68a;
+  --exfesta-light: #fffbeb;
+  --sabato-bg: #f8faff;
+  --domenica-bg: #fef5f5;
+  --festivo: #ef4444;
+  --festivo-bg: #fef2f2;
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
+  --transition: 0.2s ease;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+[data-theme="dark"] {
+  --ferie: #60a5fa;
+  --ferie-bg: #1e3a5f;
+  --ferie-light: #172554;
+  --permesso: #34d399;
+  --permesso-bg: #064e3b;
+  --permesso-light: #022c22;
+  --exfesta: #fbbf24;
+  --exfesta-bg: #713f12;
+  --exfesta-light: #451a03;
+  --sabato-bg: #0f172a;
+  --domenica-bg: #2d1b1b;
+  --festivo: #f87171;
+  --festivo-bg: #3b1212;
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #2d3140;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+header p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.theme-toggle:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+/* ── Profili ── */
+.profile-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: var(--transition);
+  user-select: none;
+}
+
+.profile-select:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  display: none;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.profile-dropdown.open {
+  display: block;
+}
+
+.profile-dropdown-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background var(--transition);
+  color: var(--text);
+  text-align: left;
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: var(--font);
+}
+
+.profile-dropdown-item:hover {
+  background: var(--bg);
+}
+
+.profile-dropdown-item.active {
+  font-weight: 600;
+  color: var(--ferie);
+}
+
+.profile-dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.profile-dropdown-item.danger {
+  color: var(--festivo);
+}
+
+.profile-dropdown-item.danger:hover {
+  background: var(--festivo-bg);
+}
+
+/* ── Profile management modal ── */
+.profile-mgmt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-mgmt-row:last-child {
+  border-bottom: none;
+}
+
+.profile-mgmt-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-mgmt-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.profile-mgmt-actions button {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.profile-mgmt-actions button:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.profile-mgmt-actions button.danger {
+  color: var(--festivo);
+}
+
+.profile-mgmt-actions button.danger:hover {
+  background: var(--festivo-bg);
+  border-color: var(--festivo);
+}
+
+.profile-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.profile-add-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.profile-add-row input:focus {
+  border-color: var(--ferie);
+}
+
+.profile-add-row button {
+  padding: 8px 16px;
+  background: var(--ferie);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.profile-add-row button:hover {
+  opacity: 0.9;
+}
+
+.profile-mgmt-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  text-align: center;
+}
+
+.profile-mgmt-error {
+  font-size: 12px;
+  color: var(--festivo);
+  margin-top: 6px;
+  display: none;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+/* ── Config ── */
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.config-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.config-field input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--transition);
+  background: var(--surface);
+}
+
+.config-field input:focus {
+  border-color: var(--ferie);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.config-field input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.config-field input::-webkit-outer-spin-button,
+.config-field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Rimanenza ── */
+.remaining-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background var(--transition);
+  margin: 0 -6px;
+  padding: 8px 6px;
+}
+
+.remaining-row:hover {
+  background: var(--bg);
+}
+
+.remaining-row + .remaining-row {
+  border-top: 1px solid var(--border);
+}
+
+.remaining-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.remaining-dot.ferie { background: var(--ferie); }
+.remaining-dot.permesso { background: var(--permesso); }
+.remaining-dot.exfesta { background: var(--exfesta); }
+
+.remaining-label {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 90px;
+}
+
+.remaining-fraction {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 90px;
+  text-align: right;
+  color: var(--text);
+}
+
+.remaining-fraction .initial {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.remaining-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.remaining-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.remaining-bar.ferie { background: var(--ferie); }
+.remaining-bar.permesso { background: var(--permesso); }
+.remaining-bar.exfesta { background: var(--exfesta); }
+
+.remaining-pct {
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 40px;
+  text-align: right;
+  color: var(--text-secondary);
+}
+
+/* ── Calendario ── */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.cal-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.cal-nav button {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cal-nav button:hover {
+  background: var(--surface);
+  border-color: var(--text-muted);
+}
+
+.cal-nav button:active {
+  transform: scale(0.96);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-day-header {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 0;
+  letter-spacing: 0.5px;
+}
+
+.cal-day-header.sab {
+  color: var(--ferie);
+}
+
+.cal-day-header.dom {
+  color: var(--festivo);
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 2px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--transition);
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--surface);
+  border: 1.5px solid transparent;
+  min-height: 56px;
+}
+
+.cal-day:hover {
+  border-color: var(--border);
+  background: #fafbfc;
+}
+
+.cal-day.sabato {
+  background: var(--sabato-bg);
+}
+
+.cal-day.sabato:hover {
+  background: #eef3ff;
+}
+
+.cal-day.domenica {
+  background: var(--domenica-bg);
+}
+
+.cal-day.domenica:hover {
+  background: #fee8e8;
+}
+
+.cal-day.festivo .day-number {
+  color: var(--festivo);
+}
+
+.cal-day.oggi {
+  border-color: var(--ferie);
+  border-width: 2px;
+}
+
+.cal-day.empty {
+  cursor: default;
+  background: transparent;
+  border-color: transparent;
+}
+
+.cal-day.empty:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.day-number {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.day-events {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: auto;
+  padding-bottom: 2px;
+}
+
+.day-event-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.day-event-dot.ferie { background: var(--ferie); }
+.day-event-dot.permesso { background: var(--permesso); }
+.day-event-dot.exfesta { background: var(--exfesta); }
+
+.day-holiday-name {
+  font-size: 7px;
+  color: var(--festivo);
+  line-height: 1;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+}
+
+/* ── Legenda ── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legend-dot.ferie { background: var(--ferie); }
+.legend-dot.permesso { background: var(--permesso); }
+.legend-dot.exfesta { background: var(--exfesta); }
+.legend-dot.sab { background: var(--sabato-bg); border: 1px solid var(--border); }
+.legend-dot.dom { background: var(--domenica-bg); border: 1px solid #fecaca; }
+.legend-dot.fest { background: var(--festivo-bg); border: 1px solid var(--festivo); }
+.legend-dot.fest::after { content: ''; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 400px;
+  padding: 24px;
+  transform: translateY(20px) scale(0.97);
+  transition: transform var(--transition);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay.open .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.modal-header h3 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.modal-header h3 small {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+
+.modal-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.modal-events {
+  margin-bottom: 16px;
+}
+
+.modal-event {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.modal-event.ferie { background: var(--ferie-light); }
+.modal-event.permesso { background: var(--permesso-light); }
+.modal-event.exfesta { background: var(--exfesta-light); }
+
+.modal-event-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.modal-event-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all var(--transition);
+}
+
+.modal-event-remove:hover {
+  color: var(--festivo);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.modal-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 16px 0;
+}
+
+.modal-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-add-row button {
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.modal-add-row button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.modal-add-row button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.modal-add-row button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-ferie {
+  color: var(--ferie);
+  border-color: var(--ferie) !important;
+  background: var(--ferie-light) !important;
+}
+
+.btn-ferie:hover:not(:disabled) {
+  background: var(--ferie-bg) !important;
+}
+
+.btn-permesso {
+  color: var(--permesso);
+  border-color: var(--permesso) !important;
+  background: var(--permesso-light) !important;
+}
+
+.btn-permesso:hover:not(:disabled) {
+  background: var(--permesso-bg) !important;
+}
+
+.btn-exfesta {
+  color: var(--exfesta);
+  border-color: var(--exfesta) !important;
+  background: var(--exfesta-light) !important;
+}
+
+.btn-exfesta:hover:not(:disabled) {
+  background: var(--exfesta-bg) !important;
+}
+
+.modal-add-row input {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+}
+
+.modal-add-row input:focus {
+  border-color: var(--text-muted);
+}
+
+/* ── Reset ── */
+.reset-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.btn-reset {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: all var(--transition);
+}
+
+.btn-reset:hover {
+  color: var(--festivo);
+  background: var(--festivo-bg);
+}
+
+.btn-undo {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.btn-undo:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+  background: var(--bg);
+}
+
+.btn-file {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-file:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+  background: var(--bg);
+}
+
+#monthly-table th, #monthly-table td {
+  padding: 6px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+#monthly-table th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 2px solid var(--border);
+}
+
+#monthly-table th:first-child,
+#monthly-table td:first-child {
+  text-align: left;
+}
+
+#monthly-table td {
+  color: var(--text);
+}
+
+#monthly-table .totale {
+  font-weight: 600;
+  border-top: 2px solid var(--border);
+}
+
+/* ── Vista Annuale ── */
+.annual-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.annual-toggle:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+  background: var(--bg);
+}
+
+#annual-grid {
+  display: grid;
+  grid-template-columns: 32px repeat(12, 1fr);
+  gap: 2px;
+  font-size: 11px;
+}
+
+#annual-grid .annual-month-header {
+  text-align: center;
+  font-weight: 600;
+  font-size: 10px;
+  color: var(--text-secondary);
+  padding: 2px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+#annual-grid .annual-day-num {
+  text-align: right;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding-right: 4px;
+  line-height: 18px;
+}
+
+#annual-grid .annual-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+  min-height: 14px;
+}
+
+#annual-grid .annual-cell:hover {
+  transform: scale(1.3);
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+#annual-grid .annual-cell.sabato {
+  background: var(--sabato-bg);
+}
+
+#annual-grid .annual-cell.domenica {
+  background: var(--domenica-bg);
+}
+
+#annual-grid .annual-cell.holiday {
+  border: 1px solid var(--festivo);
+}
+
+#annual-grid .annual-cell.ferie {
+  background: var(--ferie);
+}
+
+#annual-grid .annual-cell.permesso {
+  background: var(--permesso);
+}
+
+#annual-grid .annual-cell.exfesta {
+  background: var(--exfesta);
+}
+
+#annual-grid .annual-cell.multi {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--ferie) 0px, var(--ferie) 4px,
+    var(--permesso) 4px, var(--permesso) 8px
+  );
+}
+
+#annual-grid .annual-cell.multi-exfesta {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--exfesta) 0px, var(--exfesta) 4px,
+    var(--ferie) 4px, var(--ferie) 8px
+  );
+}
+
+#annual-grid .annual-cell.multi-all {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--ferie) 0px, var(--ferie) 3px,
+    var(--permesso) 3px, var(--permesso) 6px,
+    var(--exfesta) 6px, var(--exfesta) 9px
+  );
+}
+
+#annual-grid .annual-cell.empty {
+  background: transparent;
+  cursor: default;
+}
+
+#annual-grid .annual-cell.empty:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Non-existing days (e.g. Feb 30) */
+#annual-grid .annual-cell.noday {
+  background: transparent;
+  cursor: default;
+}
+
+#annual-grid .annual-cell.noday:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  body { padding: 12px 8px; }
+  .card { padding: 16px; }
+  .config-grid { grid-template-columns: repeat(2, 1fr); }
+  .remaining-label { min-width: 70px; font-size: 13px; }
+  .remaining-fraction { min-width: 70px; font-size: 13px; }
+  .cal-day { min-height: 44px; font-size: 12px; }
+  .day-number { font-size: 12px; }
+  .day-event-dot { width: 6px; height: 6px; }
+  .modal { padding: 20px; }
+  header h1 { font-size: 22px; }
+  .theme-toggle { width: 32px; height: 32px; font-size: 16px; }
+  .profile-select { font-size: 13px; padding: 3px 8px; }
+  #annual-grid { grid-template-columns: 24px repeat(12, 1fr); gap: 1px; }
+  #annual-grid .annual-month-header { font-size: 8px; }
+  #annual-grid .annual-cell { min-height: 10px; }
+}
+
+@media (max-width: 400px) {
+  .config-grid { grid-template-columns: 1fr 1fr; }
+  .cal-day { min-height: 36px; font-size: 11px; }
+  .day-number { font-size: 11px; }
+  .day-event-dot { width: 5px; height: 5px; }
+  .cal-day-header { font-size: 10px; }
+}
+
+/* ── Nav buttons con icone ── */
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.nav-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.nav-label {
+  font-size: 12px;
+}
+@media (max-width: 480px) {
+  .nav-label { display: none; }
+  .nav-btn-year { display: none; }
+}
+
+/* ── Stato vuoto mese animato ── */
+.empty-month-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px 20px;
+  text-align: center;
+  animation: fadeInUp 0.4s ease both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.empty-month-icon {
+  margin-bottom: 14px;
+  animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+.empty-month-icon svg {
+  width: 52px;
+  height: 52px;
+  color: var(--text-muted);
+  opacity: 0.55;
+}
+
+.empty-month-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.empty-month-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  max-width: 28ch;
+  line-height: 1.5;
+}
+
+/* ── Micro-feedback contatori ── */
+@keyframes counterPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.counter-pop {
+  animation: counterPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Responsive layout a colonna singola mobile ── */
+@media (max-width: 599px) {
+  body {
+    padding: 10px 8px 24px;
+    align-items: flex-start;
+  }
+  .container { max-width: 100%; }
+  header h1 { font-size: 20px; }
+  header p { font-size: 13px; }
+  .card { padding: 14px 14px; margin-bottom: 12px; border-radius: 10px; }
+
+  /* Saldo iniziale: 2 colonne */
+  .config-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Rimanenza compatta */
+  .remaining-bar-wrap { display: none; }
+  .remaining-label { min-width: 76px; font-size: 13px; }
+  .remaining-fraction { font-size: 13px; min-width: 80px; }
+  .remaining-pct { font-size: 12px; min-width: 36px; }
+
+  /* Cal header */
+  .cal-header { flex-wrap: nowrap; gap: 4px; }
+  .cal-header h3 { font-size: 15px; text-align: center; flex: 1; }
+  .cal-nav { gap: 4px; }
+  .cal-nav button { padding: 6px 10px; font-size: 13px; }
+
+  /* Celle calendario */
+  .cal-day { min-height: 40px; padding: 3px 1px; font-size: 11px; }
+  .day-number { font-size: 11px; }
+  .day-event-dot { width: 5px; height: 5px; }
+  .day-holiday-name { display: none; }
+
+  /* Legenda su due righe */
+  .legend { flex-wrap: wrap; gap: 6px 10px; justify-content: center; font-size: 12px; margin-top: 10px; }
+
+  /* Modal full-screen su mobile */
+  .modal { width: 100%; max-width: 100%; border-radius: 16px 16px 0 0; position: fixed; bottom: 0; left: 0; right: 0; max-height: 90vh; overflow-y: auto; padding: 20px 16px; }
+  .modal-overlay { align-items: flex-end; }
+
+  /* Reset bar wrappa su mobile */
+  .reset-bar { flex-wrap: wrap; gap: 6px; justify-content: flex-start; }
+  .btn-file, .btn-reset { font-size: 12px; padding: 6px 10px; margin-left: 0 !important; }
+  #monthly-table { font-size: 12px; }
+  #monthly-table th, #monthly-table td { padding: 5px 7px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Pianificazione Ferie</h1>
+    <p>Gestisci ferie, permessi ed ex festività sul calendario</p>
+    <div class="profile-select" id="profile-select" onclick="toggleProfileDropdown(event)">
+      <span>👤</span><span id="profile-name">—</span><span style="font-size:10px;margin-left:2px">▼</span>
+      <div class="profile-dropdown" id="profile-dropdown"></div>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
+  </header>
+
+  <!-- Saldo Iniziale -->
+  <div class="card">
+    <h2>Saldo Iniziale</h2>
+    <div class="config-grid">
+      <div class="config-field">
+        <label for="anno">Anno</label>
+        <input type="number" id="anno" min="2020" max="2040" value="2026">
+      </div>
+      <div class="config-field">
+        <label for="ferie-iniziali">Ferie (ore)</label>
+        <input type="number" id="ferie-iniziali" min="0" max="2000" value="0">
+      </div>
+      <div class="config-field">
+        <label for="permesso-iniziali">Permesso (ore)</label>
+        <input type="number" id="permesso-iniziali" min="0" max="1000" value="0">
+      </div>
+      <div class="config-field">
+        <label for="exfesta-iniziali">Ex festività (ore)</label>
+        <input type="number" id="exfesta-iniziali" min="0" max="1000" value="0">
+      </div>
+    </div>
+  </div>
+
+  <!-- Rimanenza -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin-bottom:0">Rimanenza</h2>
+      <button class="btn-undo" id="undo-btn" onclick="undo()" title="Annulla ultima azione" style="display:none">↩ Annulla</button>
+    </div>
+    <div id="remaining-container">
+      <div class="remaining-row" data-type="ferie">
+        <div class="remaining-dot ferie"></div>
+        <span class="remaining-label">Ferie</span>
+        <div class="remaining-bar-wrap"><div class="remaining-bar ferie" style="width:0%"></div></div>
+        <span class="remaining-fraction">0 / 0 <span class="initial">g</span></span>
+        <span class="remaining-pct">—</span>
+      </div>
+      <div class="remaining-row" data-type="permesso">
+        <div class="remaining-dot permesso"></div>
+        <span class="remaining-label">Permesso</span>
+        <div class="remaining-bar-wrap"><div class="remaining-bar permesso" style="width:0%"></div></div>
+        <span class="remaining-fraction">0 / 0 <span class="initial">g</span></span>
+        <span class="remaining-pct">—</span>
+      </div>
+      <div class="remaining-row" data-type="exfesta">
+        <div class="remaining-dot exfesta"></div>
+        <span class="remaining-label">Ex festività</span>
+        <div class="remaining-bar-wrap"><div class="remaining-bar exfesta" style="width:0%"></div></div>
+        <span class="remaining-fraction">0 / 0 <span class="initial">g</span></span>
+        <span class="remaining-pct">—</span>
+      </div>
+    </div>
+    <div id="year-progress" style="margin:8px 0 12px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">Anno al <strong id="year-pct" style="color:var(--text)">—</strong></span>
+      <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div id="year-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--ferie),var(--permesso));border-radius:3px;transition:width var(--transition)"></div>
+      </div>
+      <span style="font-size:11px;color:var(--text-muted);white-space:nowrap" id="year-days">—</span>
+    </div>
+    <div class="reset-bar">
+      <button class="btn-file" onclick="exportJSON()">Esporta JSON</button>
+      <button class="btn-file" onclick="document.getElementById('file-input').click()" style="margin-left:8px">Importa JSON</button>
+      <input type="file" id="file-input" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="btn-reset" onclick="resetYear()" style="margin-left:auto">Azzera anno</button>
+    </div>
+  </div>
+
+  <!-- Vista Annuale -->
+  <div class="card" id="annual-card" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <h2 style="margin-bottom:0">Vista Annuale</h2>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;font-weight:600;color:var(--text-secondary)" id="annual-year-label"></span>
+        <button class="annual-toggle" onclick="toggleAnnualView()" title="Chiudi vista annuale">✕</button>
+      </div>
+    </div>
+    <div id="annual-grid"></div>
+    <div class="legend" style="margin-top:10px">
+      <span class="legend-item"><span class="legend-dot ferie"></span> Ferie</span>
+      <span class="legend-item"><span class="legend-dot permesso"></span> Permesso</span>
+      <span class="legend-item"><span class="legend-dot exfesta"></span> Ex festività</span>
+      <span class="legend-item"><span class="legend-dot sab"></span> Sab</span>
+      <span class="legend-item"><span class="legend-dot dom"></span> Dom</span>
+      <span class="legend-item" style="font-size:11px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:repeating-linear-gradient(45deg,var(--ferie) 0,var(--ferie) 3px,var(--permesso) 3px,var(--permesso) 6px)"></span> Multipli</span>
+    </div>
+  </div>
+
+  <!-- Calendario -->
+  <div class="card">
+    <div class="cal-header">
+      <div class="cal-nav">
+        <button onclick="navMonth(-1)" title="Mese precedente" class="nav-btn">
+          <i data-lucide="chevron-left"></i><span class="nav-label">Prec</span>
+        </button>
+        <button onclick="navMonth(1)" title="Mese successivo" class="nav-btn">
+          <span class="nav-label">Succ</span><i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+      <h3 id="cal-title">—</h3>
+      <div class="cal-nav">
+        <button onclick="navMonth(-12)" title="Anno precedente" class="nav-btn nav-btn-year">
+          <i data-lucide="chevrons-left"></i><span class="nav-label">Anno prec</span>
+        </button>
+        <button onclick="navMonth(12)" title="Anno successivo" class="nav-btn nav-btn-year">
+          <span class="nav-label">Anno succ</span><i data-lucide="chevrons-right"></i>
+        </button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:-8px;margin-bottom:10px">
+      <button class="annual-toggle" onclick="toggleAnnualView()">🗓 Annuale</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:12px">
+      Clicca su un giorno per aggiungere o rimuovere ferie, permessi ed ex festività
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot ferie"></span> Ferie</span>
+      <span class="legend-item"><span class="legend-dot permesso"></span> Permesso</span>
+      <span class="legend-item"><span class="legend-dot exfesta"></span> Ex festività</span>
+      <span class="legend-item"><span class="legend-dot sab"></span> Sabato</span>
+      <span class="legend-item"><span class="legend-dot dom"></span> Domenica</span>
+      <span class="legend-item"><span class="legend-dot fest"></span> Festività</span>
+    </div>
+    <div id="monthly-summary" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:none">
+      <h2 style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Riepilogo Mensile</h2>
+      <div style="overflow-x:auto">
+        <table id="monthly-table" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><span id="modal-title">—</span> <small id="modal-subtitle"></small></h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-event-view">
+      <div class="modal-section-title">Eventi presenti</div>
+      <div class="modal-events" id="modal-events"></div>
+      <div class="modal-section-title">Aggiungi evento</div>
+      <div class="modal-add" id="modal-add">
+        <div class="modal-add-row">
+          <button class="btn-ferie" onclick="addFerie()">+ Ferie</button>
+          <input type="number" id="modal-ferie-input" min="0" max="24" value="1" placeholder="ore">
+          <label style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="modal-ferie-draft"> Bozza
+          </label>
+        </div>
+        <div class="modal-add-row">
+          <button class="btn-permesso" onclick="addPermesso()">+ Permesso</button>
+          <input type="number" id="modal-permesso-input" min="0" max="24" value="1" placeholder="ore">
+          <label style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="modal-permesso-draft"> Bozza
+          </label>
+        </div>
+        <div class="modal-add-row">
+          <button class="btn-exfesta" onclick="addExFesta()">+ Ex festività</button>
+          <input type="number" id="modal-exfesta-input" min="0" max="24" value="1" placeholder="ore">
+          <label style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="modal-exfesta-draft"> Bozza
+          </label>
+        </div>
+      </div>
+    </div>
+    <div id="modal-category-detail" style="display:none">
+      <div id="modal-category-stats" style="background:var(--bg);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;font-size:13px;line-height:1.6"></div>
+      <div class="modal-section-title" id="modal-category-title"></div>
+      <div id="modal-category-list" style="max-height:300px;overflow-y:auto"></div>
+      <div id="modal-category-total" style="text-align:right;font-size:14px;font-weight:600;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"></div>
+    </div>
+    <div id="modal-profiles" style="display:none">
+      <div class="modal-section-title">Gestisci profili</div>
+      <div id="profile-mgmt-list"></div>
+      <div class="profile-add-row">
+        <input type="text" id="profile-new-name" placeholder="Nome nuovo profilo" onkeydown="if(event.key==='Enter')addProfile()">
+        <button onclick="addProfile()">Aggiungi</button>
+      </div>
+      <div class="profile-mgmt-error" id="profile-mgmt-error"></div>
+      <div class="profile-mgmt-hint">I dati vengono salvati separatamente per ogni profilo.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.onerror = function(msg, url, line) {
+  var errDiv = document.createElement('div');
+  errDiv.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#ef4444;color:#fff;padding:12px;font-size:14px;z-index:9999';
+  errDiv.textContent = 'JS Error: ' + msg + ' (line ' + line + ')';
+  document.body.appendChild(errDiv);
+};
+console.log('Ferie Planner loaded');
+
+// ── Dark Mode ──
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('ferie-planner-theme', isDark ? '' : 'dark');
+  document.getElementById('theme-toggle').textContent = isDark ? '🌙' : '☀️';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('ferie-planner-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('theme-toggle').textContent = '☀️';
+  }
+}
+
+// ─── Profili ───
+let activeProfile = '';
+
+function getProfiles() {
+  try {
+    const raw = localStorage.getItem('ferie-planner-profiles');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+function saveProfiles(list) {
+  localStorage.setItem('ferie-planner-profiles', JSON.stringify(list));
+  saveToGitHub();
+}
+
+function getActiveProfile() {
+  return localStorage.getItem('ferie-planner-active-profile') || '';
+}
+
+function setActiveProfile(name) {
+  activeProfile = name;
+  localStorage.setItem('ferie-planner-active-profile', name);
+  saveToGitHub();
+}
+
+function getStorageKey(year) {
+  return `ferie-planner-${activeProfile}-${year}`;
+}
+
+function renderProfileDropdown() {
+  const dd = document.getElementById('profile-dropdown');
+  const profiles = getProfiles();
+  let html = '';
+  for (const p of profiles) {
+    html += `<button class="profile-dropdown-item${p === activeProfile ? ' active' : ''}" onclick="switchProfile('${p}')">${p}</button>`;
+  }
+  if (profiles.length > 0) {
+    html += `<div class="profile-dropdown-divider"></div>`;
+  }
+  html += `<button class="profile-dropdown-item" onclick="closeProfileDropdown();openProfileMgmt()">⚙️ Gestisci profili...</button>`;
+  dd.innerHTML = html;
+  document.getElementById('profile-name').textContent = activeProfile;
+}
+
+function toggleProfileDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('profile-dropdown');
+  dd.classList.toggle('open');
+}
+
+function closeProfileDropdown() {
+  document.getElementById('profile-dropdown').classList.remove('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#profile-select')) closeProfileDropdown();
+});
+
+function switchProfile(name) {
+  if (name === activeProfile) { closeProfileDropdown(); return; }
+  if (activeProfile) saveState();
+  setActiveProfile(name);
+  closeProfileDropdown();
+  loadState(curYear);
+  syncInputs();
+  renderAll();
+  renderProfileDropdown();
+}
+
+function openProfileMgmt() {
+  closeModal();
+  document.getElementById('modal-event-view').style.display = 'none';
+  document.getElementById('modal-category-detail').style.display = 'none';
+  document.getElementById('modal-profiles').style.display = 'block';
+  document.getElementById('modal-title').textContent = 'Gestisci profili';
+  document.getElementById('modal-subtitle').textContent = '';
+  renderProfileMgmt();
+  document.getElementById('profile-new-name').value = '';
+  document.getElementById('profile-mgmt-error').style.display = 'none';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function renderProfileMgmt() {
+  const list = document.getElementById('profile-mgmt-list');
+  const profiles = getProfiles();
+  list.innerHTML = '';
+  for (const p of profiles) {
+    const row = document.createElement('div');
+    row.className = 'profile-mgmt-row';
+    row.innerHTML = `
+      <span class="profile-mgmt-name">👤 ${p}${p === activeProfile ? ' <span style="color:var(--ferie);font-size:12px">(attivo)</span>' : ''}</span>
+      <div class="profile-mgmt-actions">
+        ${p !== activeProfile ? `<button onclick="deleteProfile('${p}')" class="danger" title="Elimina profilo e i suoi dati">Elimina</button>` : ''}
+      </div>
+    `;
+    list.appendChild(row);
+  }
+}
+
+function addProfile() {
+  const input = document.getElementById('profile-new-name');
+  const name = input.value.trim();
+  if (!name) return;
+  const profiles = getProfiles();
+  if (profiles.includes(name)) {
+    const err = document.getElementById('profile-mgmt-error');
+    err.textContent = 'Profilo già esistente. Scegli un nome diverso.';
+    err.style.display = 'block';
+    return;
+  }
+  profiles.push(name);
+  saveProfiles(profiles);
+  // Switch to new profile with empty state
+  if (activeProfile) saveState();
+  setActiveProfile(name);
+  state = { year: curYear, initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+  saveState();
+  renderProfileMgmt();
+  renderProfileDropdown();
+  syncInputs();
+  renderAll();
+  document.getElementById('profile-mgmt-error').style.display = 'none';
+  input.value = '';
+}
+
+function deleteProfile(name) {
+  if (!confirm(`Eliminare il profilo "${name}" e TUTTI i suoi dati?`)) return;
+  const profiles = getProfiles();
+  const idx = profiles.indexOf(name);
+  if (idx === -1) return;
+  // Remove all stored data for this profile
+  for (let y = 2000; y <= 2100; y++) {
+    localStorage.removeItem(`ferie-planner-${name}-${y}`);
+  }
+  profiles.splice(idx, 1);
+  saveProfiles(profiles);
+  if (profiles.length === 0) {
+    // Auto-create a default profile
+    profiles.push('Simone');
+    saveProfiles(profiles);
+    setActiveProfile('Simone');
+    state = { year: curYear, initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+    saveState();
+  } else if (name === activeProfile) {
+    setActiveProfile(profiles[0]);
+    loadState(curYear);
+  }
+  renderProfileMgmt();
+  renderProfileDropdown();
+  syncInputs();
+  renderAll();
+}
+
+// ─── Migrazione dati pre-esistenti ───
+function migrateOldData() {
+  const profiles = getProfiles();
+  if (profiles.length > 0) return; // Already have profiles
+  // Check if old data exists
+  let hasOldData = false;
+  for (let y = 2000; y <= 2100; y++) {
+    if (localStorage.getItem(`ferie-planner-${y}`)) { hasOldData = true; break; }
+  }
+  if (!hasOldData) {
+    // No old data, create default profile
+    saveProfiles(['Simone']);
+    setActiveProfile('Simone');
+    return;
+  }
+  // Create default and migrate
+  saveProfiles(['Simone']);
+  setActiveProfile('Simone');
+  let migrated = 0;
+  for (let y = 2000; y <= 2100; y++) {
+    const oldKey = `ferie-planner-${y}`;
+    const data = localStorage.getItem(oldKey);
+    if (data) {
+      localStorage.setItem(`ferie-planner-Simone-${y}`, data);
+      localStorage.removeItem(oldKey);
+      migrated++;
+    }
+  }
+  console.log('Migrati ' + migrated + ' anni al profilo Simone');
+}
+
+// ─── Stato ───
+let state = { year: 2026, initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+let curMonth = new Date().getMonth();
+let curYear = new Date().getFullYear();
+
+// ─── Undo ───
+let undoStack = [];
+const UNDO_MAX = 5;
+
+// ─── GitHub Sync ───
+const REPO_OWNER = 'Zizzo91';
+const REPO_NAME = 'ferie-planner';
+const GITHUB_TOKEN = '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';
+
+function pushUndo() {
+  undoStack.push(JSON.parse(JSON.stringify(state.events)));
+  if (undoStack.length > UNDO_MAX) undoStack.shift();
+  document.getElementById('undo-btn').style.display = 'inline-flex';
+}
+
+function undo() {
+  if (undoStack.length === 0) return;
+  state.events = undoStack.pop();
+  saveState();
+  renderAll();
+  if (undoStack.length === 0) document.getElementById('undo-btn').style.display = 'none';
+}
+let modalDate = null;
+let today = new Date();
+const todayStr = dateStr(today);
+
+// ─── Utility date ───
+function dateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function parseDate(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function formatDateLong(d) {
+  const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+  const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function formatMonth(d) {
+  const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function daysInMonth(year, month) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function monthStartOffset(year, month) {
+  const d = new Date(year, month, 1);
+  return (d.getDay() + 6) % 7; // 0=Monday ... 6=Sunday
+}
+
+// ─── Festività ───
+function computeEaster(year) {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mo = Math.floor((h + l - 7 * m + 114) / 31);
+  const da = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, mo - 1, da);
+}
+
+function getHolidays(year) {
+  const fixed = [
+    { m: 0, d: 1, n: 'Capodanno' },
+    { m: 0, d: 6, n: 'Epifania' },
+    { m: 3, d: 25, n: 'Festa della Liberazione' },
+    { m: 4, d: 1, n: 'Festa dei Lavoratori' },
+    { m: 5, d: 2, n: 'Festa della Repubblica' },
+    { m: 7, d: 15, n: 'Ferragosto' },
+    { m: 9, d: 1, n: 'Ognissanti' },
+    { m: 10, d: 8, n: 'Immacolata Concezione' },
+    { m: 11, d: 25, n: 'Natale' },
+    { m: 11, d: 26, n: 'Santo Stefano' },
+  ];
+  const easter = computeEaster(year);
+  const pasquetta = new Date(easter);
+  pasquetta.setDate(pasquetta.getDate() + 1);
+
+  const holidays = {};
+  for (const h of fixed) {
+    const d = new Date(year, h.m, h.d);
+    holidays[dateStr(d)] = h.n;
+  }
+  holidays[dateStr(easter)] = 'Pasqua';
+  holidays[dateStr(pasquetta)] = 'Pasquetta';
+  return holidays;
+}
+
+function isHoliday(dateStr) {
+  return holidays[dateStr] || null;
+}
+
+let holidays = {};
+
+function getSaturdayDates(year, month) {
+  const days = daysInMonth(year, month);
+  const sats = [];
+  for (let d = 1; d <= days; d++) {
+    const dow = new Date(year, month, d).getDay();
+    if (dow === 6) sats.push(d);
+  }
+  return sats;
+}
+
+function getSundayDates(year, month) {
+  const days = daysInMonth(year, month);
+  const suns = [];
+  for (let d = 1; d <= days; d++) {
+    const dow = new Date(year, month, d).getDay();
+    if (dow === 0) suns.push(d);
+  }
+  return suns;
+}
+
+// ─── Salvataggio ───
+function loadState(year) {
+  const key = getStorageKey(year);
+  const raw = localStorage.getItem(key);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.initial && parsed.events) {
+        state = parsed;
+        state.year = year;
+        return;
+      }
+    } catch (e) {}
+  }
+  state = {
+    year: year,
+    initial: { ferie: 0, permesso: 0, exFesta: 0 },
+    events: {}
+  };
+}
+
+function saveState() {
+  const key = getStorageKey(state.year);
+  localStorage.setItem(key, JSON.stringify(state));
+  saveToGitHub();
+}
+
+// ─── Calcolo rimanenza ───
+function computeRemaining() {
+  let usedFerie = 0, usedPermesso = 0, usedExFesta = 0;
+  let draftFerie = 0, draftPermesso = 0, draftExFesta = 0;
+  for (const dateKey in state.events) {
+    const ev = state.events[dateKey];
+    usedFerie += ev.ferie || 0;
+    usedPermesso += ev.permesso || 0;
+    usedExFesta += ev.exFesta || 0;
+    draftFerie += ev.draftFerie || 0;
+    draftPermesso += ev.draftPermesso || 0;
+    draftExFesta += ev.draftExFesta || 0;
+  }
+  return {
+    ferie: state.initial.ferie - usedFerie,
+    permesso: state.initial.permesso - usedPermesso,
+    exFesta: state.initial.exFesta - usedExFesta,
+    usedFerie, usedPermesso, usedExFesta,
+    ferieIpot: state.initial.ferie - (usedFerie + draftFerie),
+    permessoIpot: state.initial.permesso - (usedPermesso + draftPermesso),
+    exFestaIpot: state.initial.exFesta - (usedExFesta + draftExFesta),
+    draftFerie, draftPermesso, draftExFesta,
+    draftTotal: draftFerie + draftPermesso + draftExFesta
+  };
+}
+
+// ─── Rendering ───
+function renderRemaining() {
+  const rem = computeRemaining();
+  const types = ['ferie', 'permesso', 'exfesta'];
+  const stateKey = { ferie: 'ferie', permesso: 'permesso', exfesta: 'exFesta' };
+  const gDay = 8;
+
+  for (const t of types) {
+    const sk = stateKey[t];
+    const init = state.initial[sk];
+    const remainEff = rem[sk];
+    const remainIpot = rem[sk + 'Ipot'];
+    const used = init - remainEff;
+    const draftVal = rem['draft' + sk.charAt(0).toUpperCase() + sk.slice(1)];
+    const pctEff = init > 0 ? Math.max(0, Math.min(100, (remainEff / init) * 100)) : 0;
+    const pctIpot = init > 0 ? Math.max(0, Math.min(100, (remainIpot / init) * 100)) : 0;
+
+    const row = document.querySelector(`.remaining-row:has(.remaining-dot.${t})`);
+    if (!row) continue;
+
+    const bar = row.querySelector('.remaining-bar');
+    const fraction = row.querySelector('.remaining-fraction');
+    const pctEl = row.querySelector('.remaining-pct');
+
+    const colors = { ferie: 'var(--ferie)', permesso: 'var(--permesso)', exfesta: 'var(--exfesta)' };
+
+    if (draftVal > 0) {
+      bar.style.background = colors[t];
+      bar.style.width = `${pctIpot}%`;
+      bar.style.backgroundImage = `repeating-linear-gradient(90deg, transparent 0px, transparent 4px, rgba(255,255,255,0.2) 4px, rgba(255,255,255,0.2) 8px)`;
+      fraction.innerHTML =
+        `${(remainEff / gDay).toFixed(1)} <span class="initial">g</span>` +
+        ` <span style="color:var(--text-muted);font-size:12px">ip.</span> ` +
+        `${(remainIpot / gDay).toFixed(1)}` +
+        ` / ${(init / gDay).toFixed(1)} <span class="initial">g</span>`;
+      pctEl.textContent = init > 0 ? `${Math.round(pctEff)}% / ${Math.round(pctIpot)}%` : '—';
+    } else {
+      bar.style.background = colors[t];
+      bar.style.backgroundImage = 'none';
+      bar.style.width = `${pctEff}%`;
+      if (remainEff < 0) {
+        bar.style.background = '#ef4444';
+        bar.style.backgroundImage = 'none';
+      }
+      fraction.innerHTML =
+        `${(remainEff / gDay).toFixed(1)} / ${(init / gDay).toFixed(1)} <span class="initial">g</span>`;
+      pctEl.textContent = init > 0 ? `${Math.round(pctEff)}%` : '—';
+    }
+
+    row.onclick = null;
+    row.addEventListener('click', function() {
+      showCategoryDetail(t, sk);
+    });
+  }
+}
+
+function renderYearProgress() {
+  const now = new Date();
+  const start = new Date(state.year, 0, 1);
+  const end = new Date(state.year + 1, 0, 1);
+  const total = (end - start) / 86400000;
+  const elapsed = (now - start) / 86400000;
+  const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+  document.getElementById('year-pct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('year-bar').style.width = pct + '%';
+  const daysPast = Math.floor(elapsed);
+  const daysTotal = Math.floor(total);
+  document.getElementById('year-days').textContent = `giorno ${daysPast} / ${daysTotal}`;
+}
+
+function renderMonthlySummary() {
+  const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+  const monthly = [];
+  for (let i = 0; i < 12; i++) monthly.push({ ferie: 0, permesso: 0, exFesta: 0, dFerie: 0, dPermesso: 0, dExFesta: 0 });
+
+  for (const dateKey in state.events) {
+    const parts = dateKey.split('-');
+    const year = parseInt(parts[0]);
+    const m = parseInt(parts[1]) - 1;
+    if (year !== state.year) continue;
+    const ev = state.events[dateKey];
+    monthly[m].ferie += ev.ferie || 0;
+    monthly[m].permesso += ev.permesso || 0;
+    monthly[m].exFesta += ev.exFesta || 0;
+    monthly[m].dFerie += ev.draftFerie || 0;
+    monthly[m].dPermesso += ev.draftPermesso || 0;
+    monthly[m].dExFesta += ev.draftExFesta || 0;
+  }
+
+  const container = document.getElementById('monthly-summary');
+  const table = document.getElementById('monthly-table');
+
+  const hasData = monthly.some(m => m.ferie || m.permesso || m.exFesta || m.dFerie || m.dPermesso || m.dExFesta);
+  if (!hasData) {
+    container.style.display = 'block';
+    table.innerHTML = '';
+    if (!container.querySelector('.empty-month-state')) {
+      container.innerHTML = `
+        <h2 style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Riepilogo Mensile</h2>
+        <div class="empty-month-state">
+          <div class="empty-month-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-width="2"></path>
+            </svg>
+          </div>
+          <div class="empty-month-title">Nessun evento registrato</div>
+          <div class="empty-month-sub">Clicca su un giorno del calendario per aggiungere ferie, permessi o ex festività in questo mese.</div>
+        </div>`;
+    }
+    return;
+  }
+  container.style.display = 'block';
+  // Ripristina struttura tabella se avevamo mostrato l'empty state
+  if (container.querySelector('.empty-month-state')) {
+      container.innerHTML = `
+        <h2 style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Riepilogo Mensile</h2>
+        <div style="overflow-x:auto">
+          <table id="monthly-table" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+        </div>`;
+  }
+  const realTable = container.querySelector('#monthly-table');
+
+  let html = `<tr><th>Mese</th><th style="color:var(--ferie)">Ferie</th><th style="color:var(--permesso)">Permesso</th><th style="color:var(--exfesta)">Ex fest.</th><th>Totale</th></tr>`;
+  let totalFerie = 0, totalPermesso = 0, totalEx = 0;
+  for (let i = 0; i < 12; i++) {
+    const m = monthly[i];
+    totalFerie += m.ferie; totalPermesso += m.permesso; totalEx += m.exFesta;
+    const rowTotal = m.ferie + m.permesso + m.exFesta;
+    const hasDraftRow = m.dFerie || m.dPermesso || m.dExFesta;
+    if (rowTotal > 0 || hasDraftRow) {
+      const f = m.ferie + (m.dFerie ? `<span style="opacity:0.4">+${m.dFerie}</span>` : '');
+      const p = m.permesso + (m.dPermesso ? `<span style="opacity:0.4">+${m.dPermesso}</span>` : '');
+      const e = m.exFesta + (m.dExFesta ? `<span style="opacity:0.4">+${m.dExFesta}</span>` : '');
+      html += `<tr><td>${months[i]}</td><td>${f}h</td><td>${p}h</td><td>${e}h</td><td>${rowTotal}h</td></tr>`;
+    }
+  }
+  const grandTotal = totalFerie + totalPermesso + totalEx;
+  html += `<tr class="totale"><td>Totale</td><td>${totalFerie}h</td><td>${totalPermesso}h</td><td>${totalEx}h</td><td>${grandTotal}h</td></tr>`;
+  realTable.innerHTML = html;
+}
+
+// ─── Vista Annuale ───
+let annualVisible = false;
+
+function toggleAnnualView() {
+  annualVisible = !annualVisible;
+  document.getElementById('annual-card').style.display = annualVisible ? 'block' : 'none';
+  if (annualVisible) renderAnnualView();
+}
+
+function renderAnnualView() {
+  const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+  const grid = document.getElementById('annual-grid');
+  grid.innerHTML = '';
+
+  document.getElementById('annual-year-label').textContent = state.year;
+  const holidaysAll = getHolidays(state.year);
+
+  // Header row: empty corner + month names
+  const corner = document.createElement('div');
+  grid.appendChild(corner);
+  for (let m = 0; m < 12; m++) {
+    const el = document.createElement('div');
+    el.className = 'annual-month-header';
+    el.textContent = months[m];
+    grid.appendChild(el);
+  }
+
+  // Day rows (1-31)
+  for (let d = 1; d <= 31; d++) {
+    // Day number
+    const dayNum = document.createElement('div');
+    dayNum.className = 'annual-day-num';
+    dayNum.textContent = d;
+    grid.appendChild(dayNum);
+
+    for (let m = 0; m < 12; m++) {
+      const cell = document.createElement('div');
+      cell.className = 'annual-cell';
+
+      const dim = daysInMonth(state.year, m);
+      if (d > dim) {
+        cell.classList.add('noday');
+        grid.appendChild(cell);
+        continue;
+      }
+
+      const dateKey = `${state.year}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dow = new Date(state.year, m, d).getDay();
+      const hName = holidaysAll[dateKey];
+      const ev = state.events[dateKey];
+
+      // Weekend/holiday class
+      if (dow === 6) cell.classList.add('sabato');
+      if (dow === 0) cell.classList.add('domenica');
+      if (hName) cell.classList.add('holiday');
+
+      // Event coloring
+      const hasConfirmed = ev && (ev.ferie || ev.permesso || ev.exFesta);
+      const hasDraftEv = ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta);
+
+      if (hasConfirmed || hasDraftEv) {
+        const hasF = (ev.ferie || 0) + (ev.draftFerie || 0) > 0;
+        const hasP = (ev.permesso || 0) + (ev.draftPermesso || 0) > 0;
+        const hasE = (ev.exFesta || 0) + (ev.draftExFesta || 0) > 0;
+        const count = (hasF ? 1 : 0) + (hasP ? 1 : 0) + (hasE ? 1 : 0);
+
+        if (count > 1) {
+          if (hasF && hasP && hasE) cell.classList.add('multi-all');
+          else if (hasF && hasP) cell.classList.add('multi');
+          else if (hasF && hasE) cell.classList.add('multi-exfesta');
+          else if (hasP && hasE) {
+            cell.style.background = 'repeating-linear-gradient(45deg,var(--permesso) 0px,var(--permesso) 4px,var(--exfesta) 4px,var(--exfesta) 8px)';
+          }
+        } else if (hasF) cell.classList.add('ferie');
+        else if (hasP) cell.classList.add('permesso');
+        else if (hasE) cell.classList.add('exfesta');
+
+        // If only draft events, reduce opacity
+        if (!hasConfirmed && hasDraftEv) {
+          cell.style.opacity = '0.35';
+        }
+      } else if (!hName && dow !== 6 && dow !== 0) {
+        cell.classList.add('empty');
+      }
+
+      // Tooltip
+      const tipParts = [];
+      if (ev && ev.ferie) tipParts.push('Ferie: ' + ev.ferie + 'h');
+      if (ev && ev.permesso) tipParts.push('Permesso: ' + ev.permesso + 'h');
+      if (ev && ev.exFesta) tipParts.push('Ex festività: ' + ev.exFesta + 'h');
+      if (ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta)) {
+        const dParts = [];
+        if (ev.draftFerie) dParts.push('Ferie: ' + ev.draftFerie + 'h');
+        if (ev.draftPermesso) dParts.push('Permesso: ' + ev.draftPermesso + 'h');
+        if (ev.draftExFesta) dParts.push('Ex festività: ' + ev.draftExFesta + 'h');
+        tipParts.push('Bozza: ' + dParts.join(', '));
+      }
+      if (hName) tipParts.push(hName);
+      if (tipParts.length) cell.title = `${d} ${months[m]} · ` + tipParts.join(' · ');
+      else cell.title = `${d} ${months[m]}`;
+
+      // Click → navigate to that month
+      cell.addEventListener('click', function() {
+        const targetDate = new Date(state.year, m, d);
+        curMonth = m;
+        renderCalendar();
+        // Open day modal
+        const dateKey2 = `${state.year}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        openModal(dateKey2);
+      });
+
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function renderCalendar() {
+  holidays = getHolidays(curYear);
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  // Day headers
+  const dayHeaders = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'];
+  for (let i = 0; i < 7; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day-header';
+    if (i === 5) el.classList.add('sab');
+    if (i === 6) el.classList.add('dom');
+    el.textContent = dayHeaders[i];
+    grid.appendChild(el);
+  }
+
+  const dim = daysInMonth(curYear, curMonth);
+  const offset = monthStartOffset(curYear, curMonth);
+  const sats = getSaturdayDates(curYear, curMonth);
+  const suns = getSundayDates(curYear, curMonth);
+
+  // Empty cells
+  for (let i = 0; i < offset; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  // Day cells
+  for (let d = 1; d <= dim; d++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+
+    const dateKey = `${curYear}-${String(curMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+    if (sats.includes(d)) el.classList.add('sabato');
+    if (suns.includes(d)) el.classList.add('domenica');
+    if (dateKey === todayStr) el.classList.add('oggi');
+
+    const hName = isHoliday(dateKey);
+    if (hName) {
+      el.classList.add('festivo');
+    }
+
+    const ev = state.events[dateKey];
+    const hasEvents = ev && (ev.ferie || ev.permesso || ev.exFesta);
+    const hasDraft = ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta);
+
+    // Tooltip
+    const tipParts = [];
+    if (hasEvents) {
+      if (ev.ferie) tipParts.push('Ferie: ' + ev.ferie + 'h');
+      if (ev.permesso) tipParts.push('Permesso: ' + ev.permesso + 'h');
+      if (ev.exFesta) tipParts.push('Ex festività: ' + ev.exFesta + 'h');
+    }
+    if (hasDraft) {
+      const dParts = [];
+      if (ev.draftFerie) dParts.push('Ferie: ' + ev.draftFerie + 'h');
+      if (ev.draftPermesso) dParts.push('Permesso: ' + ev.draftPermesso + 'h');
+      if (ev.draftExFesta) dParts.push('Ex festività: ' + ev.draftExFesta + 'h');
+      tipParts.push('Bozza: ' + dParts.join(', '));
+    }
+    if (hName) tipParts.push('🎉 ' + hName);
+    el.title = tipParts.length ? tipParts.join(' · ') : 'Nessun evento';
+
+    // Day number
+    const numSpan = document.createElement('span');
+    numSpan.className = 'day-number';
+    numSpan.textContent = d;
+    el.appendChild(numSpan);
+
+    // Holiday name (small text below number)
+    if (hName) {
+      const hSpan = document.createElement('div');
+      hSpan.className = 'day-holiday-name';
+      hSpan.textContent = hName;
+      el.appendChild(hSpan);
+    }
+
+    // Event dots
+    if (hasEvents || hasDraft) {
+      const dotsWrap = document.createElement('div');
+      dotsWrap.className = 'day-events';
+      const types = ['ferie', 'permesso', 'exFesta'];
+      const typeCss = { ferie: 'ferie', permesso: 'permesso', exFesta: 'exfesta' };
+      for (const t of types) {
+        if (ev[t] > 0) {
+          const dot = document.createElement('div');
+          dot.className = `day-event-dot ${typeCss[t]}`;
+          dotsWrap.appendChild(dot);
+        }
+        const dt = 'draft' + t.charAt(0).toUpperCase() + t.slice(1);
+        if (ev[dt] > 0) {
+          const dot = document.createElement('div');
+          dot.className = `day-event-dot ${typeCss[t]}`;
+          dot.style.opacity = '0.4';
+          dotsWrap.appendChild(dot);
+        }
+      }
+      el.appendChild(dotsWrap);
+    }
+
+    el.dataset.date = dateKey;
+    grid.appendChild(el);
+  }
+
+  // Fill remaining cells to complete last row
+  const total = offset + dim;
+  const remainder = total % 7;
+  if (remainder > 0) {
+    for (let i = 0; i < 7 - remainder; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+  }
+
+  document.getElementById('cal-title').textContent = formatMonth(new Date(curYear, curMonth, 1));
+  lucide.createIcons();
+}
+
+function renderAll() {
+  renderCalendar();
+  renderRemaining();
+  renderYearProgress();
+  renderMonthlySummary();
+}
+
+// ─── Modal ───
+function openModal(dateKey) {
+  modalDate = dateKey;
+  document.getElementById('modal-event-view').style.display = '';
+  document.getElementById('modal-category-detail').style.display = 'none';
+  document.getElementById('modal-profiles').style.display = 'none';
+  const d = parseDate(dateKey);
+  document.getElementById('modal-title').textContent = `${d.getDate()} / ${d.getMonth() + 1} / ${d.getFullYear()}`;
+  document.getElementById('modal-subtitle').textContent = formatDateLong(d);
+
+  const ev = state.events[dateKey];
+  const eventsDiv = document.getElementById('modal-events');
+  eventsDiv.innerHTML = '';
+
+  const hasConfirmed = ev && (ev.ferie || ev.permesso || ev.exFesta);
+  const hasDraft = ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta);
+
+  if (hasConfirmed || hasDraft) {
+    const types = [
+      { key: 'ferie', dkey: 'draftFerie', label: 'Ferie', cls: 'ferie', unit: 'ore' },
+      { key: 'permesso', dkey: 'draftPermesso', label: 'Permesso', cls: 'permesso', unit: 'ore' },
+      { key: 'exFesta', dkey: 'draftExFesta', label: 'Ex festività', cls: 'exfesta', unit: 'ore' },
+    ];
+    for (const t of types) {
+      const val = ev ? (ev[t.key] || 0) : 0;
+      const dval = ev ? (ev[t.dkey] || 0) : 0;
+      if (val > 0) {
+        const row = document.createElement('div');
+        row.className = `modal-event ${t.cls}`;
+        row.innerHTML = `
+          <span class="modal-event-label">
+            <span class="remaining-dot ${t.cls}"></span>
+            ${t.label}: ${val} ${t.unit}
+          </span>
+          <button class="modal-event-remove" onclick="removeEvent('${dateKey}','${t.key}')" title="Rimuovi">✕</button>
+        `;
+        eventsDiv.appendChild(row);
+      }
+      if (dval > 0) {
+        const row = document.createElement('div');
+        row.className = `modal-event ${t.cls}`;
+        row.style.opacity = '0.5';
+        row.innerHTML = `
+          <span class="modal-event-label">
+            <span class="remaining-dot ${t.cls}" style="opacity:0.5"></span>
+            ${t.label} (bozza): ${dval} ${t.unit}
+          </span>
+          <button class="modal-event-remove" onclick="removeEvent('${dateKey}','${t.dkey}')" title="Rimuovi">✕</button>
+        `;
+        eventsDiv.appendChild(row);
+      }
+    }
+  } else {
+    eventsDiv.innerHTML = '<div class="modal-empty">Nessun evento per questo giorno</div>';
+  }
+
+  // Reset inputs
+  document.getElementById('modal-ferie-input').value = '1';
+  document.getElementById('modal-permesso-input').value = '1';
+  document.getElementById('modal-exfesta-input').value = '1';
+  document.getElementById('modal-ferie-draft').checked = false;
+  document.getElementById('modal-permesso-draft').checked = false;
+  document.getElementById('modal-exfesta-draft').checked = false;
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-profiles').style.display = 'none';
+  document.getElementById('modal-overlay').classList.remove('open');
+  modalDate = null;
+}
+
+// Close on overlay click
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─── Dettaglio categoria ───
+function showCategoryDetail(type, stateKey) {
+  modalDate = null;
+  document.getElementById('modal-event-view').style.display = 'none';
+  document.getElementById('modal-category-detail').style.display = 'block';
+  document.getElementById('modal-profiles').style.display = 'none';
+
+  const labels = { ferie: 'Ferie', permesso: 'Permesso', exfesta: 'Ex festività' };
+  const cssColor = { ferie: 'ferie', permesso: 'permesso', exfesta: 'exfesta' };
+  const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+  const label = labels[type];
+  const color = cssColor[type];
+
+  document.getElementById('modal-category-title').textContent = label;
+
+  const items = [];
+  let used = 0, draftUsed = 0;
+  const draftKey = 'draft' + stateKey.charAt(0).toUpperCase() + stateKey.slice(1);
+  for (const dateKey in state.events) {
+    const val = state.events[dateKey][stateKey] || 0;
+    if (val > 0) {
+      const d = parseDate(dateKey);
+      items.push({ date: d, val, draft: false });
+      used += val;
+    }
+    const dval = state.events[dateKey][draftKey] || 0;
+    if (dval > 0) {
+      const d = parseDate(dateKey);
+      items.push({ date: d, val: dval, draft: true });
+      draftUsed += dval;
+    }
+  }
+  items.sort((a, b) => a.date - b.date || (a.draft ? 1 : 0) - (b.draft ? 1 : 0));
+
+  // Stats
+  const init = state.initial[stateKey];
+  const remain = init - used;
+  const remainIpot = init - (used + draftUsed);
+  const gDay = 8;
+  let statsHtml =
+    `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--${color});margin-right:6px;vertical-align:middle"></span>` +
+    `${label} &nbsp;·&nbsp; ` +
+    `Consumati: <strong>${(used/gDay).toFixed(1)}g</strong> (${used}h)`;
+  if (draftUsed > 0) {
+    statsHtml += ` + <span style="opacity:0.5">${(draftUsed/gDay).toFixed(1)}g</span> bozza`;
+  }
+  statsHtml += ` &nbsp;·&nbsp; Rimanenti: <strong>${(remain/gDay).toFixed(1)}g</strong>`;
+  if (draftUsed > 0) {
+    statsHtml += ` <span style="color:var(--text-muted)">ip. ${(remainIpot/gDay).toFixed(1)}g</span>`;
+  }
+  document.getElementById('modal-category-stats').innerHTML = statsHtml;
+
+  // List
+  const list = document.getElementById('modal-category-list');
+  list.innerHTML = '';
+  if (items.length === 0) {
+    list.innerHTML = '<div class="modal-empty">Nessun evento registrato</div>';
+  } else {
+    for (const item of items) {
+      const days = item.val / gDay;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:14px;border-bottom:1px solid var(--border)';
+      if (item.draft) {
+        row.style.opacity = '0.5';
+        row.innerHTML =
+          `<span>${item.date.getDate()} ${months[item.date.getMonth()]} ${item.date.getFullYear()} <span style="color:var(--text-muted);font-size:11px">(bozza)</span></span>` +
+          `<span style="font-weight:600;color:var(--${color})">${days.toFixed(1)}g (${item.val}h)</span>`;
+      } else {
+        row.innerHTML =
+          `<span>${item.date.getDate()} ${months[item.date.getMonth()]} ${item.date.getFullYear()}</span>` +
+          `<span style="font-weight:600;color:var(--${color})">${days.toFixed(1)}g (${item.val}h)</span>`;
+      }
+      list.appendChild(row);
+    }
+  }
+
+  let totalText = `Totale: ${(used/gDay).toFixed(1)}g (${used}h)`;
+  if (draftUsed > 0) totalText += ` · ${(draftUsed/gDay).toFixed(1)}g in bozza`;
+  document.getElementById('modal-category-total').textContent = totalText;
+
+  document.getElementById('modal-title').textContent = label;
+  const totalItems = items.length;
+  document.getElementById('modal-subtitle').textContent =
+    `${totalItems} giorn${totalItems === 1 ? 'o' : 'i'} con ${label.toLowerCase()} · ` +
+    `${(used/gDay).toFixed(1)}g usati${draftUsed > 0 ? ` (+${(draftUsed/gDay).toFixed(1)}g bozza)` : ''}`;
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+// ─── Eventi ───
+function addFerie() {
+  if (!modalDate) return;
+  const val = parseInt(document.getElementById('modal-ferie-input').value) || 0;
+  if (val <= 0) return;
+  const isDraft = document.getElementById('modal-ferie-draft').checked;
+  pushUndo();
+  if (!state.events[modalDate]) state.events[modalDate] = { ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 };
+  const field = isDraft ? 'draftFerie' : 'ferie';
+  state.events[modalDate][field] = (state.events[modalDate][field] || 0) + val;
+  saveState();
+  renderAll();
+  openModal(modalDate);
+}
+
+function addPermesso() {
+  if (!modalDate) return;
+  const val = parseInt(document.getElementById('modal-permesso-input').value) || 0;
+  if (val <= 0) return;
+  const isDraft = document.getElementById('modal-permesso-draft').checked;
+  pushUndo();
+  if (!state.events[modalDate]) state.events[modalDate] = { ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 };
+  const field = isDraft ? 'draftPermesso' : 'permesso';
+  state.events[modalDate][field] = (state.events[modalDate][field] || 0) + val;
+  saveState();
+  renderAll();
+  openModal(modalDate);
+}
+
+function addExFesta() {
+  if (!modalDate) return;
+  const val = parseInt(document.getElementById('modal-exfesta-input').value) || 0;
+  if (val <= 0) return;
+  const isDraft = document.getElementById('modal-exfesta-draft').checked;
+  pushUndo();
+  if (!state.events[modalDate]) state.events[modalDate] = { ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 };
+  const field = isDraft ? 'draftExFesta' : 'exFesta';
+  state.events[modalDate][field] = (state.events[modalDate][field] || 0) + val;
+  saveState();
+  renderAll();
+  openModal(modalDate);
+}
+
+function removeEvent(dateKey, type) {
+  if (!state.events[dateKey]) return;
+  pushUndo();
+  state.events[dateKey][type] = 0;
+  // Clean up if all zero
+  if (!state.events[dateKey].ferie && !state.events[dateKey].permesso && !state.events[dateKey].exFesta &&
+      !state.events[dateKey].draftFerie && !state.events[dateKey].draftPermesso && !state.events[dateKey].draftExFesta) {
+    delete state.events[dateKey];
+  }
+  saveState();
+  renderAll();
+  if (modalDate === dateKey) openModal(dateKey);
+}
+
+// ─── Navigazione ───
+function navMonth(delta) {
+  curMonth += delta;
+  if (curMonth > 11) { curMonth = 0; curYear++; onYearChange(); }
+  if (curMonth < 0) { curMonth = 11; curYear--; onYearChange(); }
+  renderCalendar();
+}
+
+function onYearChange() {
+  loadState(curYear);
+  syncInputs();
+  renderRemaining();
+}
+
+function changeYear(year) {
+  year = parseInt(year) || new Date().getFullYear();
+  if (year < 2000) year = 2000;
+  if (year > 2100) year = 2100;
+  curYear = year;
+  curMonth = 0;
+  loadState(year);
+  syncInputs();
+  renderAll();
+}
+
+function syncInputs() {
+  document.getElementById('anno').value = state.year;
+  document.getElementById('ferie-iniziali').value = state.initial.ferie;
+  document.getElementById('permesso-iniziali').value = state.initial.permesso;
+  document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
+}
+
+// ─── Aggiornamento saldo iniziale ───
+function updateInitial() {
+  const ferie = parseInt(document.getElementById('ferie-iniziali').value) || 0;
+  const permesso = parseInt(document.getElementById('permesso-iniziali').value) || 0;
+  const exFesta = parseInt(document.getElementById('exfesta-iniziali').value) || 0;
+  const year = parseInt(document.getElementById('anno').value) || new Date().getFullYear();
+
+  if (year !== state.year) {
+    changeYear(year);
+    syncInputs();
+    return;
+  }
+
+  state.initial.ferie = ferie;
+  state.initial.permesso = permesso;
+  state.initial.exFesta = exFesta;
+  saveState();
+  renderRemaining();
+}
+
+function resetYear() {
+  if (!confirm(`Azzerare tutti i dati per il ${state.year}?`)) return;
+  state.initial = { ferie: 0, permesso: 0, exFesta: 0 };
+  state.events = {};
+  saveState();
+  document.getElementById('ferie-iniziali').value = 0;
+  document.getElementById('permesso-iniziali').value = 0;
+  document.getElementById('exfesta-iniziali').value = 0;
+  renderAll();
+}
+
+// ─── Export / Import JSON ───
+function exportJSON() {
+  const data = {
+    profile: activeProfile,
+    year: state.year,
+    initial: state.initial,
+    events: state.events
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ferie-${activeProfile}-${state.year}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || typeof data.year !== 'number' || !data.initial || !data.events) {
+        alert('Il file JSON non è valido. Deve contenere year, initial ed events.');
+        return;
+      }
+      if (data.year !== state.year) {
+        if (!confirm(`Il file è per l'anno ${data.year}, ma stai visualizzando il ${state.year}. Caricare comunque? Passerò all'anno ${data.year}.`)) return;
+      }
+      state.year = data.year;
+      state.initial = { ferie: data.initial.ferie || 0, permesso: data.initial.permesso || 0, exFesta: data.initial.exFesta || 0 };
+      state.events = data.events || {};
+      saveState();
+      curYear = data.year;
+      curMonth = 0;
+      syncInputs();
+      renderAll();
+      alert('Piano ferie caricato con successo!');
+    } catch (err) {
+      alert('Errore nel leggere il file JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ─── GitHub Sync ───
+async function loadFromGitHub() {
+  try {
+    const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data.json`, { cache: 'no-store' });
+    if (!res.ok) return false;
+    const json = await res.json();
+    if (!json.profiles || !json.data) return false;
+    localStorage.setItem('ferie-planner-profiles', JSON.stringify(json.profiles));
+    if (json.activeProfile) localStorage.setItem('ferie-planner-active-profile', json.activeProfile);
+    for (const [key, val] of Object.entries(json.data)) {
+      const lsKey = `ferie-planner-${key}`;
+      localStorage.setItem(lsKey, JSON.stringify(val));
+    }
+    console.log('Caricati dati da GitHub per', json.profiles.join(', '));
+    return true;
+  } catch (e) {
+    console.log('GitHub non disponibile, uso dati locali');
+    return false;
+  }
+}
+
+async function saveToGitHub() {
+  try {
+    const profiles = getProfiles();
+    const activeProfile = getActiveProfile();
+    if (profiles.length === 0) return;
+    const data = {};
+    for (const p of profiles) {
+      for (const key in localStorage) {
+        if (key.startsWith(`ferie-planner-${p}-`)) {
+          const yearKey = key.replace('ferie-planner-', '');
+          try { data[yearKey] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+        }
+      }
+    }
+    const payload = { profiles, activeProfile, data };
+    const jsonStr = JSON.stringify(payload, null, 2);
+    const content = btoa(unescape(encodeURIComponent(jsonStr)));
+    let sha = null;
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/data.json`, {
+        headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
+      });
+      if (res.ok) { const j = await res.json(); sha = j.sha; }
+    } catch(e) {}
+    const body = { message: `Ferie Planner sync - ${new Date().toLocaleString('it-IT')}`, content };
+    if (sha) body.sha = sha;
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/data.json`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      console.error('GitHub sync error:', err.message);
+    } else {
+      console.log('Dati sincronizzati su GitHub');
+    }
+  } catch (e) {
+    console.error('GitHub sync failed:', e);
+  }
+}
+
+// ─── Input listeners ───
+document.getElementById('ferie-iniziali').addEventListener('input', updateInitial);
+document.getElementById('permesso-iniziali').addEventListener('input', updateInitial);
+document.getElementById('exfesta-iniziali').addEventListener('input', updateInitial);
+document.getElementById('anno').addEventListener('change', updateInitial);
+document.getElementById('permesso-iniziali').addEventListener('change', updateInitial);
+document.getElementById('exfesta-iniziali').addEventListener('change', updateInitial);
+document.getElementById('ferie-iniziali').addEventListener('change', updateInitial);
+
+// ─── Click calendario (delegation) ───
+document.getElementById('cal-grid').addEventListener('click', function(e) {
+  const day = e.target.closest('.cal-day');
+  if (day && day.dataset.date) {
+    openModal(day.dataset.date);
+  }
+});
+
+// ─── Init ───
+(async function init() {
+  const hasGitHub = await loadFromGitHub();
+  initTheme();
+  lucide.createIcons();
+  migrateOldData();
+  activeProfile = getActiveProfile();
+  if (!activeProfile) {
+    const p = getProfiles();
+    activeProfile = p.length > 0 ? p[0] : 'Simone';
+    setActiveProfile(activeProfile);
+  }
+  renderProfileDropdown();
+  const now = new Date();
+  curYear = now.getFullYear();
+  curMonth = now.getMonth();
+  loadState(curYear);
+  document.getElementById('anno').value = state.year;
+  document.getElementById('ferie-iniziali').value = state.initial.ferie;
+  document.getElementById('permesso-iniziali').value = state.initial.permesso;
+  document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
+  renderAll();
+  if (!hasGitHub) saveToGitHub();
+})();
+</script>
+</body>
+</html>
