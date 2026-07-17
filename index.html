@@ -123,6 +123,93 @@ header p {
   color: var(--text);
 }
 
+.btn-sync {
+  position: absolute;
+  top: 0;
+  right: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 0 12px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+.btn-sync:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.btn-sync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-sync.dirty {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.btn-sync.syncing {
+  border-color: var(--text-muted);
+}
+
+.btn-sync.saved {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+#dirty-dot {
+  display: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+}
+
+.btn-sync.dirty #dirty-dot {
+  display: inline-block;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  animation: toastIn 0.3s ease;
+  pointer-events: none;
+}
+
+.toast.success {
+  background: #16a34a;
+  color: #fff;
+}
+
+.toast.error {
+  background: #dc2626;
+  color: #fff;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Profili ── */
 .profile-select {
   position: relative;
@@ -1128,6 +1215,7 @@ header p {
   .day-pill { font-size: 8px; padding: 1px 4px; }
   .modal { padding: 20px; }
   header h1 { font-size: 22px; }
+  .btn-sync { right: 38px; height: 32px; font-size: 12px; padding: 0 8px; }
   .theme-toggle { width: 32px; height: 32px; font-size: 16px; }
   .profile-select { font-size: 13px; padding: 3px 8px; }
   #annual-grid { grid-template-columns: 24px repeat(12, 1fr); gap: 1px; }
@@ -1141,6 +1229,8 @@ header p {
   .day-number { font-size: 11px; }
   .day-pill { font-size: 7px; padding: 1px 3px; }
   .cal-day-header { font-size: 10px; }
+  .btn-sync { right: 34px; height: 28px; font-size: 11px; padding: 0 6px; }
+  .btn-sync #sync-label { display: none; }
 }
 
 /* ── Nav buttons con icone ── */
@@ -1279,6 +1369,7 @@ header p {
       <span>👤</span><span id="profile-name">—</span><span style="font-size:10px;margin-left:2px">▼</span>
       <div class="profile-dropdown" id="profile-dropdown"></div>
     </div>
+    <button class="btn-sync" id="btn-sync" onclick="syncToGitHub()" title="Salva su GitHub"><span id="dirty-dot"></span><span id="sync-icon">☁️</span><span id="sync-label">Salva</span></button>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
   </header>
 
@@ -1694,6 +1785,24 @@ const REPO_OWNER = 'Zizzo91';
 const REPO_NAME = 'ferie-planner';
 const GITHUB_TOKEN = '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';
 
+let dirty = false;
+
+function updateSyncButton() {
+  const btn = document.getElementById('btn-sync');
+  const label = document.getElementById('sync-label');
+  const icon = document.getElementById('sync-icon');
+  btn.className = 'btn-sync';
+  btn.disabled = false;
+  if (dirty) btn.classList.add('dirty');
+  if (syncing) { btn.classList.add('syncing'); btn.disabled = true; }
+  if (justSaved) { btn.classList.add('saved'); }
+  icon.textContent = syncing ? '⏳' : justSaved ? '✅' : dirty ? '☁️' : '☁️';
+  label.textContent = syncing ? 'Salvataggio…' : justSaved ? 'Salvato' : 'Salva';
+}
+
+let syncing = false;
+let justSaved = false;
+
 function pushUndo() {
   undoStack.push(JSON.parse(JSON.stringify(state.events)));
   if (undoStack.length > UNDO_MAX) undoStack.shift();
@@ -1846,7 +1955,8 @@ function loadState(year) {
 function saveState() {
   const key = getStorageKey(state.year);
   localStorage.setItem(key, JSON.stringify(state));
-  saveToGitHub();
+  dirty = true;
+  updateSyncButton();
 }
 
 // ─── Calcolo rimanenza ───
@@ -2669,45 +2779,67 @@ async function loadFromGitHub() {
   }
 }
 
-async function saveToGitHub() {
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, type === 'success' ? 3000 : 5000);
+}
+
+async function syncToGitHub() {
+  if (syncing) return;
+  syncing = true;
+  updateSyncButton();
+  dirty = false;
   try {
-    const profiles = getProfiles();
-    const activeProfile = getActiveProfile();
-    if (profiles.length === 0) return;
-    const data = {};
-    for (const p of profiles) {
-      for (const key in localStorage) {
-        if (key.startsWith(`ferie-planner-${p}-`)) {
-          const yearKey = key.replace('ferie-planner-', '');
-          try { data[yearKey] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
-        }
+    await saveToGitHub();
+    justSaved = true;
+    updateSyncButton();
+    showToast('Dati salvati su GitHub ✓', 'success');
+    setTimeout(() => { justSaved = false; updateSyncButton(); }, 2500);
+  } catch (e) {
+    dirty = true;
+    showToast('Errore salvataggio: ' + e.message, 'error');
+    updateSyncButton();
+  }
+  syncing = false;
+  updateSyncButton();
+}
+
+async function saveToGitHub() {
+  const profiles = getProfiles();
+  const activeProfile = getActiveProfile();
+  if (profiles.length === 0) return;
+  const data = {};
+  for (const p of profiles) {
+    for (const key in localStorage) {
+      if (key.startsWith(`ferie-planner-${p}-`)) {
+        const yearKey = key.replace('ferie-planner-', '');
+        try { data[yearKey] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
       }
     }
-    const payload = { profiles, activeProfile, data };
-    const jsonStr = JSON.stringify(payload, null, 2);
-    const content = btoa(unescape(encodeURIComponent(jsonStr)));
-    let sha = null;
-    try {
-      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/data.json`, {
-        headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
-      });
-      if (res.ok) { const j = await res.json(); sha = j.sha; }
-    } catch(e) {}
-    const body = { message: `Ferie Planner sync - ${new Date().toLocaleString('it-IT')}`, content };
-    if (sha) body.sha = sha;
+  }
+  const payload = { profiles, activeProfile, data };
+  const jsonStr = JSON.stringify(payload, null, 2);
+  const content = btoa(unescape(encodeURIComponent(jsonStr)));
+  let sha = null;
+  try {
     const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/data.json`, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
     });
-    if (!res.ok) {
-      const err = await res.json();
-      console.error('GitHub sync error:', err.message);
-    } else {
-      console.log('Dati sincronizzati su GitHub');
-    }
-  } catch (e) {
-    console.error('GitHub sync failed:', e);
+    if (res.ok) { const j = await res.json(); sha = j.sha; }
+  } catch(e) {}
+  const body = { message: `Ferie Planner sync - ${new Date().toLocaleString('it-IT')}`, content };
+  if (sha) body.sha = sha;
+  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/data.json`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Errore sconosciuto');
   }
 }
 
@@ -2750,8 +2882,18 @@ document.getElementById('cal-grid').addEventListener('click', function(e) {
   document.getElementById('permesso-iniziali').value = state.initial.permesso;
   document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
   renderAll();
-  if (!hasGitHub) saveToGitHub();
+  if (!hasGitHub) {
+    try { await saveToGitHub(); } catch(e) {}
+    justSaved = true;
+    dirty = false;
+    updateSyncButton();
+    setTimeout(() => { justSaved = false; updateSyncButton(); }, 2500);
+  } else {
+    dirty = false;
+    updateSyncButton();
+  }
 })();
 </script>
+<div id="toast" class="toast" style="display:none"></div>
 </body>
 </html>
