@@ -518,12 +518,12 @@ header p {
   border-radius: var(--radius-sm);
   cursor: pointer;
   position: relative;
-  transition: background var(--transition);
+  transition: background var(--transition), border-radius var(--transition);
   font-size: 14px;
   font-weight: 500;
   background: var(--surface);
   border: 1.5px solid transparent;
-  min-height: 56px;
+  min-height: 64px;
 }
 
 .cal-day:hover {
@@ -567,30 +567,72 @@ header p {
   border-color: transparent;
 }
 
+/* ── Sfondo evento cella ── */
+.cal-day.has-ferie { background: var(--ferie-bg); border-left: 4px solid var(--ferie); }
+.cal-day.has-permesso { background: var(--permesso-bg); border-left: 4px solid var(--permesso); }
+.cal-day.has-exfesta { background: var(--exfesta-bg); border-left: 4px solid var(--exfesta); }
+.cal-day.has-multi { background: var(--surface); border-left: 4px solid; border-image: linear-gradient(180deg, var(--ferie), var(--permesso), var(--exfesta)) 1; }
+.cal-day.has-draft { opacity: 0.65; border-left-style: dashed; }
+
+/* Weekend + evento: evento ha priorità */
+.cal-day.sabato.has-ferie, .cal-day.domenica.has-ferie { background: var(--ferie-bg); }
+.cal-day.sabato.has-permesso, .cal-day.domenica.has-permesso { background: var(--permesso-bg); }
+.cal-day.sabato.has-exfesta, .cal-day.domenica.has-exfesta { background: var(--exfesta-bg); }
+.cal-day.sabato.has-multi, .cal-day.domenica.has-multi { background: var(--surface); }
+
+/* Festivo + evento: mantieni data rossa ma sfondo evento */
+.cal-day.festivo.has-ferie { background: var(--ferie-bg); }
+.cal-day.festivo.has-permesso { background: var(--permesso-bg); }
+.cal-day.festivo.has-exfesta { background: var(--exfesta-bg); }
+.cal-day.festivo.has-multi { background: var(--surface); }
+.cal-day.festivo.has-ferie .day-number,
+.cal-day.festivo.has-permesso .day-number,
+.cal-day.festivo.has-exfesta .day-number,
+.cal-day.festivo.has-multi .day-number { color: var(--festivo); }
+
+/* Oggi + evento */
+.cal-day.oggi.has-ferie { border-color: var(--ferie); border-width: 2px; }
+.cal-day.oggi.has-permesso { border-color: var(--permesso); border-width: 2px; }
+.cal-day.oggi.has-exfesta { border-color: var(--exfesta); border-width: 2px; }
+.cal-day.oggi.has-multi { border-color: var(--ferie); border-width: 2px; }
+
+/* Arrotondamento run consecutivi */
+.cal-day.run-start { border-radius: 8px 0 0 8px; }
+.cal-day.run-end { border-radius: 0 8px 8px 0; }
+.cal-day.run-inner { border-radius: 0; }
+.cal-day.run-single { border-radius: 8px; }
+
 .day-number {
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
 }
 
-.day-events {
+/* ── Pill ore ── */
+.day-pills {
   display: flex;
-  gap: 3px;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
   margin-top: auto;
   padding-bottom: 2px;
+  width: 100%;
 }
-
-.day-event-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+.day-pill {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
-
-.day-event-dot.ferie { background: var(--ferie); }
-.day-event-dot.permesso { background: var(--permesso); }
-.day-event-dot.exfesta { background: var(--exfesta); }
+.day-pill.ferie { background: var(--ferie); color: #fff; }
+.day-pill.permesso { background: var(--permesso); color: #fff; }
+.day-pill.exfesta { background: var(--exfesta); color: #fff; }
+.day-pill.draft { opacity: 0.5; border: 1px dashed currentColor; background: transparent; color: inherit; }
 
 .day-holiday-name {
   font-size: 7px;
@@ -623,9 +665,9 @@ header p {
 }
 
 .legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
+  width: 16px;
+  height: 12px;
+  border-radius: 4px;
 }
 
 .legend-dot.ferie { background: var(--ferie); }
@@ -634,7 +676,7 @@ header p {
 .legend-dot.sab { background: var(--sabato-bg); border: 1px solid var(--border); }
 .legend-dot.dom { background: var(--domenica-bg); border: 1px solid #fecaca; }
 .legend-dot.fest { background: var(--festivo-bg); border: 1px solid var(--festivo); }
-.legend-dot.fest::after { content: ''; }
+.legend-dot.bozza { background: transparent; border: 1.5px dashed var(--text-muted); }
 
 /* ── Modal ── */
 .modal-overlay {
@@ -1081,9 +1123,9 @@ header p {
   .config-grid { grid-template-columns: repeat(2, 1fr); }
   .remaining-label { min-width: 70px; font-size: 13px; }
   .remaining-fraction { min-width: 70px; font-size: 13px; }
-  .cal-day { min-height: 44px; font-size: 12px; }
+  .cal-day { min-height: 46px; font-size: 12px; }
   .day-number { font-size: 12px; }
-  .day-event-dot { width: 6px; height: 6px; }
+  .day-pill { font-size: 8px; padding: 1px 4px; }
   .modal { padding: 20px; }
   header h1 { font-size: 22px; }
   .theme-toggle { width: 32px; height: 32px; font-size: 16px; }
@@ -1095,9 +1137,9 @@ header p {
 
 @media (max-width: 400px) {
   .config-grid { grid-template-columns: 1fr 1fr; }
-  .cal-day { min-height: 36px; font-size: 11px; }
+  .cal-day { min-height: 38px; font-size: 11px; }
   .day-number { font-size: 11px; }
-  .day-event-dot { width: 5px; height: 5px; }
+  .day-pill { font-size: 7px; padding: 1px 3px; }
   .cal-day-header { font-size: 10px; }
 }
 
@@ -1206,9 +1248,9 @@ header p {
   .cal-nav button { padding: 6px 10px; font-size: 13px; }
 
   /* Celle calendario */
-  .cal-day { min-height: 40px; padding: 3px 1px; font-size: 11px; }
+  .cal-day { min-height: 46px; padding: 3px 1px; font-size: 11px; }
   .day-number { font-size: 11px; }
-  .day-event-dot { width: 5px; height: 5px; }
+  .day-pill { font-size: 8px; padding: 1px 4px; }
   .day-holiday-name { display: none; }
 
   /* Legenda su due righe */
@@ -1362,6 +1404,7 @@ header p {
       <span class="legend-item"><span class="legend-dot sab"></span> Sabato</span>
       <span class="legend-item"><span class="legend-dot dom"></span> Domenica</span>
       <span class="legend-item"><span class="legend-dot fest"></span> Festività</span>
+      <span class="legend-item"><span class="legend-dot bozza"></span> Bozza</span>
     </div>
     <div id="monthly-summary" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:none">
       <h2 style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Riepilogo Mensile</h2>
@@ -1679,6 +1722,12 @@ function dateStr(d) {
 function parseDate(str) {
   const [y, m, d] = str.split('-').map(Number);
   return new Date(y, m - 1, d);
+}
+
+function addDays(dateKey, n) {
+  const d = parseDate(dateKey);
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function formatDateLong(d) {
@@ -2166,27 +2215,46 @@ function renderCalendar() {
       el.appendChild(hSpan);
     }
 
-    // Event dots
-    if (hasEvents || hasDraft) {
-      const dotsWrap = document.createElement('div');
-      dotsWrap.className = 'day-events';
-      const types = ['ferie', 'permesso', 'exFesta'];
-      const typeCss = { ferie: 'ferie', permesso: 'permesso', exFesta: 'exfesta' };
-      for (const t of types) {
-        if (ev[t] > 0) {
-          const dot = document.createElement('div');
-          dot.className = `day-event-dot ${typeCss[t]}`;
-          dotsWrap.appendChild(dot);
+    // Event background + pills
+    const catList = [
+      { key: 'ferie', dkey: 'draftFerie', cls: 'ferie', label: 'Ferie' },
+      { key: 'permesso', dkey: 'draftPermesso', cls: 'permesso', label: 'Perm.' },
+      { key: 'exFesta', dkey: 'draftExFesta', cls: 'exfesta', label: 'ExF' }
+    ];
+    const confirmed = ev ? catList.filter(c => ev[c.key] > 0) : [];
+    const draftOnly = ev ? catList.filter(c => !(ev[c.key] > 0) && ev[c.dkey] > 0) : [];
+
+    if (confirmed.length > 0 || draftOnly.length > 0) {
+      // CSS class per background
+      if (confirmed.length === 1) {
+        el.classList.add('has-' + confirmed[0].cls);
+      } else if (confirmed.length > 1) {
+        el.classList.add('has-multi');
+      }
+      if (confirmed.length === 0 && draftOnly.length > 0) {
+        el.classList.add('has-' + draftOnly[0].cls, 'has-draft');
+      }
+
+      // Pills
+      const pillsDiv = document.createElement('div');
+      pillsDiv.className = 'day-pills';
+      for (const c of catList) {
+        const val = ev ? (ev[c.key] || 0) : 0;
+        if (val > 0) {
+          const pill = document.createElement('div');
+          pill.className = 'day-pill ' + c.cls;
+          pill.textContent = c.label + ' \u00b7 ' + val + 'h';
+          pillsDiv.appendChild(pill);
         }
-        const dt = 'draft' + t.charAt(0).toUpperCase() + t.slice(1);
-        if (ev[dt] > 0) {
-          const dot = document.createElement('div');
-          dot.className = `day-event-dot ${typeCss[t]}`;
-          dot.style.opacity = '0.4';
-          dotsWrap.appendChild(dot);
+        const dval = ev ? (ev[c.dkey] || 0) : 0;
+        if (dval > 0 && val === 0) {
+          const pill = document.createElement('div');
+          pill.className = 'day-pill ' + c.cls + ' draft';
+          pill.textContent = 'Bozza ' + c.label + ' \u00b7 ' + dval + 'h';
+          pillsDiv.appendChild(pill);
         }
       }
-      el.appendChild(dotsWrap);
+      el.appendChild(pillsDiv);
     }
 
     el.dataset.date = dateKey;
@@ -2202,6 +2270,31 @@ function renderCalendar() {
       el.className = 'cal-day empty';
       grid.appendChild(el);
     }
+  }
+
+  // Run detection for consecutive same-type days
+  for (let d = 1; d <= dim; d++) {
+    const dateKey = `${curYear}-${String(curMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const cell = grid.querySelector(`[data-date="${dateKey}"]`);
+    if (!cell) continue;
+    const ev = state.events[dateKey];
+    if (!ev) continue;
+    const runCats = ['ferie', 'permesso', 'exFesta'];
+    const mainCat = runCats.find(c => (ev[c]||0) > 0);
+    if (!mainCat) continue;
+    // Skip multi-category days
+    const multi = runCats.filter(c => (ev[c]||0) > 0).length > 1;
+    if (multi) continue;
+    const prevDate = addDays(dateKey, -1);
+    const nextDate = addDays(dateKey, 1);
+    const prevEv = state.events[prevDate];
+    const nextEv = state.events[nextDate];
+    const prevSame = prevEv && (prevEv[mainCat]||0) > 0;
+    const nextSame = nextEv && (nextEv[mainCat]||0) > 0;
+    if (prevSame && nextSame) cell.classList.add('run-inner');
+    else if (prevSame && !nextSame) cell.classList.add('run-end');
+    else if (!prevSame && nextSame) cell.classList.add('run-start');
+    else cell.classList.add('run-single');
   }
 
   document.getElementById('cal-title').textContent = formatMonth(new Date(curYear, curMonth, 1));
