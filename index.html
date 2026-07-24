@@ -154,33 +154,6 @@ header p {
   cursor: not-allowed;
 }
 
-.btn-sync.dirty {
-  border-color: #f59e0b;
-  color: #f59e0b;
-}
-
-.btn-sync.syncing {
-  border-color: var(--text-muted);
-}
-
-.btn-sync.saved {
-  border-color: #16a34a;
-  color: #16a34a;
-}
-
-#dirty-dot {
-  display: none;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #f59e0b;
-  flex-shrink: 0;
-}
-
-.btn-sync.dirty #dirty-dot {
-  display: inline-block;
-}
-
 .toast {
   position: fixed;
   bottom: 24px;
@@ -1369,7 +1342,7 @@ header p {
       <span>👤</span><span id="profile-name">—</span><span style="font-size:10px;margin-left:2px">▼</span>
       <div class="profile-dropdown" id="profile-dropdown"></div>
     </div>
-    <button class="btn-sync" id="btn-sync" onclick="syncToGitHub()" title="Salva su GitHub"><span id="dirty-dot"></span><span id="sync-icon">☁️</span><span id="sync-label">Salva</span></button>
+    <button class="btn-sync" id="btn-sync" onclick="saveLocal()" title="Salva localmente"><span id="sync-icon">💾</span><span id="sync-label">Salva</span></button>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
   </header>
 
@@ -1433,7 +1406,7 @@ header p {
       <span style="font-size:11px;color:var(--text-muted);white-space:nowrap" id="year-days">—</span>
     </div>
     <div class="reset-bar">
-      <button class="btn-file" onclick="exportJSON()">Esporta JSON</button>
+      <button class="btn-file" onclick="exportJSON()">Esporta / Carica su GitHub</button>
       <button class="btn-file" onclick="document.getElementById('file-input').click()" style="margin-left:8px">Importa JSON</button>
       <input type="file" id="file-input" accept=".json" style="display:none" onchange="importJSON(event)">
       <button class="btn-reset" onclick="resetYear()" style="margin-left:auto">Azzera anno</button>
@@ -1570,6 +1543,34 @@ window.onerror = function(msg, url, line) {
 };
 console.log('Ferie Planner loaded');
 
+// localStorage fallback for file:// protocol
+(function() {
+  const mem = {};
+  try {
+    localStorage.setItem('__test__', '1');
+    localStorage.removeItem('__test__');
+    return;
+  } catch(e) {}
+  const METHODS = ['getItem','setItem','removeItem','clear','key','length'];
+  localStorage = new Proxy({}, {
+    get(_, p) {
+      if (p === 'getItem') return k => mem[k] !== undefined ? mem[k] : null;
+      if (p === 'setItem') return (k, v) => { mem[k] = String(v); };
+      if (p === 'removeItem') return k => delete mem[k];
+      if (p === 'clear') return () => { Object.keys(mem).forEach(k => delete mem[k]); };
+      if (p === 'length') return Object.keys(mem).length;
+      if (p === 'key') return i => Object.keys(mem)[i] || null;
+      return mem[p];
+    },
+    has(_, p) { return p in mem; },
+    ownKeys() { return Object.keys(mem); },
+    getOwnPropertyDescriptor(_, p) {
+      if (p in mem) return { enumerable: true, configurable: true };
+      if (METHODS.includes(p)) return { enumerable: false, configurable: true };
+    }
+  });
+})();
+
 // ── Dark Mode ──
 function toggleTheme() {
   const html = document.documentElement;
@@ -1599,7 +1600,6 @@ function getProfiles() {
 
 function saveProfiles(list) {
   localStorage.setItem('ferie-planner-profiles', JSON.stringify(list));
-  saveToGitHub();
 }
 
 function getActiveProfile() {
@@ -1609,7 +1609,6 @@ function getActiveProfile() {
 function setActiveProfile(name) {
   activeProfile = name;
   localStorage.setItem('ferie-planner-active-profile', name);
-  saveToGitHub();
 }
 
 function getStorageKey(year) {
@@ -1780,28 +1779,9 @@ let curYear = new Date().getFullYear();
 let undoStack = [];
 const UNDO_MAX = 5;
 
-// ─── GitHub Sync ───
+// ─── GitHub (read-only, repo pubblico) ───
 const REPO_OWNER = 'Zizzo91';
-const REPO_NAME = 'ferie-planner';
-const GITHUB_TOKEN = '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';
-
-let dirty = false;
-
-function updateSyncButton() {
-  const btn = document.getElementById('btn-sync');
-  const label = document.getElementById('sync-label');
-  const icon = document.getElementById('sync-icon');
-  btn.className = 'btn-sync';
-  btn.disabled = false;
-  if (dirty) btn.classList.add('dirty');
-  if (syncing) { btn.classList.add('syncing'); btn.disabled = true; }
-  if (justSaved) { btn.classList.add('saved'); }
-  icon.textContent = syncing ? '⏳' : justSaved ? '✅' : dirty ? '☁️' : '☁️';
-  label.textContent = syncing ? 'Salvataggio…' : justSaved ? 'Salvato' : 'Salva';
-}
-
-let syncing = false;
-let justSaved = false;
+const REPO_NAME = 'Ferie-Planner';
 
 function pushUndo() {
   undoStack.push(JSON.parse(JSON.stringify(state.events)));
@@ -1955,8 +1935,6 @@ function loadState(year) {
 function saveState() {
   const key = getStorageKey(state.year);
   localStorage.setItem(key, JSON.stringify(state));
-  dirty = true;
-  updateSyncButton();
 }
 
 // ─── Calcolo rimanenza ───
@@ -2712,19 +2690,29 @@ function resetYear() {
 
 // ─── Export / Import JSON ───
 function exportJSON() {
-  const data = {
-    profile: activeProfile,
-    year: state.year,
-    initial: state.initial,
-    events: state.events
+  const profiles = getProfiles();
+  const data = {};
+  for (const p of profiles) {
+    for (const key in localStorage) {
+      if (key.startsWith('ferie-planner-' + p + '-')) {
+        const yearKey = key.replace('ferie-planner-', '');
+        try { data[yearKey] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+      }
+    }
+  }
+  const payload = {
+    profiles: profiles,
+    activeProfile: activeProfile,
+    data: data
   };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `ferie-${activeProfile}-${state.year}.json`;
+  a.download = 'data.json';
   a.click();
   URL.revokeObjectURL(url);
+  showToast('File data.json scaricato — caricalo su github.com/Zizzo91/Ferie-Planner', 'success');
 }
 
 function importJSON(event) {
@@ -2734,22 +2722,50 @@ function importJSON(event) {
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data || typeof data.year !== 'number' || !data.initial || !data.events) {
-        alert('Il file JSON non è valido. Deve contenere year, initial ed events.');
-        return;
+      if (data && data.profiles && data.data) {
+        for (const key in data.data) {
+          localStorage.setItem('ferie-planner-' + key, JSON.stringify(data.data[key]));
+        }
+        if (data.profiles) localStorage.setItem('ferie-planner-profiles', JSON.stringify(data.profiles));
+        if (data.activeProfile) localStorage.setItem('ferie-planner-active-profile', data.activeProfile);
+        activeProfile = data.activeProfile || (data.profiles && data.profiles[0]) || '';
+        const years = Object.keys(data.data).map(k => parseInt(k.split('-').pop())).filter(n => !isNaN(n));
+        if (years.length > 0) {
+          curYear = years[years.length - 1];
+          curMonth = 0;
+          loadState(curYear);
+        }
+        syncInputs();
+        renderProfileDropdown();
+        renderAll();
+        showToast('Dati caricati con successo!', 'success');
+      } else if (data && typeof data.year === 'number' && data.initial && data.events) {
+        if (data.year !== state.year) {
+          if (!confirm('Il file è per l\'anno ' + data.year + ', ma stai visualizzando il ' + state.year + '. Caricare comunque?')) return;
+        }
+        const pName = data.profile || activeProfile || 'Simone';
+        if (!getProfiles().includes(pName)) {
+          const list = getProfiles();
+          list.push(pName);
+          saveProfiles(list);
+        }
+        localStorage.setItem('ferie-planner-' + pName + '-' + data.year, JSON.stringify({
+          year: data.year,
+          initial: data.initial,
+          events: data.events
+        }));
+        activeProfile = pName;
+        localStorage.setItem('ferie-planner-active-profile', pName);
+        curYear = data.year;
+        curMonth = 0;
+        loadState(curYear);
+        syncInputs();
+        renderProfileDropdown();
+        renderAll();
+        showToast('Piano ferie caricato con successo!', 'success');
+      } else {
+        alert('Il file JSON non è valido. Deve essere un file data.json esportato dall\'app o un file ferie-profilo-anno.json.');
       }
-      if (data.year !== state.year) {
-        if (!confirm(`Il file è per l'anno ${data.year}, ma stai visualizzando il ${state.year}. Caricare comunque? Passerò all'anno ${data.year}.`)) return;
-      }
-      state.year = data.year;
-      state.initial = { ferie: data.initial.ferie || 0, permesso: data.initial.permesso || 0, exFesta: data.initial.exFesta || 0 };
-      state.events = data.events || {};
-      saveState();
-      curYear = data.year;
-      curMonth = 0;
-      syncInputs();
-      renderAll();
-      alert('Piano ferie caricato con successo!');
     } catch (err) {
       alert('Errore nel leggere il file JSON: ' + err.message);
     }
@@ -2787,60 +2803,8 @@ function showToast(msg, type) {
   setTimeout(() => { t.style.display = 'none'; }, type === 'success' ? 3000 : 5000);
 }
 
-async function syncToGitHub() {
-  if (syncing) return;
-  syncing = true;
-  updateSyncButton();
-  dirty = false;
-  try {
-    await saveToGitHub();
-    justSaved = true;
-    updateSyncButton();
-    showToast('Dati salvati su GitHub ✓', 'success');
-    setTimeout(() => { justSaved = false; updateSyncButton(); }, 2500);
-  } catch (e) {
-    dirty = true;
-    showToast('Errore salvataggio: ' + e.message, 'error');
-    updateSyncButton();
-  }
-  syncing = false;
-  updateSyncButton();
-}
-
-async function saveToGitHub() {
-  const profiles = getProfiles();
-  const activeProfile = getActiveProfile();
-  if (profiles.length === 0) return;
-  const data = {};
-  for (const p of profiles) {
-    for (const key in localStorage) {
-      if (key.startsWith(`ferie-planner-${p}-`)) {
-        const yearKey = key.replace('ferie-planner-', '');
-        try { data[yearKey] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
-      }
-    }
-  }
-  const payload = { profiles, activeProfile, data };
-  const jsonStr = JSON.stringify(payload, null, 2);
-  const content = btoa(unescape(encodeURIComponent(jsonStr)));
-  let sha = null;
-  try {
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/data.json`, {
-      headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
-    });
-    if (res.ok) { const j = await res.json(); sha = j.sha; }
-  } catch(e) {}
-  const body = { message: `Ferie Planner sync - ${new Date().toLocaleString('it-IT')}`, content };
-  if (sha) body.sha = sha;
-  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/data.json`, {
-    method: 'PUT',
-    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'Errore sconosciuto');
-  }
+function saveLocal() {
+  showToast('Salvato localmente ✓', 'success');
 }
 
 // ─── Input listeners ───
@@ -2882,16 +2846,6 @@ document.getElementById('cal-grid').addEventListener('click', function(e) {
   document.getElementById('permesso-iniziali').value = state.initial.permesso;
   document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
   renderAll();
-  if (!hasGitHub) {
-    try { await saveToGitHub(); } catch(e) {}
-    justSaved = true;
-    dirty = false;
-    updateSyncButton();
-    setTimeout(() => { justSaved = false; updateSyncButton(); }, 2500);
-  } else {
-    dirty = false;
-    updateSyncButton();
-  }
 })();
 </script>
 <div id="toast" class="toast" style="display:none"></div>
