@@ -1,0 +1,10 @@
+# Dati locali personali e backup — mai committare
+data.json
+backup-*.json
+script/*.json
+*.local.json
+
+# Configurazioni locali
+.vscode/
+.DS_Store
+node_modules/

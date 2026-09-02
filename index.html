@@ -4,10 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pianificazione Ferie</title>
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+<script src="config/supabase-config.js"></script>
 <style>
 :root {
   --ferie: #3b82f6;
@@ -1330,14 +1333,58 @@ header p {
   #monthly-table th, #monthly-table td { padding: 5px 7px; }
 }
 
+#loginScreen { position:fixed; inset:0; z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; background:linear-gradient(135deg,#1a6dd8 0%,#0ea5e9 100%); }
+[data-theme="dark"] #loginScreen { background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); }
+#loginScreen.hidden { display:none; }
+#loginCard { background:var(--surface); border-radius:16px; padding:28px; width:100%; max-width:340px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.25); }
+#loginCard h2 { font-size:20px; font-weight:700; color:var(--text); margin-bottom:4px; }
+#loginCard p { font-size:13px; color:var(--text-secondary); margin-bottom:18px; }
+#loginError { color:#ef4444; font-size:13px; min-height:18px; margin-bottom:10px; }
+#loginStatus { color:var(--text-secondary); font-size:13px; min-height:18px; margin-bottom:10px; }
+#pin-dots { display:flex; justify-content:center; gap:10px; margin-bottom:22px; }
+.pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--text-muted); }
+.pin-dot.filled { background:var(--ferie); border-color:var(--ferie); }
+.pin-grid { display:grid; grid-template-columns:repeat(3,70px); gap:10px; justify-content:center; }
+.pin-btn { width:70px; height:52px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:20px; font-weight:600; border-radius:10px; cursor:pointer; transition:var(--transition); }
+.pin-btn:hover { border-color:var(--ferie); background:var(--ferie-light); }
+.pin-btn.ghost { font-size:16px; color:var(--text-secondary); font-weight:500; }
+#logoutBtn { position:absolute; top:44px; right:0; background:var(--surface); border:1px solid var(--border); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; line-height:1; color:var(--text-secondary); transition:var(--transition); box-shadow:var(--shadow); }
+#logoutBtn:hover { border-color:var(--text-muted); color:var(--text); }
 </style>
 </head>
 <body>
+<div id="loginScreen">
+  <div id="loginCard">
+    <h2>🔒 Ferie Planner</h2>
+    <p>Inserisci il PIN per accedere</p>
+    <div id="loginError"></div>
+    <div id="loginStatus"></div>
+    <div id="pin-dots">
+      <div class="pin-dot" id="ldot0"></div><div class="pin-dot" id="ldot1"></div><div class="pin-dot" id="ldot2"></div>
+      <div class="pin-dot" id="ldot3"></div><div class="pin-dot" id="ldot4"></div><div class="pin-dot" id="ldot5"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pinPad('1')">1</button>
+      <button class="pin-btn" onclick="pinPad('2')">2</button>
+      <button class="pin-btn" onclick="pinPad('3')">3</button>
+      <button class="pin-btn" onclick="pinPad('4')">4</button>
+      <button class="pin-btn" onclick="pinPad('5')">5</button>
+      <button class="pin-btn" onclick="pinPad('6')">6</button>
+      <button class="pin-btn" onclick="pinPad('7')">7</button>
+      <button class="pin-btn" onclick="pinPad('8')">8</button>
+      <button class="pin-btn" onclick="pinPad('9')">9</button>
+      <button class="pin-btn ghost" onclick="pinPadClear()">✕</button>
+      <button class="pin-btn" onclick="pinPad('0')">0</button>
+      <button class="pin-btn ghost" onclick="pinPadBackspace()">⌫</button>
+    </div>
+  </div>
+</div>
 <div class="container">
 
   <header>
     <h1>Pianificazione Ferie</h1>
     <p>Gestisci ferie, permessi ed ex festività sul calendario</p>
+    <button class="theme-toggle" id="logoutBtn" onclick="logout()" title="Esci" style="display:none">🚪</button>
     <div class="profile-select" id="profile-select" onclick="toggleProfileDropdown(event)">
       <span>👤</span><span id="profile-name">—</span><span style="font-size:10px;margin-left:2px">▼</span>
       <div class="profile-dropdown" id="profile-dropdown"></div>
@@ -1779,9 +1826,167 @@ let curYear = new Date().getFullYear();
 let undoStack = [];
 const UNDO_MAX = 5;
 
-// ─── GitHub (read-only, repo pubblico) ───
-const REPO_OWNER = 'Zizzo91';
-const REPO_NAME = 'Ferie-Planner';
+// ─── Supabase (auth + cloud sync) ───
+const supabaseConfig = (window && window.SUPABASE_CONFIG) ? window.SUPABASE_CONFIG : null;
+let supabaseSdk = null;
+
+function getSupabaseSdk() {
+  if (supabaseSdk) return supabaseSdk;
+  if (!supabaseConfig || !window.supabase || !window.supabase.createClient) return null;
+  supabaseSdk = window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey, {
+    auth: { persistSession: false, autoRefreshToken: true, flowType: 'pkce' }
+  });
+  return supabaseSdk;
+}
+
+// ─── Login PIN 6 cifre ───
+const PIN_LEN = 6;
+let pinBuffer = '';
+
+function setLoginStatus(msg) { const el = document.getElementById('loginStatus'); if (el) el.textContent = msg || ''; }
+function showLoginError(msg) { const el = document.getElementById('loginError'); if (el) el.textContent = msg; }
+function hideLoginError() { const el = document.getElementById('loginError'); if (el) el.textContent = ''; }
+function updateLoginDots() {
+  for (let i = 0; i < PIN_LEN; i++) {
+    const el = document.getElementById('ldot' + i);
+    if (el) el.classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function pinPad(d) {
+  if (pinBuffer.length >= PIN_LEN) return;
+  pinBuffer += d; updateLoginDots();
+  if (pinBuffer.length === PIN_LEN) setTimeout(() => doPinLogin(), 180);
+}
+function pinPadBackspace() { pinBuffer = pinBuffer.slice(0, -1); updateLoginDots(); hideLoginError(); }
+function pinPadClear() { pinBuffer = ''; updateLoginDots(); hideLoginError(); }
+
+async function doPinLogin() {
+  const sdk = getSupabaseSdk();
+  const email = (supabaseConfig && supabaseConfig.pinEmail || '').trim().toLowerCase();
+  if (!email) { showLoginError('Config mancante (pinEmail).'); return; }
+  if (!sdk) { showLoginError('SDK non disponibile.'); return; }
+  const password = pinBuffer; pinBuffer = ''; updateLoginDots();
+  setLoginStatus('Verifica...'); hideLoginError();
+  try {
+    let { data, error } = await sdk.auth.signInWithPassword({ email, password });
+    if (error && /invalid login credentials/i.test(error.message || '')) {
+      const su = await sdk.auth.signUp({ email, password });
+      if (su.error) {
+        setLoginStatus('');
+        const m = (su.error.message || '').toLowerCase();
+        if (/rate limit|troppi tentativi|email.*limit/i.test(m)) {
+          showLoginError('Limite momentaneo di Supabase: riprova tra circa un\'ora con lo stesso PIN.');
+          return;
+        }
+        if (/weak_password|8 character|too short|almeno 8/i.test(m)) {
+          showLoginError('Supabase richiede una password più lunga: imposta \'Minimum password length\' a 6 nel pannello Auth.');
+          return;
+        }
+        if (/already registered/i.test(m)) showLoginError('PIN errato.');
+        else showLoginError(su.error.message || 'Errore');
+        return;
+      }
+      if (!su.data || !su.data.session) {
+        setLoginStatus('');
+        showLoginError('Account creato: verifica l\'email di conferma, poi reinserisci lo stesso PIN.');
+        return;
+      }
+      data = su.data;
+    }
+    if (error) { setLoginStatus(''); showLoginError(error.message || 'Errore'); return; }
+    await applyAuthUI();
+    await startApp();
+  } catch (e) {
+    setLoginStatus('');
+    showLoginError(e && e.message ? e.message : 'Errore');
+  }
+}
+
+async function logout() {
+  const sdk = getSupabaseSdk();
+  try { if (sdk) await sdk.auth.signOut(); } catch (e) {}
+  if ('serviceWorker' in navigator) {
+    setTimeout(() => { location.reload(); }, 150);
+  } else {
+    location.reload();
+  }
+}
+
+// ─── Cloud state (schema ferie, una riga per utente) ───
+async function loadCloudState() {
+  const sdk = getSupabaseSdk();
+  if (!sdk) return false;
+  const { data: { user } } = await sdk.auth.getUser();
+  if (!user) return false;
+  const { data, error } = await sdk
+    .schema('ferie')
+    .from('state')
+    .select('profiles,active_profile,last_update')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (error || !data) return false;
+  const profiles = data.profiles || {};
+  // Rebuild localStorage mirror from cloud
+  const list = [];
+  for (const key of Object.keys(profiles)) {
+    const val = profiles[key];
+    if (!val || !val.initial || !val.events) continue;
+    const parts = key.split('-');
+    const y = parseInt(parts.pop(), 10);
+    const name = parts.join('-');
+    if (isNaN(y)) continue;
+    localStorage.setItem(`ferie-planner-${name}-${y}`, JSON.stringify({ year: y, initial: val.initial, events: val.events }));
+    if (!list.includes(name)) list.push(name);
+  }
+  if (list.length > 0) {
+    localStorage.setItem('ferie-planner-profiles', JSON.stringify(list));
+  }
+  const active = data.active_profile || (list.length > 0 ? list[0] : '');
+  if (active) {
+    activeProfile = active;
+    localStorage.setItem('ferie-planner-active-profile', active);
+  }
+  console.log('Cloud caricato per', list.join(', '));
+  return true;
+}
+
+async function syncCloudState() {
+  const sdk = getSupabaseSdk();
+  if (!sdk) return;
+  const { data: { user } } = await sdk.auth.getUser();
+  if (!user) return;
+  // Collect all localStorage profile data into profiles JSONB
+  const profiles = {};
+  const list = getProfiles();
+  for (const name of list) {
+    for (let y = 2000; y <= 2100; y++) {
+      const raw = localStorage.getItem(`ferie-planner-${name}-${y}`);
+      if (!raw) continue;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.initial && parsed.events) {
+          profiles[`${name}-${y}`] = { initial: parsed.initial, events: parsed.events };
+        }
+      } catch (e) {}
+    }
+  }
+  const row = {
+    user_id: user.id,
+    profiles,
+    active_profile: activeProfile || '',
+    last_update: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await sdk.schema('ferie').from('state').upsert(row, { onConflict: 'user_id' });
+  if (error) {
+    if (/rate limit|troppi tentativi/i.test(error.message || '')) {
+      showToast('⚠️ Limite momentaneo Supabase: riprova tra circa un\'ora.', 'error');
+      return;
+    }
+    showToast('❌ Errore salvataggio cloud: ' + (error.message || 'errore'), 'error');
+  }
+}
 
 function pushUndo() {
   undoStack.push(JSON.parse(JSON.stringify(state.events)));
@@ -1935,6 +2140,13 @@ function loadState(year) {
 function saveState() {
   const key = getStorageKey(state.year);
   localStorage.setItem(key, JSON.stringify(state));
+  scheduleCloudSync();
+}
+
+let cloudSyncTimer = null;
+function scheduleCloudSync() {
+  if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => { cloudSyncTimer = null; syncCloudState(); }, 400);
 }
 
 // ─── Calcolo rimanenza ───
@@ -2712,7 +2924,7 @@ function exportJSON() {
   a.download = 'data.json';
   a.click();
   URL.revokeObjectURL(url);
-  showToast('File data.json scaricato — caricalo su github.com/Zizzo91/Ferie-Planner', 'success');
+  showToast('File data.json scaricato', 'success');
 }
 
 function importJSON(event) {
@@ -2738,6 +2950,7 @@ function importJSON(event) {
         syncInputs();
         renderProfileDropdown();
         renderAll();
+        scheduleCloudSync();
         showToast('Dati caricati con successo!', 'success');
       } else if (data && typeof data.year === 'number' && data.initial && data.events) {
         if (data.year !== state.year) {
@@ -2762,6 +2975,7 @@ function importJSON(event) {
         syncInputs();
         renderProfileDropdown();
         renderAll();
+        scheduleCloudSync();
         showToast('Piano ferie caricato con successo!', 'success');
       } else {
         alert('Il file JSON non è valido. Deve essere un file data.json esportato dall\'app o un file ferie-profilo-anno.json.');
@@ -2774,27 +2988,6 @@ function importJSON(event) {
   event.target.value = '';
 }
 
-// ─── GitHub Sync ───
-async function loadFromGitHub() {
-  try {
-    const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data.json`, { cache: 'no-store' });
-    if (!res.ok) return false;
-    const json = await res.json();
-    if (!json.profiles || !json.data) return false;
-    localStorage.setItem('ferie-planner-profiles', JSON.stringify(json.profiles));
-    if (json.activeProfile) localStorage.setItem('ferie-planner-active-profile', json.activeProfile);
-    for (const [key, val] of Object.entries(json.data)) {
-      const lsKey = `ferie-planner-${key}`;
-      localStorage.setItem(lsKey, JSON.stringify(val));
-    }
-    console.log('Caricati dati da GitHub per', json.profiles.join(', '));
-    return true;
-  } catch (e) {
-    console.log('GitHub non disponibile, uso dati locali');
-    return false;
-  }
-}
-
 function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -2803,8 +2996,14 @@ function showToast(msg, type) {
   setTimeout(() => { t.style.display = 'none'; }, type === 'success' ? 3000 : 5000);
 }
 
+// ─── Serve solo per UI (supebase sync sopra) ───
 function saveLocal() {
-  showToast('Salvato localmente ✓', 'success');
+  showToast('Salvataggio...', '');
+  syncCloudState().then(() => {
+    showToast('Salvato ✓', 'success');
+  }).catch(() => {
+    showToast('❌ Errore salvataggio cloud', 'error');
+  });
 }
 
 // ─── Input listeners ───
@@ -2824,9 +3023,14 @@ document.getElementById('cal-grid').addEventListener('click', function(e) {
   }
 });
 
-// ─── Init ───
-(async function init() {
-  const hasGitHub = await loadFromGitHub();
+// ─── Init: solo dopo login ───
+function applyAuthUI() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('logoutBtn').style.display = 'flex';
+}
+
+async function startApp() {
+  await loadCloudState();
   initTheme();
   lucide.createIcons();
   migrateOldData();
@@ -2846,7 +3050,11 @@ document.getElementById('cal-grid').addEventListener('click', function(e) {
   document.getElementById('permesso-iniziali').value = state.initial.permesso;
   document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
   renderAll();
-})();
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
 </script>
 <div id="toast" class="toast" style="display:none"></div>
 </body>
