@@ -1350,6 +1350,10 @@ header p {
 .pin-btn.ghost { font-size:16px; color:var(--text-secondary); font-weight:500; }
 #logoutBtn { position:absolute; top:44px; right:0; background:var(--surface); border:1px solid var(--border); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; line-height:1; color:var(--text-secondary); transition:var(--transition); box-shadow:var(--shadow); }
 #logoutBtn:hover { border-color:var(--text-muted); color:var(--text); }
+#sync-badge { position:absolute; top:44px; right:44px; font-size:12px; font-weight:600; padding:4px 8px; border-radius:10px; background:#fb923c; color:#fff; box-shadow:var(--shadow); }
+#sync-badge.ok { background:#22c55e; }
+#sync-badge.err { background:#ef4444; color:#fff; }
+#sync-badge.syncing { background:#0ea5e9; }
 </style>
 </head>
 <body>
@@ -1390,6 +1394,7 @@ header p {
       <div class="profile-dropdown" id="profile-dropdown"></div>
     </div>
     <button class="btn-sync" id="btn-sync" onclick="saveLocal()" title="Salva localmente"><span id="sync-icon">💾</span><span id="sync-label">Salva</span></button>
+    <span id="sync-badge" title="" style="display:none"></span>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
   </header>
 
@@ -1767,6 +1772,13 @@ function deleteProfile(name) {
   for (let y = 2000; y <= 2100; y++) {
     localStorage.removeItem(`ferie-planner-${name}-${y}`);
   }
+  // Pulisci anche i timestamp associati
+  const tsMap = getSyncTimestamps();
+  const keys = Object.keys(tsMap).filter(k => k.startsWith(name + '-'));
+  if (keys.length > 0) {
+    keys.forEach(k => delete tsMap[k]);
+    localStorage.setItem('ferie-planner-sync-timestamps', JSON.stringify(tsMap));
+  }
   profiles.splice(idx, 1);
   saveProfiles(profiles);
   if (profiles.length === 0) {
@@ -1914,6 +1926,54 @@ async function logout() {
 }
 
 // ─── Cloud state (schema ferie, una riga per utente) ───
+// Mirror locale: localStorage. Migliore piu' recente per Nome-YYYY -> vince cloud o locale.
+// Viene tenuta una mappa dei timestamp per-chiave ("Nome-YYYY" -> ISO) sia in localStorage
+// che sul cloud (campo "timestamps"). Il formato degli eventi resta invariato.
+
+function getSyncTimestamps() {
+  try {
+    return JSON.parse(localStorage.getItem('ferie-planner-sync-timestamps') || '{}');
+  } catch (e) { return {}; }
+}
+function getSyncTimestamp(key) {
+  const map = getSyncTimestamps();
+  return map[key] || '';
+}
+function setSyncTimestamp(key, iso) {
+  const map = getSyncTimestamps();
+  map[key] = iso;
+  localStorage.setItem('ferie-planner-sync-timestamps', JSON.stringify(map));
+}
+function isCloudNewer(localTs, cloudTs) {
+  if (!cloudTs) return false;
+  if (!localTs) return true;
+  return new Date(cloudTs).getTime() > new Date(localTs).getTime();
+}
+
+function parseProfileKey(key) {
+  const parts = key.split('-');
+  const y = parseInt(parts.pop(), 10);
+  if (isNaN(y)) return null;
+  return { year: y, name: parts.join('-') };
+}
+
+function mergeYearFromCloud(key, val, ts) {
+  const pk = parseProfileKey(key);
+  if (!pk || !val || !val.initial || !val.events) return false;
+  const localTs = getSyncTimestamp(key);
+  if (isCloudNewer(localTs, ts)) {
+    localStorage.setItem(`ferie-planner-${pk.name}-${pk.year}`, JSON.stringify({ year: pk.year, initial: val.initial, events: val.events }));
+    setSyncTimestamp(key, ts);
+    if (!getProfiles().includes(pk.name)) {
+      const list = getProfiles();
+      list.push(pk.name);
+      saveProfiles(list);
+    }
+    return true;
+  }
+  return false;
+}
+
 async function loadCloudState() {
   const sdk = getSupabaseSdk();
   if (!sdk) return false;
@@ -1922,69 +1982,176 @@ async function loadCloudState() {
   const { data, error } = await sdk
     .schema('ferie')
     .from('state')
-    .select('profiles,active_profile,last_update')
+    .select('profiles,active_profile,timestamps,last_update')
     .eq('user_id', user.id)
     .maybeSingle();
   if (error || !data) return false;
   const profiles = data.profiles || {};
-  // Rebuild localStorage mirror from cloud
-  const list = [];
+  const cloudTimestamps = data.timestamps || {};
+  let merged = 0;
   for (const key of Object.keys(profiles)) {
-    const val = profiles[key];
-    if (!val || !val.initial || !val.events) continue;
-    const parts = key.split('-');
-    const y = parseInt(parts.pop(), 10);
-    const name = parts.join('-');
-    if (isNaN(y)) continue;
-    localStorage.setItem(`ferie-planner-${name}-${y}`, JSON.stringify({ year: y, initial: val.initial, events: val.events }));
-    if (!list.includes(name)) list.push(name);
+    const ts = cloudTimestamps[key] || data.last_update || '';
+    if (mergeYearFromCloud(key, profiles[key], ts)) merged++;
   }
-  if (list.length > 0) {
-    localStorage.setItem('ferie-planner-profiles', JSON.stringify(list));
-  }
+  const list = getProfiles();
+  // Normalizza active_profile: preferisci quello cloud se piu' recente dell'ultimo locale attivo
   const active = data.active_profile || (list.length > 0 ? list[0] : '');
-  if (active) {
+  if (active && list.indexOf(active) !== -1) {
     activeProfile = active;
     localStorage.setItem('ferie-planner-active-profile', active);
   }
-  console.log('Cloud caricato per', list.join(', '));
+  let firstLoad = false;
+  if (list.length === 0 && Object.keys(profiles).length > 0) {
+    firstLoad = true;
+  }
+  if (activeProfile && list.indexOf(activeProfile) === -1 && list.length > 0) {
+    activeProfile = list[0];
+  }
+  console.log('Cloud caricato, merged keys:', merged, '| firstLoad:', firstLoad);
   return true;
 }
 
-async function syncCloudState() {
-  const sdk = getSupabaseSdk();
-  if (!sdk) return;
-  const { data: { user } } = await sdk.auth.getUser();
-  if (!user) return;
-  // Collect all localStorage profile data into profiles JSONB
-  const profiles = {};
-  const list = getProfiles();
-  for (const name of list) {
-    for (let y = 2000; y <= 2100; y++) {
-      const raw = localStorage.getItem(`ferie-planner-${name}-${y}`);
-      if (!raw) continue;
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.initial && parsed.events) {
-          profiles[`${name}-${y}`] = { initial: parsed.initial, events: parsed.events };
-        }
-      } catch (e) {}
+// Queue di retry con backoff
+let syncRunning = false;
+let syncQueued = false;
+let syncRetries = 0;
+let syncFails = 0;
+
+function setSyncBadge(state, msg) {
+  const b = document.getElementById('sync-badge');
+  if (!b) return;
+  b.className = state;
+  b.style.display = state ? 'inline-block' : 'none';
+  b.title = msg || '';
+  if (state === 'ok') b.textContent = '✓ Cloud salvato';
+  else if (state === 'syncing') b.textContent = '⏳ Salvataggio…';
+  else if (state === 'err') b.textContent = '⏳ Non sincronizzato';
+  else b.textContent = '';
+}
+
+function setOffline() {
+  setSyncBadge('err', 'Modifiche non ancora salvate sul cloud. Riprovo automaticamente.');
+}
+
+function setSyncedNow() {
+  setSyncBadge('ok', 'Ultimo salvataggio: ' + new Date().toLocaleTimeString());
+  setTimeout(() => { const b = document.getElementById('sync-badge'); if (b && b.className === 'ok') b.style.display = 'none'; }, 3000);
+}
+
+async function syncCloudState(force) {
+  if (syncRunning) { syncQueued = true; return; }
+  syncRunning = true;
+  try {
+    const sdk = getSupabaseSdk();
+    if (!sdk) return;
+    const { data: { user } } = await sdk.auth.getUser();
+    if (!user) return;
+    // 1) Leggi la riga esistente per fare merge corretto (non sovrascrivere ciecamente)
+    const { data: existing } = await sdk
+      .schema('ferie')
+      .from('state')
+      .select('profiles,timestamps,last_update,updated_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const mergedCloud = {};
+    const mergedTimestamps = {};
+    // 1) Prendi i dati esistenti sul cloud
+    if (existing && existing.profiles) {
+      for (const key of Object.keys(existing.profiles)) {
+        const ts = (existing.timestamps && existing.timestamps[key]) || existing.last_update || '';
+        const pk = parseProfileKey(key);
+        if (!pk) continue;
+        mergedCloud[key] = existing.profiles[key];
+        mergedTimestamps[key] = ts;
+      }
     }
-  }
-  const row = {
-    user_id: user.id,
-    profiles,
-    active_profile: activeProfile || '',
-    last_update: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  const { error } = await sdk.schema('ferie').from('state').upsert(row, { onConflict: 'user_id' });
-  if (error) {
-    if (/rate limit|troppi tentativi/i.test(error.message || '')) {
-      showToast('⚠️ Limite momentaneo Supabase: riprova tra circa un\'ora.', 'error');
-      return;
+    // 2) I dati locali vincono solo se piu' recenti della copia cloud corrispondente (o se assenti sul cloud)
+    const now = new Date().toISOString();
+    const list = getProfiles();
+    for (const name of list) {
+      for (let y = 2000; y <= 2100; y++) {
+        const raw = localStorage.getItem(`ferie-planner-${name}-${y}`);
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw);
+          if (!parsed || !parsed.initial || !parsed.events) continue;
+          const key = `${name}-${y}`;
+          const localTs = getSyncTimestamp(key);
+          const cloudTs = mergedTimestamps[key] || '';
+          // Il locale prevale se non esiste sul cloud oppure ha timestamp piu' recente
+          if (!mergedCloud[key] || !isCloudNewer(localTs, cloudTs)) {
+            mergedCloud[key] = { initial: parsed.initial, events: parsed.events };
+            mergedTimestamps[key] = localTs || now;
+          }
+        } catch (e) {}
+      }
     }
-    showToast('❌ Errore salvataggio cloud: ' + (error.message || 'errore'), 'error');
+    // Se non c'e' nulla, mantieni almeno una bozza minima col profilo attivo
+    if (Object.keys(mergedCloud).length === 0 && activeProfile) {
+      const today = new Date();
+      const key = `${activeProfile}-${today.getFullYear()}`;
+      if (!mergedCloud[key]) {
+        mergedCloud[key] = { initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+        mergedTimestamps[key] = now;
+      }
+    }
+    const row = {
+      user_id: user.id,
+      profiles: mergedCloud,
+      timestamps: mergedTimestamps,
+      active_profile: activeProfile || '',
+      last_update: now,
+      updated_at: now
+    };
+    const { error } = await sdk.schema('ferie').from('state').upsert(row, { onConflict: 'user_id' });
+    if (error) {
+      // Rate limit -> riprova con backoff prolungato, non spammare toast
+      if (/rate limit|troppi tentativi/i.test(error.message || '')) {
+        syncFails++;
+        if (syncFails === 1) showToast('⚠️ Limite momentaneo Supabase: riprovo automaticamente tra poco.', 'error');
+        throw error;
+      }
+      throw error;
+    }
+    // Riuscito: allinea il mirror locale al risultato del merge (cloud piu' recente incluso)
+    let currentChanged = false;
+    const currentKey = activeProfile ? `${activeProfile}-${state && state.year}` : null;
+    for (const key of Object.keys(mergedCloud)) {
+      const pk = parseProfileKey(key);
+      if (!pk) continue;
+      const localTs = getSyncTimestamp(key);
+      const mergedTs = mergedTimestamps[key] || '';
+      // Se il cloud vince (piu' recente del locale), riscrivi anche il mirror locale
+      if (mergedTs && localTs && isCloudNewer(mergedTs, localTs)) {
+        localStorage.setItem(`ferie-planner-${pk.name}-${pk.year}`, JSON.stringify({
+          year: pk.year, initial: mergedCloud[key].initial, events: mergedCloud[key].events
+        }));
+        if (key === currentKey) currentChanged = true;
+      }
+      setSyncTimestamp(key, mergedTimestamps[key] || getSyncTimestamp(key));
+    }
+    syncRetries = 0;
+    syncFails = 0;
+    setSyncedNow();
+    syncQueued = false;
+    // Se l'anno/profilo in vista e' stato aggiornato da cloud, ricarica lo stato a schermo
+    if (currentChanged && state && state.year) {
+      loadState(state.year);
+      syncInputs();
+      renderAll();
+    }
+  } catch (e) {
+    syncFails++;
+    setOffline();
+    // backoff esponenziale: 2s, 4s, 8s, 16s, 32s, poi max 60s
+    const delay = Math.min(2000 * Math.pow(2, Math.min(syncRetries, 5)), 60000);
+    syncRetries++;
+    console.warn('Sync cloud fallita, retry tra', delay, 'ms', e && e.message ? e.message : e);
+    setTimeout(() => { if (!syncQueued && syncFails > 0) syncCloudState(); else if (syncQueued) syncCloudState(); }, delay);
+  } finally {
+    syncRunning = false;
+    if (syncQueued) { syncQueued = false; setTimeout(() => syncCloudState(), 0); }
   }
 }
 
@@ -2140,13 +2307,14 @@ function loadState(year) {
 function saveState() {
   const key = getStorageKey(state.year);
   localStorage.setItem(key, JSON.stringify(state));
+  setSyncTimestamp(key, new Date().toISOString());
   scheduleCloudSync();
 }
 
 let cloudSyncTimer = null;
 function scheduleCloudSync() {
   if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
-  cloudSyncTimer = setTimeout(() => { cloudSyncTimer = null; syncCloudState(); }, 400);
+  cloudSyncTimer = setTimeout(() => { cloudSyncTimer = null; setSyncBadge('syncing', 'Salvataggio…'); syncCloudState(); }, 400);
 }
 
 // ─── Calcolo rimanenza ───
@@ -2781,43 +2949,27 @@ function showCategoryDetail(type, stateKey) {
 }
 
 // ─── Eventi ───
-function addFerie() {
-  if (!modalDate) return;
-  const val = parseInt(document.getElementById('modal-ferie-input').value) || 0;
-  if (val <= 0) return;
-  const isDraft = document.getElementById('modal-ferie-draft').checked;
-  pushUndo();
-  if (!state.events[modalDate]) state.events[modalDate] = { ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 };
-  const field = isDraft ? 'draftFerie' : 'ferie';
-  state.events[modalDate][field] = (state.events[modalDate][field] || 0) + val;
-  saveState();
-  renderAll();
-  openModal(modalDate);
-}
+const EMPTY_EVENT = () => ({ ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 });
 
-function addPermesso() {
-  if (!modalDate) return;
-  const val = parseInt(document.getElementById('modal-permesso-input').value) || 0;
-  if (val <= 0) return;
-  const isDraft = document.getElementById('modal-permesso-draft').checked;
-  pushUndo();
-  if (!state.events[modalDate]) state.events[modalDate] = { ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 };
-  const field = isDraft ? 'draftPermesso' : 'permesso';
-  state.events[modalDate][field] = (state.events[modalDate][field] || 0) + val;
-  saveState();
-  renderAll();
-  openModal(modalDate);
-}
+function addFerie() { addToDay('ferie'); }
+function addPermesso() { addToDay('permesso'); }
+function addExFesta() { addToDay('exfesta'); }
 
-function addExFesta() {
+// Unica logica di aggiunta. idPrefix (ferie|permesso|exfesta) coincide coi suffissi HTML minuscoli.
+// Il nome attributo evento resta: ferie / permesso / exFesta (con la maiuscola nell'ex festa).
+function addToDay(idPrefix) {
   if (!modalDate) return;
-  const val = parseInt(document.getElementById('modal-exfesta-input').value) || 0;
+  const attr = idPrefix === 'exfesta' ? 'exFesta' : idPrefix;
+  const cap = idPrefix === 'exfesta' ? 'ExFesta' : (idPrefix.charAt(0).toUpperCase() + idPrefix.slice(1));
+  const input = document.getElementById('modal-' + idPrefix + '-input');
+  const draftChk = document.getElementById('modal-' + idPrefix + '-draft');
+  const val = input ? (parseInt(input.value) || 0) : 0;
   if (val <= 0) return;
-  const isDraft = document.getElementById('modal-exfesta-draft').checked;
+  const isDraft = draftChk ? draftChk.checked : false;
+  const target = isDraft ? 'draft' + cap : attr;
   pushUndo();
-  if (!state.events[modalDate]) state.events[modalDate] = { ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 };
-  const field = isDraft ? 'draftExFesta' : 'exFesta';
-  state.events[modalDate][field] = (state.events[modalDate][field] || 0) + val;
+  if (!state.events[modalDate]) state.events[modalDate] = EMPTY_EVENT();
+  state.events[modalDate][target] = (state.events[modalDate][target] || 0) + val;
   saveState();
   renderAll();
   openModal(modalDate);
@@ -2996,14 +3148,20 @@ function showToast(msg, type) {
   setTimeout(() => { t.style.display = 'none'; }, type === 'success' ? 3000 : 5000);
 }
 
-// ─── Serve solo per UI (supebase sync sopra) ───
+// ─── Salvataggio manuale (badge + sync forzata via coda) ───
 function saveLocal() {
-  showToast('Salvataggio...', '');
-  syncCloudState().then(() => {
-    showToast('Salvato ✓', 'success');
-  }).catch(() => {
-    showToast('❌ Errore salvataggio cloud', 'error');
-  });
+  const hadFail = syncFails > 0;
+  showToast('Salvataggio…', '');
+  setSyncBadge('syncing', 'Salvataggio…');
+  // Sincronizza subito, piegando il debounce
+  if (syncRunning) { syncQueued = true; showToast('Salvataggio già in corso, sarà completato tra poco.', ''); return; }
+  scheduleCloudSync();
+  // Mostra esito tramite badge; il retry automatico completa il lavoro.
+  setTimeout(() => {
+    const b = document.getElementById('sync-badge');
+    const ok = b && (b.className === 'ok' || b.className === '');
+    showToast(ok ? 'Salvato ✓' : (hadFail ? 'In attesa di rete: salvataggio automatico in corso.' : 'Salvataggio in corso…'), ok ? 'success' : '');
+  }, 1200);
 }
 
 // ─── Input listeners ───
@@ -3050,11 +3208,24 @@ async function startApp() {
   document.getElementById('permesso-iniziali').value = state.initial.permesso;
   document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
   renderAll();
+  // Allinea a salire: spinge sul cloud eventuali dati locali piu' recenti
+  scheduleCloudSync();
 }
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
+
+// ─── Robustezza rete: retry quando torna online, flush prima di chiudere ───
+window.addEventListener('online', () => {
+  if (syncFails > 0) { syncRetries = 0; syncCloudState(); }
+});
+window.addEventListener('beforeunload', () => {
+  // Flush best-effort: sincronizza subito senza attendere il debounce
+  if (syncQueued || syncRunning) {
+    try { syncCloudState(); } catch (e) {}
+  }
+});
 </script>
 <div id="toast" class="toast" style="display:none"></div>
 </body>
