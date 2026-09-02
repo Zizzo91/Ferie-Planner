@@ -19,7 +19,7 @@ Pianificazione ferie, permessi ed ex festività, con **login PIN a 6 cifre** e *
 
 ## Dati
 
-I dati sono salvati in localStorage (mirror) e sincronizzati su **Supabase** (progetto `gfglazxhxxplhoteaahr`, schema `ferie`, una riga per utente protetta da RLS).
+I dati sono salvati in localStorage (mirror) e sincronizzati su **Supabase** (progetto `gfglazxhxxplhoteaahr`, schema `ferie`, una riga per utente protetta da RLS). La sincronizzazione fa un merge per-anno/profilo (vince la versione più recente) con retry automatico e badge di stato in caso di rete assente.
 
 ## Sviluppo
 
