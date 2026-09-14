@@ -432,15 +432,37 @@ header p {
 
 /* ── Rimanenza ── */
 .remaining-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: block;
   padding: 8px 0;
   cursor: pointer;
   border-radius: 6px;
   transition: background var(--transition);
   margin: 0 -6px;
   padding: 8px 6px;
+}
+
+.remaining-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.remaining-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 3px 0 0 24px;
+  line-height: 1.45;
+}
+
+.remaining-sub strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.draft-legend {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
 }
 
 .remaining-row:hover {
@@ -1430,27 +1452,37 @@ header p {
     </div>
     <div id="remaining-container">
       <div class="remaining-row" data-type="ferie">
-        <div class="remaining-dot ferie"></div>
-        <span class="remaining-label">Ferie</span>
-        <div class="remaining-bar-wrap"><div class="remaining-bar ferie" style="width:0%"></div></div>
-        <span class="remaining-fraction">0 / 0 <span class="initial">g</span></span>
-        <span class="remaining-pct">—</span>
+        <div class="remaining-main">
+          <div class="remaining-dot ferie"></div>
+          <span class="remaining-label">Ferie</span>
+          <div class="remaining-bar-wrap"><div class="remaining-bar ferie" style="width:0%"></div></div>
+          <span class="remaining-fraction">—</span>
+          <span class="remaining-pct">—</span>
+        </div>
+        <div class="remaining-sub"></div>
       </div>
       <div class="remaining-row" data-type="permesso">
-        <div class="remaining-dot permesso"></div>
-        <span class="remaining-label">Permesso</span>
-        <div class="remaining-bar-wrap"><div class="remaining-bar permesso" style="width:0%"></div></div>
-        <span class="remaining-fraction">0 / 0 <span class="initial">g</span></span>
-        <span class="remaining-pct">—</span>
+        <div class="remaining-main">
+          <div class="remaining-dot permesso"></div>
+          <span class="remaining-label">Permesso</span>
+          <div class="remaining-bar-wrap"><div class="remaining-bar permesso" style="width:0%"></div></div>
+          <span class="remaining-fraction">—</span>
+          <span class="remaining-pct">—</span>
+        </div>
+        <div class="remaining-sub"></div>
       </div>
       <div class="remaining-row" data-type="exfesta">
-        <div class="remaining-dot exfesta"></div>
-        <span class="remaining-label">Ex festività</span>
-        <div class="remaining-bar-wrap"><div class="remaining-bar exfesta" style="width:0%"></div></div>
-        <span class="remaining-fraction">0 / 0 <span class="initial">g</span></span>
-        <span class="remaining-pct">—</span>
+        <div class="remaining-main">
+          <div class="remaining-dot exfesta"></div>
+          <span class="remaining-label">Ex festività</span>
+          <div class="remaining-bar-wrap"><div class="remaining-bar exfesta" style="width:0%"></div></div>
+          <span class="remaining-fraction">—</span>
+          <span class="remaining-pct">—</span>
+        </div>
+        <div class="remaining-sub"></div>
       </div>
     </div>
+    <div id="draft-legend" class="draft-legend" style="display:none">▨ tratteggio = giornate in bozza, non ancora confermate</div>
     <div id="year-progress" style="margin:8px 0 12px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
       <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">Anno al <strong id="year-pct" style="color:var(--text)">—</strong></span>
       <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
@@ -2389,19 +2421,35 @@ function renderRemaining() {
     const bar = row.querySelector('.remaining-bar');
     const fraction = row.querySelector('.remaining-fraction');
     const pctEl = row.querySelector('.remaining-pct');
+    const sub = row.querySelector('.remaining-sub');
 
     const colors = { ferie: 'var(--ferie)', permesso: 'var(--permesso)', exfesta: 'var(--exfesta)' };
+
+    if (init > 0) {
+      fraction.innerHTML =
+        `<strong>${(remainEff / gDay).toFixed(1)} g</strong> ` +
+        `<span class="initial">rimasti di ${(init / gDay).toFixed(1)} g</span>`;
+      pctEl.textContent = `${Math.round(pctEff)}%`;
+      pctEl.title = 'Percentuale rimanente sul totale';
+      if (draftVal > 0) {
+        sub.innerHTML =
+          `usati ${(used / gDay).toFixed(1)} g · ` +
+          `in bozza ${(draftVal / gDay).toFixed(1)} g → ` +
+          `<strong>con bozze: ${(remainIpot / gDay).toFixed(1)} g</strong>`;
+      } else {
+        sub.textContent = `usati ${(used / gDay).toFixed(1)} g`;
+      }
+    } else {
+      fraction.innerHTML = `<span class="initial">—</span>`;
+      pctEl.textContent = '—';
+      pctEl.title = '';
+      sub.textContent = 'non impostate';
+    }
 
     if (draftVal > 0) {
       bar.style.background = colors[t];
       bar.style.width = `${pctIpot}%`;
       bar.style.backgroundImage = `repeating-linear-gradient(90deg, transparent 0px, transparent 4px, rgba(255,255,255,0.2) 4px, rgba(255,255,255,0.2) 8px)`;
-      fraction.innerHTML =
-        `${(remainEff / gDay).toFixed(1)} <span class="initial">g</span>` +
-        ` <span style="color:var(--text-muted);font-size:12px">ip.</span> ` +
-        `${(remainIpot / gDay).toFixed(1)}` +
-        ` / ${(init / gDay).toFixed(1)} <span class="initial">g</span>`;
-      pctEl.textContent = init > 0 ? `${Math.round(pctEff)}% / ${Math.round(pctIpot)}%` : '—';
     } else {
       bar.style.background = colors[t];
       bar.style.backgroundImage = 'none';
@@ -2410,16 +2458,15 @@ function renderRemaining() {
         bar.style.background = '#ef4444';
         bar.style.backgroundImage = 'none';
       }
-      fraction.innerHTML =
-        `${(remainEff / gDay).toFixed(1)} / ${(init / gDay).toFixed(1)} <span class="initial">g</span>`;
-      pctEl.textContent = init > 0 ? `${Math.round(pctEff)}%` : '—';
     }
 
-    row.onclick = null;
-    row.addEventListener('click', function() {
+    row.onclick = function() {
       showCategoryDetail(t, sk);
-    });
+    };
   }
+
+  const legend = document.getElementById('draft-legend');
+  if (legend) legend.style.display = rem.draftTotal > 0 ? '' : 'none';
 }
 
 function renderYearProgress() {
