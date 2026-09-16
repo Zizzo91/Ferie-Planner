@@ -2135,7 +2135,7 @@ async function syncCloudState(force) {
           // Il locale prevale se non esiste sul cloud oppure ha timestamp piu' recente
           if (!mergedCloud[key] || !isCloudNewer(localTs, cloudTs)) {
             mergedCloud[key] = { initial: parsed.initial, events: parsed.events };
-            mergedTimestamps[key] = localTs || now;
+            mergedTimestamps[key] = now;
           }
         } catch (e) {}
       }
