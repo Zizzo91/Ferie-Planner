@@ -2035,8 +2035,7 @@ async function loadCloudState() {
   const { data: { user } } = await sdk.auth.getUser();
   if (!user) return false;
   const { data, error } = await sdk
-    .schema('ferie')
-    .from('state')
+    .from('ferie_state')
     .select('profiles,active_profile,timestamps,last_update')
     .eq('user_id', user.id)
     .maybeSingle();
@@ -2103,8 +2102,7 @@ async function syncCloudState(force) {
     if (!user) return;
     // 1) Leggi la riga esistente per fare merge corretto (non sovrascrivere ciecamente)
     const { data: existing } = await sdk
-      .schema('ferie')
-      .from('state')
+      .from('ferie_state')
       .select('profiles,timestamps,last_update,updated_at')
       .eq('user_id', user.id)
       .maybeSingle();
@@ -2159,7 +2157,7 @@ async function syncCloudState(force) {
       last_update: now,
       updated_at: now
     };
-    const { error } = await sdk.schema('ferie').from('state').upsert(row, { onConflict: 'user_id' });
+    const { error } = await sdk.from('ferie_state').upsert(row, { onConflict: 'user_id' });
     if (error) {
       // Rate limit -> riprova con backoff prolungato, non spammare toast
       if (/rate limit|troppi tentativi/i.test(error.message || '')) {
