@@ -2362,6 +2362,7 @@ function undo() {
   if (undoStack.length === 0) document.getElementById('undo-btn').style.display = 'none';
 }
 let modalDate = null;
+let modalBulkKeys = null; // se il giorno cliccato fa parte di una durata selezionata, applto a tutti
 let today = new Date();
 const todayStr = dateStr(today);
 
@@ -2988,12 +2989,14 @@ function renderAll() {
 // ─── Modal ───
 function openModal(dateKey) {
   modalDate = dateKey;
+  modalBulkKeys = (selectedDates.length > 1 && selectedDates.includes(dateKey)) ? selectedDates.slice() : null;
   document.getElementById('modal-event-view').style.display = '';
   document.getElementById('modal-category-detail').style.display = 'none';
   document.getElementById('modal-profiles').style.display = 'none';
   const d = parseDate(dateKey);
   document.getElementById('modal-title').textContent = `${d.getDate()} / ${d.getMonth() + 1} / ${d.getFullYear()}`;
-  document.getElementById('modal-subtitle').textContent = formatDateLong(d);
+  document.getElementById('modal-subtitle').textContent =
+    formatDateLong(d) + (modalBulkKeys ? ` · applica a ${modalBulkKeys.length} giorni selezionati` : '');
 
   const ev = state.events[dateKey];
   const eventsDiv = document.getElementById('modal-events');
@@ -3056,6 +3059,7 @@ function closeModal() {
   document.getElementById('modal-profiles').style.display = 'none';
   document.getElementById('modal-overlay').classList.remove('open');
   modalDate = null;
+  modalBulkKeys = null;
 }
 
 // Close on overlay click
@@ -3176,22 +3180,32 @@ function addToDay(idPrefix) {
   if (val <= 0) return;
   const isDraft = draftChk ? draftChk.checked : false;
   const target = isDraft ? 'draft' + cap : attr;
+  const keys = modalBulkKeys && modalBulkKeys.includes(modalDate) ? modalBulkKeys.slice() : [modalDate];
   pushUndo();
-  if (!state.events[modalDate]) state.events[modalDate] = EMPTY_EVENT();
-  state.events[modalDate][target] = (state.events[modalDate][target] || 0) + val;
+  for (const dk of keys) {
+    if (!state.events[dk]) state.events[dk] = EMPTY_EVENT();
+    state.events[dk][target] = (state.events[dk][target] || 0) + val;
+  }
   saveState();
   renderAll();
   openModal(modalDate);
+  if (keys.length > 1) {
+    const labels = { ferie: 'Ferie', permesso: 'Permesso', exfesta: 'Ex festività' };
+    showToast((isDraft ? 'Bozza ' : '') + labels[idPrefix] + ': aggiunte ' + val + 'h a ' + keys.length + ' giorni', 'success');
+  }
 }
 
 function removeEvent(dateKey, type) {
-  if (!state.events[dateKey]) return;
+  const keys = modalBulkKeys && modalBulkKeys.includes(dateKey) ? modalBulkKeys.slice() : [dateKey];
   pushUndo();
-  state.events[dateKey][type] = 0;
-  // Clean up if all zero
-  if (!state.events[dateKey].ferie && !state.events[dateKey].permesso && !state.events[dateKey].exFesta &&
-      !state.events[dateKey].draftFerie && !state.events[dateKey].draftPermesso && !state.events[dateKey].draftExFesta) {
-    delete state.events[dateKey];
+  for (const dk of keys) {
+    if (!state.events[dk]) continue;
+    state.events[dk][type] = 0;
+    // Clean up if all zero
+    if (!state.events[dk].ferie && !state.events[dk].permesso && !state.events[dk].exFesta &&
+        !state.events[dk].draftFerie && !state.events[dk].draftPermesso && !state.events[dk].draftExFesta) {
+      delete state.events[dk];
+    }
   }
   saveState();
   renderAll();
