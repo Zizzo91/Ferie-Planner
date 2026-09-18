@@ -576,6 +576,11 @@ header p {
   gap: 2px;
 }
 
+.cal-grid.dragging,
+.cal-grid.dragging .cal-day {
+  cursor: crosshair;
+}
+
 .cal-day-header {
   text-align: center;
   font-size: 12px;
@@ -610,6 +615,9 @@ header p {
   background: var(--surface);
   border: 1.5px solid transparent;
   min-height: 64px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .cal-day:hover {
@@ -653,6 +661,13 @@ header p {
   border-color: transparent;
 }
 
+.cal-day.selected {
+  outline: 2px solid var(--ferie);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm) !important;
+  z-index: 2;
+}
+
 /* ── Sfondo evento cella ── */
 .cal-day.has-ferie { background: var(--ferie-bg); border-left: 4px solid var(--ferie); }
 .cal-day.has-permesso { background: var(--permesso-bg); border-left: 4px solid var(--permesso); }
@@ -692,6 +707,102 @@ header p {
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
+}
+
+/* ── Selezione multipla ── */
+.selection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 16px;
+  padding: 8px 14px;
+  margin: 0 0 12px;
+  box-sizing: border-box;
+  visibility: hidden;
+  background: var(--ferie-bg);
+  border: 1px solid var(--ferie);
+  border-radius: var(--radius-sm);
+  transition: visibility 0.2s;
+}
+
+.selection-bar.visible {
+  visibility: visible;
+}
+
+.bulk-applicator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bulk-cat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+}
+
+.bulk-cat-name {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bulk-cat-name.ferie { color: var(--ferie); }
+.bulk-cat-name.permesso { color: var(--permesso); }
+.bulk-cat-name.exfesta { color: var(--exfesta); }
+
+.bulk-input {
+  width: 48px;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  text-align: center;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.bulk-apply {
+  background: var(--cat, var(--ferie));
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 600;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: opacity var(--transition);
+  white-space: nowrap;
+}
+
+.bulk-apply:hover {
+  opacity: 0.85;
+}
+
+.bulk-draft {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.selection-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ferie);
+  white-space: nowrap;
 }
 
 /* ── Pill ore ── */
@@ -1542,9 +1653,31 @@ header p {
     <div style="text-align:right;margin-top:-8px;margin-bottom:10px">
       <button class="annual-toggle" onclick="toggleAnnualView()">🗓 Annuale</button>
     </div>
+    <div id="selection-bar" class="selection-bar" style="visibility:hidden">
+      <span id="selection-count" class="selection-count">— giorni selezionati</span>
+      <div class="bulk-applicator">
+        <label class="bulk-cat">
+          <span class="bulk-cat-name ferie">Ferie</span>
+          <input type="number" id="bulk-input-ferie" class="bulk-input" min="0" max="24" value="8">
+          <button type="button" class="bulk-apply" style="--cat:var(--ferie)" onclick="applyToSelected('ferie','draftFerie')">Aggiungi</button>
+        </label>
+        <label class="bulk-cat">
+          <span class="bulk-cat-name permesso">Permesso</span>
+          <input type="number" id="bulk-input-permesso" class="bulk-input" min="0" max="24" value="8">
+          <button type="button" class="bulk-apply" style="--cat:var(--permesso)" onclick="applyToSelected('permesso','draftPermesso')">Aggiungi</button>
+        </label>
+        <label class="bulk-cat">
+          <span class="bulk-cat-name exfesta">Ex fest.</span>
+          <input type="number" id="bulk-input-exfesta" class="bulk-input" min="0" max="24" value="8">
+          <button type="button" class="bulk-apply" style="--cat:var(--exfesta)" onclick="applyToSelected('exFesta','draftExFesta')">Aggiungi</button>
+        </label>
+        <label class="bulk-draft"><input type="checkbox" id="bulk-draft"> Bozza</label>
+      </div>
+      <button class="btn-reset" onclick="clearSelection()">Annulla</button>
+    </div>
     <div class="cal-grid" id="cal-grid"></div>
     <div style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:12px">
-      Clicca su un giorno per aggiungere o rimuovere ferie, permessi ed ex festività
+      Clicca su un giorno per aggiungere o rimuovere ferie, permessi ed ex festività · Trascina sui giorni per selezionarne più d'uno
     </div>
     <div class="legend">
       <span class="legend-item"><span class="legend-dot ferie"></span> Ferie</span>
@@ -1866,6 +1999,13 @@ function migrateOldData() {
 let state = { year: 2026, initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
 let curMonth = new Date().getMonth();
 let curYear = new Date().getFullYear();
+
+// ─── Selezione multipla (drag) ───
+let selectedDates = [];
+let dragActive = false;
+let dragStarted = false;
+let suppressClick = false;
+let selectAnchor = null; // { el, dateKey, row, col }
 
 // ─── Undo ───
 let undoStack = [];
@@ -2710,6 +2850,7 @@ function renderCalendar() {
     if (sats.includes(d)) el.classList.add('sabato');
     if (suns.includes(d)) el.classList.add('domenica');
     if (dateKey === todayStr) el.classList.add('oggi');
+    if (selectedDates.includes(dateKey)) el.classList.add('selected');
 
     const hName = isHoliday(dateKey);
     if (hName) {
@@ -3241,12 +3382,169 @@ document.getElementById('permesso-iniziali').addEventListener('change', updateIn
 document.getElementById('exfesta-iniziali').addEventListener('change', updateInitial);
 document.getElementById('ferie-iniziali').addEventListener('change', updateInitial);
 
-// ─── Click calendario (delegation) ───
-document.getElementById('cal-grid').addEventListener('click', function(e) {
-  const day = e.target.closest('.cal-day');
-  if (day && day.dataset.date) {
-    openModal(day.dataset.date);
+// ─── Selezione multipla (trascinamento) ───
+function posOf(el) {
+  const grid = document.getElementById('cal-grid');
+  const idx = Array.from(grid.children).indexOf(el);
+  return { row: Math.floor(idx / 7), col: idx % 7 };
+}
+
+function datesInRange() {
+  const grid = document.getElementById('cal-grid');
+  const a = selectAnchor;
+  const children = Array.from(grid.children);
+  const r1 = Math.min(a.row, currentDrag.pos.row);
+  const r2 = Math.max(a.row, currentDrag.pos.row);
+  const c1 = Math.min(a.col, currentDrag.pos.col);
+  const c2 = Math.max(a.col, currentDrag.pos.col);
+  const out = [];
+  for (let i = 0; i < children.length; i++) {
+    const c = children[i];
+    if (!c.classList || !c.classList.contains('cal-day') || !c.dataset.date) continue;
+    const row = Math.floor(i / 7);
+    const col = i % 7;
+    if (row >= r1 && row <= r2 && col >= c1 && col <= c2) out.push(c.dataset.date);
   }
+  return out;
+}
+
+function applySelectionVisual() {
+  document.querySelectorAll('#cal-grid .cal-day[data-date]').forEach(c => {
+    c.classList.toggle('selected', selectedDates.includes(c.dataset.date));
+  });
+}
+
+function clearSelection() {
+  selectedDates = [];
+  updateSelectionBar();
+  applySelectionVisual();
+}
+
+function updateSelectionBar() {
+  const bar = document.getElementById('selection-bar');
+  const count = document.getElementById('selection-count');
+  if (selectedDates.length > 0) {
+    bar.classList.add('visible');
+    count.textContent = selectedDates.length + (selectedDates.length === 1 ? ' giorno selezionato' : ' giorni selezionati');
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+function applyToSelected(realField, draftField) {
+  if (selectedDates.length === 0) return;
+  const input = document.getElementById('bulk-input-' + realField);
+  const val = parseInt(input.value) || 0;
+  if (val <= 0) return;
+  const isDraft = document.getElementById('bulk-draft').checked;
+  const field = isDraft ? draftField : realField;
+  pushUndo();
+  for (const dk of selectedDates) {
+    if (!state.events[dk]) state.events[dk] = EMPTY_EVENT();
+    state.events[dk][field] = (state.events[dk][field] || 0) + val;
+  }
+  const n = selectedDates.length;
+  const labels = { ferie: 'Ferie', permesso: 'Permesso', exFesta: 'Ex festività' };
+  saveState();
+  renderAll();
+  clearSelection();
+  const prefix = isDraft ? 'Bozza ' : '';
+  showToast(prefix + labels[realField] + ': aggiunte ' + val + 'h a ' + n + (n === 1 ? ' giorno' : ' giorni'), 'success');
+}
+
+// ─── Drag selection handlers (mouse + touch) ───
+let currentDrag = null;
+
+function beginDrag(day) {
+  if (!day || !day.dataset.date) return false;
+  if (document.getElementById('modal-overlay').classList.contains('open')) return false;
+  const pos = posOf(day);
+  dragActive = true;
+  dragStarted = false;
+  suppressClick = false;
+  selectAnchor = { el: day, dateKey: day.dataset.date, row: pos.row, col: pos.col };
+  currentDrag = { pos };
+  document.getElementById('cal-grid').classList.add('dragging');
+  return true;
+}
+
+function moveDrag(clientX, clientY) {
+  if (!dragActive) return;
+  const el = document.elementFromPoint(clientX, clientY);
+  const day = el && el.closest ? el.closest('.cal-day') : null;
+  if (!day || !day.dataset.date) return;
+  if (day === selectAnchor.el) return;
+  if (!dragStarted) {
+    dragStarted = true;
+    selectedDates = [];
+  }
+  currentDrag.pos = posOf(day);
+  selectedDates = datesInRange();
+  applySelectionVisual();
+  updateSelectionBar();
+}
+
+function endDrag(clientX, clientY) {
+  if (!dragActive) return;
+  dragActive = false;
+  document.getElementById('cal-grid').classList.remove('dragging');
+  if (dragStarted) {
+    suppressClick = true;
+    const el = document.elementFromPoint(clientX, clientY);
+    const day = el && el.closest ? el.closest('.cal-day') : null;
+    if (day && day.dataset.date && currentDrag && day !== selectAnchor.el) {
+      currentDrag.pos = posOf(day);
+      selectedDates = datesInRange();
+      applySelectionVisual();
+      updateSelectionBar();
+    }
+  }
+  selectAnchor = null;
+  currentDrag = null;
+}
+
+const calGrid = document.getElementById('cal-grid');
+
+// Mouse
+calGrid.addEventListener('mousedown', function(e) {
+  if (e.button !== 0) return;
+  if (beginDrag(e.target.closest('.cal-day'))) e.preventDefault();
+});
+document.addEventListener('mousemove', function(e) {
+  moveDrag(e.clientX, e.clientY);
+});
+document.addEventListener('mouseup', function(e) {
+  endDrag(e.clientX, e.clientY);
+});
+calGrid.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+// Touch (tablet / touchscreen)
+calGrid.addEventListener('touchstart', function(e) {
+  if (e.touches.length !== 1) return;
+  beginDrag(e.target.closest('.cal-day'));
+}, { passive: true });
+document.addEventListener('touchmove', function(e) {
+  if (!dragActive || e.touches.length !== 1) return;
+  e.preventDefault();
+  moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+document.addEventListener('touchend', function(e) {
+  if (!dragActive) return;
+  const t = e.changedTouches && e.changedTouches[0];
+  endDrag(t ? t.clientX : 0, t ? t.clientY : 0);
+  if (suppressClick) setTimeout(function() { suppressClick = false; }, 500);
+});
+
+// ─── Click calendario (delegation) ───
+calGrid.addEventListener('click', function(e) {
+  if (suppressClick) {
+    suppressClick = false;
+    dragStarted = false;
+    return;
+  }
+  const day = e.target.closest('.cal-day');
+  if (!day || !day.dataset.date) return;
+  openModal(day.dataset.date);
 });
 
 // ─── Init: solo dopo login ───
