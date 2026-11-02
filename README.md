@@ -1,9 +1,10 @@
 # Ferie Planner
 
-Pianificazione ferie, permessi ed ex festività, con **login PIN a 6 cifre** e **sincronizzazione cloud su Supabase** (cross-device).
+Pianificazione ferie, permessi, ex festività, malattia e malattia figlio, con **login PIN a 6 cifre** e **sincronizzazione cloud su Supabase** (cross-device).
 
-- **Calendario interattivo**: clicca un giorno per assegnare/rimuovere ferie, permessi, ex festività.
+- **Calendario interattivo**: clicca un giorno per assegnare/rimuovere ferie, permessi, ex festività, malattia e malattia figlio.
 - **Saldi parziali**: ore consumate per categoria e residui, divisi per la giornata lavorativa (8 ore).
+- **Malattia figlio**: massimo 10 giorni per anno (80 ore). Oltre il limite compare un avviso, ma l'inserimento non viene bloccato.
 - **Riepilogo mensile** e **vista annuale** (12×31) con colori per stato.
 - **Dark mode**, **undo** (5 livelli), **export/import JSON**, festività italiane e tooltip.
 - **Profilo multiplo** (Simone, Michela, …): ogni profilo salva i propri dati per anno.
@@ -13,7 +14,7 @@ Pianificazione ferie, permessi ed ex festività, con **login PIN a 6 cifre** e *
 
 1. Apri https://zizzo91.github.io/Ferie-Planner/
 2. Inserisci il **PIN a 6 cifre** (la password dell'account `simone.marramao@hotmail.it`).
-3. Usa il selettore profilo in alto e il calendario per gestire ferie/permessi.
+3. Usa il selettore profilo in alto e il calendario per gestire ferie, permessi, ex festività, malattia e malattia figlio.
 
 > Il PIN viene richiesto ad ogni apertura (sessione non persistita). Se al primo accesso su un nuovo dispositivo serve confermare l'email, clicca il link nella mail di verifica e poi reinserisci lo stesso PIN.
 

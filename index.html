@@ -23,6 +23,12 @@
   --exfesta: #f59e0b;
   --exfesta-bg: #fde68a;
   --exfesta-light: #fffbeb;
+  --malattia: #e11d48;
+  --malattia-bg: #ffe4e6;
+  --malattia-light: #fff1f2;
+  --malattiafiglio: #8b5cf6;
+  --malattiafiglio-bg: #ede9fe;
+  --malattiafiglio-light: #f5f3ff;
   --sabato-bg: #f8faff;
   --domenica-bg: #fef5f5;
   --festivo: #ef4444;
@@ -51,6 +57,12 @@
   --exfesta: #fbbf24;
   --exfesta-bg: #713f12;
   --exfesta-light: #451a03;
+  --malattia: #fb7185;
+  --malattia-bg: #4c0519;
+  --malattia-light: #2b0a13;
+  --malattiafiglio: #a78bfa;
+  --malattiafiglio-bg: #2e1065;
+  --malattiafiglio-light: #221a3d;
   --sabato-bg: #0f172a;
   --domenica-bg: #2d1b1b;
   --festivo: #f87171;
@@ -424,6 +436,14 @@ header p {
   -moz-appearance: textfield;
 }
 
+.config-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
 .config-field input::-webkit-outer-spin-button,
 .config-field input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -483,6 +503,8 @@ header p {
 .remaining-dot.ferie { background: var(--ferie); }
 .remaining-dot.permesso { background: var(--permesso); }
 .remaining-dot.exfesta { background: var(--exfesta); }
+.remaining-dot.malattia { background: var(--malattia); }
+.remaining-dot.malattiafiglio { background: var(--malattiafiglio); }
 
 .remaining-label {
   font-size: 14px;
@@ -521,6 +543,8 @@ header p {
 .remaining-bar.ferie { background: var(--ferie); }
 .remaining-bar.permesso { background: var(--permesso); }
 .remaining-bar.exfesta { background: var(--exfesta); }
+.remaining-bar.malattia { background: var(--malattia); }
+.remaining-bar.malattiafiglio { background: var(--malattiafiglio); }
 
 .remaining-pct {
   font-size: 12px;
@@ -672,29 +696,39 @@ header p {
 .cal-day.has-ferie { background: var(--ferie-bg); border-left: 4px solid var(--ferie); }
 .cal-day.has-permesso { background: var(--permesso-bg); border-left: 4px solid var(--permesso); }
 .cal-day.has-exfesta { background: var(--exfesta-bg); border-left: 4px solid var(--exfesta); }
-.cal-day.has-multi { background: var(--surface); border-left: 4px solid; border-image: linear-gradient(180deg, var(--ferie), var(--permesso), var(--exfesta)) 1; }
+.cal-day.has-malattia { background: var(--malattia-bg); border-left: 4px solid var(--malattia); }
+.cal-day.has-malattiafiglio { background: var(--malattiafiglio-bg); border-left: 4px solid var(--malattiafiglio); }
+.cal-day.has-multi { background: var(--surface); border-left: 4px solid; border-image: linear-gradient(180deg, var(--ferie), var(--permesso), var(--exfesta), var(--malattia), var(--malattiafiglio)) 1; }
 .cal-day.has-draft { opacity: 0.65; border-left-style: dashed; }
 
 /* Weekend + evento: evento ha priorità */
 .cal-day.sabato.has-ferie, .cal-day.domenica.has-ferie { background: var(--ferie-bg); }
 .cal-day.sabato.has-permesso, .cal-day.domenica.has-permesso { background: var(--permesso-bg); }
 .cal-day.sabato.has-exfesta, .cal-day.domenica.has-exfesta { background: var(--exfesta-bg); }
+.cal-day.sabato.has-malattia, .cal-day.domenica.has-malattia { background: var(--malattia-bg); }
+.cal-day.sabato.has-malattiafiglio, .cal-day.domenica.has-malattiafiglio { background: var(--malattiafiglio-bg); }
 .cal-day.sabato.has-multi, .cal-day.domenica.has-multi { background: var(--surface); }
 
 /* Festivo + evento: mantieni data rossa ma sfondo evento */
 .cal-day.festivo.has-ferie { background: var(--ferie-bg); }
 .cal-day.festivo.has-permesso { background: var(--permesso-bg); }
 .cal-day.festivo.has-exfesta { background: var(--exfesta-bg); }
+.cal-day.festivo.has-malattia { background: var(--malattia-bg); }
+.cal-day.festivo.has-malattiafiglio { background: var(--malattiafiglio-bg); }
 .cal-day.festivo.has-multi { background: var(--surface); }
 .cal-day.festivo.has-ferie .day-number,
 .cal-day.festivo.has-permesso .day-number,
 .cal-day.festivo.has-exfesta .day-number,
+.cal-day.festivo.has-malattia .day-number,
+.cal-day.festivo.has-malattiafiglio .day-number,
 .cal-day.festivo.has-multi .day-number { color: var(--festivo); }
 
 /* Oggi + evento */
 .cal-day.oggi.has-ferie { border-color: var(--ferie); border-width: 2px; }
 .cal-day.oggi.has-permesso { border-color: var(--permesso); border-width: 2px; }
 .cal-day.oggi.has-exfesta { border-color: var(--exfesta); border-width: 2px; }
+.cal-day.oggi.has-malattia { border-color: var(--malattia); border-width: 2px; }
+.cal-day.oggi.has-malattiafiglio { border-color: var(--malattiafiglio); border-width: 2px; }
 .cal-day.oggi.has-multi { border-color: var(--ferie); border-width: 2px; }
 
 /* Arrotondamento run consecutivi */
@@ -757,6 +791,8 @@ header p {
 .bulk-cat-name.ferie { color: var(--ferie); }
 .bulk-cat-name.permesso { color: var(--permesso); }
 .bulk-cat-name.exfesta { color: var(--exfesta); }
+.bulk-cat-name.malattia { color: var(--malattia); }
+.bulk-cat-name.malattiafiglio { color: var(--malattiafiglio); }
 
 .bulk-input {
   width: 48px;
@@ -829,6 +865,8 @@ header p {
 .day-pill.ferie { background: var(--ferie); color: #fff; }
 .day-pill.permesso { background: var(--permesso); color: #fff; }
 .day-pill.exfesta { background: var(--exfesta); color: #fff; }
+.day-pill.malattia { background: var(--malattia); color: #fff; }
+.day-pill.malattiafiglio { background: var(--malattiafiglio); color: #fff; }
 .day-pill.draft { opacity: 0.5; border: 1px dashed currentColor; background: transparent; color: inherit; }
 
 .day-holiday-name {
@@ -870,6 +908,8 @@ header p {
 .legend-dot.ferie { background: var(--ferie); }
 .legend-dot.permesso { background: var(--permesso); }
 .legend-dot.exfesta { background: var(--exfesta); }
+.legend-dot.malattia { background: var(--malattia); }
+.legend-dot.malattiafiglio { background: var(--malattiafiglio); }
 .legend-dot.sab { background: var(--sabato-bg); border: 1px solid var(--border); }
 .legend-dot.dom { background: var(--domenica-bg); border: 1px solid #fecaca; }
 .legend-dot.fest { background: var(--festivo-bg); border: 1px solid var(--festivo); }
@@ -978,6 +1018,8 @@ header p {
 .modal-event.ferie { background: var(--ferie-light); }
 .modal-event.permesso { background: var(--permesso-light); }
 .modal-event.exfesta { background: var(--exfesta-light); }
+.modal-event.malattia { background: var(--malattia-light); }
+.modal-event.malattiafiglio { background: var(--malattiafiglio-light); }
 
 .modal-event-label {
   display: flex;
@@ -1075,6 +1117,26 @@ header p {
 
 .btn-exfesta:hover:not(:disabled) {
   background: var(--exfesta-bg) !important;
+}
+
+.btn-malattia {
+  color: var(--malattia);
+  border-color: var(--malattia) !important;
+  background: var(--malattia-light) !important;
+}
+
+.btn-malattia:hover:not(:disabled) {
+  background: var(--malattia-bg) !important;
+}
+
+.btn-malattiafiglio {
+  color: var(--malattiafiglio);
+  border-color: var(--malattiafiglio) !important;
+  background: var(--malattiafiglio-light) !important;
+}
+
+.btn-malattiafiglio:hover:not(:disabled) {
+  background: var(--malattiafiglio-bg) !important;
 }
 
 .modal-add-row input {
@@ -1267,6 +1329,14 @@ header p {
   background: var(--exfesta);
 }
 
+#annual-grid .annual-cell.malattia {
+  background: var(--malattia);
+}
+
+#annual-grid .annual-cell.malattiafiglio {
+  background: var(--malattiafiglio);
+}
+
 #annual-grid .annual-cell.multi {
   background: repeating-linear-gradient(
     45deg,
@@ -1288,7 +1358,9 @@ header p {
     45deg,
     var(--ferie) 0px, var(--ferie) 3px,
     var(--permesso) 3px, var(--permesso) 6px,
-    var(--exfesta) 6px, var(--exfesta) 9px
+    var(--exfesta) 6px, var(--exfesta) 9px,
+    var(--malattia) 9px, var(--malattia) 12px,
+    var(--malattiafiglio) 12px, var(--malattiafiglio) 15px
   );
 }
 
@@ -1521,7 +1593,7 @@ header p {
 
   <header>
     <h1>Pianificazione Ferie</h1>
-    <p>Gestisci ferie, permessi ed ex festività sul calendario</p>
+    <p>Gestisci ferie, permessi, ex festività, malattia e malattia figlio sul calendario</p>
     <button class="theme-toggle" id="logoutBtn" onclick="logout()" title="Esci" style="display:none">🚪</button>
     <div class="profile-select" id="profile-select" onclick="toggleProfileDropdown(event)">
       <span>👤</span><span id="profile-name">—</span><span style="font-size:10px;margin-left:2px">▼</span>
@@ -1551,6 +1623,15 @@ header p {
       <div class="config-field">
         <label for="exfesta-iniziali">Ex festività (ore)</label>
         <input type="number" id="exfesta-iniziali" min="0" max="1000" value="0">
+      </div>
+      <div class="config-field">
+        <label for="malattia-iniziali">Malattia (ore)</label>
+        <input type="number" id="malattia-iniziali" min="0" max="2000" value="0">
+      </div>
+      <div class="config-field">
+        <label for="malattiafiglio-iniziali">Malattia figlio (ore)</label>
+        <input type="number" id="malattiafiglio-iniziali" min="0" max="2000" value="0">
+        <span class="config-hint">Limite consigliato: 10 giorni/anno (80 ore)</span>
       </div>
     </div>
   </div>
@@ -1592,6 +1673,26 @@ header p {
         </div>
         <div class="remaining-sub"></div>
       </div>
+      <div class="remaining-row" data-type="malattia">
+        <div class="remaining-main">
+          <div class="remaining-dot malattia"></div>
+          <span class="remaining-label">Malattia</span>
+          <div class="remaining-bar-wrap"><div class="remaining-bar malattia" style="width:0%"></div></div>
+          <span class="remaining-fraction">—</span>
+          <span class="remaining-pct">—</span>
+        </div>
+        <div class="remaining-sub"></div>
+      </div>
+      <div class="remaining-row" data-type="malattiafiglio">
+        <div class="remaining-main">
+          <div class="remaining-dot malattiafiglio"></div>
+          <span class="remaining-label">Malattia figlio</span>
+          <div class="remaining-bar-wrap"><div class="remaining-bar malattiafiglio" style="width:0%"></div></div>
+          <span class="remaining-fraction">—</span>
+          <span class="remaining-pct">—</span>
+        </div>
+        <div class="remaining-sub"></div>
+      </div>
     </div>
     <div id="draft-legend" class="draft-legend" style="display:none">▨ tratteggio = giornate in bozza, non ancora confermate</div>
     <div id="year-progress" style="margin:8px 0 12px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
@@ -1623,6 +1724,8 @@ header p {
       <span class="legend-item"><span class="legend-dot ferie"></span> Ferie</span>
       <span class="legend-item"><span class="legend-dot permesso"></span> Permesso</span>
       <span class="legend-item"><span class="legend-dot exfesta"></span> Ex festività</span>
+      <span class="legend-item"><span class="legend-dot malattia"></span> Malattia</span>
+      <span class="legend-item"><span class="legend-dot malattiafiglio"></span> Malattia figlio</span>
       <span class="legend-item"><span class="legend-dot sab"></span> Sab</span>
       <span class="legend-item"><span class="legend-dot dom"></span> Dom</span>
       <span class="legend-item" style="font-size:11px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:repeating-linear-gradient(45deg,var(--ferie) 0,var(--ferie) 3px,var(--permesso) 3px,var(--permesso) 6px)"></span> Multipli</span>
@@ -1659,17 +1762,27 @@ header p {
         <label class="bulk-cat">
           <span class="bulk-cat-name ferie">Ferie</span>
           <input type="number" id="bulk-input-ferie" class="bulk-input" min="0" max="24" value="8">
-          <button type="button" class="bulk-apply" style="--cat:var(--ferie)" onclick="applyToSelected('ferie','draftFerie')">Aggiungi</button>
+          <button type="button" class="bulk-apply" style="--cat:var(--ferie)" onclick="applyToSelected('ferie')">Aggiungi</button>
         </label>
         <label class="bulk-cat">
           <span class="bulk-cat-name permesso">Permesso</span>
           <input type="number" id="bulk-input-permesso" class="bulk-input" min="0" max="24" value="8">
-          <button type="button" class="bulk-apply" style="--cat:var(--permesso)" onclick="applyToSelected('permesso','draftPermesso')">Aggiungi</button>
+          <button type="button" class="bulk-apply" style="--cat:var(--permesso)" onclick="applyToSelected('permesso')">Aggiungi</button>
         </label>
         <label class="bulk-cat">
           <span class="bulk-cat-name exfesta">Ex fest.</span>
           <input type="number" id="bulk-input-exfesta" class="bulk-input" min="0" max="24" value="8">
-          <button type="button" class="bulk-apply" style="--cat:var(--exfesta)" onclick="applyToSelected('exFesta','draftExFesta')">Aggiungi</button>
+          <button type="button" class="bulk-apply" style="--cat:var(--exfesta)" onclick="applyToSelected('exfesta')">Aggiungi</button>
+        </label>
+        <label class="bulk-cat">
+          <span class="bulk-cat-name malattia">Malattia</span>
+          <input type="number" id="bulk-input-malattia" class="bulk-input" min="0" max="24" value="8">
+          <button type="button" class="bulk-apply" style="--cat:var(--malattia)" onclick="applyToSelected('malattia')">Aggiungi</button>
+        </label>
+        <label class="bulk-cat">
+          <span class="bulk-cat-name malattiafiglio">Mal. figlio</span>
+          <input type="number" id="bulk-input-malattiafiglio" class="bulk-input" min="0" max="24" value="8">
+          <button type="button" class="bulk-apply" style="--cat:var(--malattiafiglio)" onclick="applyToSelected('malattiafiglio')">Aggiungi</button>
         </label>
         <label class="bulk-draft"><input type="checkbox" id="bulk-draft"> Bozza</label>
       </div>
@@ -1677,12 +1790,14 @@ header p {
     </div>
     <div class="cal-grid" id="cal-grid"></div>
     <div style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:12px">
-      Clicca su un giorno per aggiungere o rimuovere ferie, permessi ed ex festività · Trascina sui giorni per selezionarne più d'uno
+      Clicca su un giorno per aggiungere o rimuovere ferie, permessi, ex festività, malattia e malattia figlio · Trascina sui giorni per selezionarne più d'uno
     </div>
     <div class="legend">
       <span class="legend-item"><span class="legend-dot ferie"></span> Ferie</span>
       <span class="legend-item"><span class="legend-dot permesso"></span> Permesso</span>
       <span class="legend-item"><span class="legend-dot exfesta"></span> Ex festività</span>
+      <span class="legend-item"><span class="legend-dot malattia"></span> Malattia</span>
+      <span class="legend-item"><span class="legend-dot malattiafiglio"></span> Malattia figlio</span>
       <span class="legend-item"><span class="legend-dot sab"></span> Sabato</span>
       <span class="legend-item"><span class="legend-dot dom"></span> Domenica</span>
       <span class="legend-item"><span class="legend-dot fest"></span> Festività</span>
@@ -1729,6 +1844,20 @@ header p {
           <input type="number" id="modal-exfesta-input" min="0" max="24" value="1" placeholder="ore">
           <label style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
             <input type="checkbox" id="modal-exfesta-draft"> Bozza
+          </label>
+        </div>
+        <div class="modal-add-row">
+          <button class="btn-malattia" onclick="addMalattia()">+ Malattia</button>
+          <input type="number" id="modal-malattia-input" min="0" max="24" value="1" placeholder="ore">
+          <label style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="modal-malattia-draft"> Bozza
+          </label>
+        </div>
+        <div class="modal-add-row">
+          <button class="btn-malattiafiglio" onclick="addMalattiaFiglio()">+ Malattia figlio</button>
+          <input type="number" id="modal-malattiafiglio-input" min="0" max="24" value="1" placeholder="ore">
+          <label style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="modal-malattiafiglio-draft"> Bozza
           </label>
         </div>
       </div>
@@ -1919,7 +2048,7 @@ function addProfile() {
   // Switch to new profile with empty state
   if (activeProfile) saveState();
   setActiveProfile(name);
-  state = { year: curYear, initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+  state = { year: curYear, initial: defaultInitial(), events: {} };
   saveState();
   renderProfileMgmt();
   renderProfileDropdown();
@@ -1952,7 +2081,7 @@ function deleteProfile(name) {
     profiles.push('Simone');
     saveProfiles(profiles);
     setActiveProfile('Simone');
-    state = { year: curYear, initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+    state = { year: curYear, initial: defaultInitial(), events: {} };
     saveState();
   } else if (name === activeProfile) {
     setActiveProfile(profiles[0]);
@@ -1995,8 +2124,47 @@ function migrateOldData() {
   console.log('Migrati ' + migrated + ' anni al profilo Simone');
 }
 
+// ─── Categorie evento ───
+// Unica fonte di verità per chiavi stato, chiavi bozza, classi CSS ed etichette.
+const CATEGORIES = [
+  { key: 'ferie',          draft: 'draftFerie',          cls: 'ferie',          label: 'Ferie',           short: 'Ferie',       id: 'ferie' },
+  { key: 'permesso',       draft: 'draftPermesso',       cls: 'permesso',       label: 'Permesso',        short: 'Perm.',       id: 'permesso' },
+  { key: 'exFesta',        draft: 'draftExFesta',        cls: 'exfesta',        label: 'Ex festività',    short: 'Ex fest.',    id: 'exfesta' },
+  { key: 'malattia',       draft: 'draftMalattia',       cls: 'malattia',       label: 'Malattia',        short: 'Malattia',    id: 'malattia' },
+  { key: 'malattiaFiglio', draft: 'draftMalattiaFiglio', cls: 'malattiafiglio', label: 'Malattia figlio', short: 'Mal. figlio', id: 'malattiafiglio' }
+];
+const HOURS_PER_DAY = 8;
+const MALATTIA_FIGLIO_MAX_H = 10 * HOURS_PER_DAY; // 10 giorni/anno
+
+function getCategory(idOrKey) {
+  return CATEGORIES.find(c => c.id === idOrKey || c.key === idOrKey) || null;
+}
+
+// Saldo iniziale di default per un anno nuovo. La malattia figlio parte dal limite di 10 gg.
+function defaultInitial() {
+  const o = {};
+  for (const c of CATEGORIES) o[c.key] = c.key === 'malattiaFiglio' ? MALATTIA_FIGLIO_MAX_H : 0;
+  return o;
+}
+
+// Completa i dati vecchi (senza le nuove categorie) senza alterare i valori già presenti.
+function normalizeInitial(initial) {
+  const out = (initial && typeof initial === 'object') ? initial : {};
+  for (const c of CATEGORIES) {
+    if (typeof out[c.key] !== 'number' || !isFinite(out[c.key])) {
+      out[c.key] = c.key === 'malattiaFiglio' ? MALATTIA_FIGLIO_MAX_H : 0;
+    }
+  }
+  return out;
+}
+
+function getInitial(key) {
+  const v = state && state.initial ? state.initial[key] : 0;
+  return (typeof v === 'number' && isFinite(v)) ? v : 0;
+}
+
 // ─── Stato ───
-let state = { year: 2026, initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+let state = { year: 2026, initial: defaultInitial(), events: {} };
 let curMonth = new Date().getMonth();
 let curYear = new Date().getFullYear();
 
@@ -2285,7 +2453,7 @@ async function syncCloudState(force) {
       const today = new Date();
       const key = `${activeProfile}-${today.getFullYear()}`;
       if (!mergedCloud[key]) {
-        mergedCloud[key] = { initial: { ferie: 0, permesso: 0, exFesta: 0 }, events: {} };
+        mergedCloud[key] = { initial: defaultInitial(), events: {} };
         mergedTimestamps[key] = now;
       }
     }
@@ -2485,6 +2653,7 @@ function loadState(year) {
     try {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.initial && parsed.events) {
+        parsed.initial = normalizeInitial(parsed.initial);
         state = parsed;
         state.year = year;
         return;
@@ -2493,7 +2662,7 @@ function loadState(year) {
   }
   state = {
     year: year,
-    initial: { ferie: 0, permesso: 0, exFesta: 0 },
+    initial: defaultInitial(),
     events: {}
   };
 }
@@ -2513,48 +2682,40 @@ function scheduleCloudSync() {
 
 // ─── Calcolo rimanenza ───
 function computeRemaining() {
-  let usedFerie = 0, usedPermesso = 0, usedExFesta = 0;
-  let draftFerie = 0, draftPermesso = 0, draftExFesta = 0;
+  const used = {}, draft = {};
+  for (const c of CATEGORIES) { used[c.key] = 0; draft[c.key] = 0; }
   for (const dateKey in state.events) {
     const ev = state.events[dateKey];
-    usedFerie += ev.ferie || 0;
-    usedPermesso += ev.permesso || 0;
-    usedExFesta += ev.exFesta || 0;
-    draftFerie += ev.draftFerie || 0;
-    draftPermesso += ev.draftPermesso || 0;
-    draftExFesta += ev.draftExFesta || 0;
+    if (!ev) continue;
+    for (const c of CATEGORIES) {
+      used[c.key] += ev[c.key] || 0;
+      draft[c.key] += ev[c.draft] || 0;
+    }
   }
-  return {
-    ferie: state.initial.ferie - usedFerie,
-    permesso: state.initial.permesso - usedPermesso,
-    exFesta: state.initial.exFesta - usedExFesta,
-    usedFerie, usedPermesso, usedExFesta,
-    ferieIpot: state.initial.ferie - (usedFerie + draftFerie),
-    permessoIpot: state.initial.permesso - (usedPermesso + draftPermesso),
-    exFestaIpot: state.initial.exFesta - (usedExFesta + draftExFesta),
-    draftFerie, draftPermesso, draftExFesta,
-    draftTotal: draftFerie + draftPermesso + draftExFesta
-  };
+  const rem = { used, draft, draftTotal: 0 };
+  for (const c of CATEGORIES) {
+    const init = getInitial(c.key);
+    rem[c.key] = init - used[c.key];
+    rem[c.key + 'Ipot'] = init - (used[c.key] + draft[c.key]);
+    rem.draftTotal += draft[c.key];
+  }
+  return rem;
 }
 
 // ─── Rendering ───
 function renderRemaining() {
   const rem = computeRemaining();
-  const types = ['ferie', 'permesso', 'exfesta'];
-  const stateKey = { ferie: 'ferie', permesso: 'permesso', exfesta: 'exFesta' };
-  const gDay = 8;
 
-  for (const t of types) {
-    const sk = stateKey[t];
-    const init = state.initial[sk];
-    const remainEff = rem[sk];
-    const remainIpot = rem[sk + 'Ipot'];
-    const used = init - remainEff;
-    const draftVal = rem['draft' + sk.charAt(0).toUpperCase() + sk.slice(1)];
+  for (const c of CATEGORIES) {
+    const init = getInitial(c.key);
+    const used = rem.used[c.key];
+    const draftVal = rem.draft[c.key];
+    const remainEff = rem[c.key];
+    const remainIpot = rem[c.key + 'Ipot'];
     const pctEff = init > 0 ? Math.max(0, Math.min(100, (remainEff / init) * 100)) : 0;
     const pctIpot = init > 0 ? Math.max(0, Math.min(100, (remainIpot / init) * 100)) : 0;
 
-    const row = document.querySelector(`.remaining-row:has(.remaining-dot.${t})`);
+    const row = document.querySelector(`.remaining-row:has(.remaining-dot.${c.cls})`);
     if (!row) continue;
 
     const bar = row.querySelector('.remaining-bar');
@@ -2562,35 +2723,48 @@ function renderRemaining() {
     const pctEl = row.querySelector('.remaining-pct');
     const sub = row.querySelector('.remaining-sub');
 
-    const colors = { ferie: 'var(--ferie)', permesso: 'var(--permesso)', exfesta: 'var(--exfesta)' };
-
+    // Riga principale: rimasti / totale
     if (init > 0) {
       fraction.innerHTML =
-        `<strong>${(remainEff / gDay).toFixed(1)} g</strong> ` +
-        `<span class="initial">rimasti di ${(init / gDay).toFixed(1)} g</span>`;
+        `<strong>${(remainEff / HOURS_PER_DAY).toFixed(1)} g</strong> ` +
+        `<span class="initial">rimasti di ${(init / HOURS_PER_DAY).toFixed(1)} g</span>`;
       pctEl.textContent = `${Math.round(pctEff)}%`;
       pctEl.title = 'Percentuale rimanente sul totale';
-      if (draftVal > 0) {
-        sub.innerHTML =
-          `usati ${(used / gDay).toFixed(1)} g · ` +
-          `in bozza ${(draftVal / gDay).toFixed(1)} g → ` +
-          `<strong>con bozze: ${(remainIpot / gDay).toFixed(1)} g</strong>`;
-      } else {
-        sub.textContent = `usati ${(used / gDay).toFixed(1)} g`;
-      }
     } else {
       fraction.innerHTML = `<span class="initial">—</span>`;
       pctEl.textContent = '—';
       pctEl.title = '';
-      sub.textContent = 'non impostate';
     }
 
+    // Riga di dettaglio: usati, bozze, ipotesi
+    let subHtml;
+    if (init > 0 || used > 0 || draftVal > 0) {
+      subHtml = `usati ${(used / HOURS_PER_DAY).toFixed(1)} g`;
+      if (draftVal > 0) {
+        subHtml += ` · in bozza ${(draftVal / HOURS_PER_DAY).toFixed(1)} g → ` +
+          `<strong>con bozze: ${(remainIpot / HOURS_PER_DAY).toFixed(1)} g</strong>`;
+      }
+      if (init === 0) subHtml += ' · nessun totale impostato';
+    } else {
+      subHtml = 'non impostate';
+    }
+    // Limite per malattia figlio: 10 giorni/anno
+    if (c.key === 'malattiaFiglio' && (used > 0 || draftVal > 0)) {
+      const over = (used + draftVal) - MALATTIA_FIGLIO_MAX_H;
+      if (over > 0) {
+        subHtml += ` · <span style="color:var(--festivo);font-weight:600">⚠️ limite 10 gg superato di ${(over / HOURS_PER_DAY).toFixed(1)} g</span>`;
+      } else {
+        subHtml += ' · limite 10 gg';
+      }
+    }
+    sub.innerHTML = subHtml;
+
+    // Barra
+    bar.style.background = `var(--${c.cls})`;
     if (draftVal > 0) {
-      bar.style.background = colors[t];
       bar.style.width = `${pctIpot}%`;
       bar.style.backgroundImage = `repeating-linear-gradient(90deg, transparent 0px, transparent 4px, rgba(255,255,255,0.2) 4px, rgba(255,255,255,0.2) 8px)`;
     } else {
-      bar.style.background = colors[t];
       bar.style.backgroundImage = 'none';
       bar.style.width = `${pctEff}%`;
       if (remainEff < 0) {
@@ -2600,7 +2774,7 @@ function renderRemaining() {
     }
 
     row.onclick = function() {
-      showCategoryDetail(t, sk);
+      showCategoryDetail(c.key);
     };
   }
 
@@ -2625,7 +2799,11 @@ function renderYearProgress() {
 function renderMonthlySummary() {
   const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
   const monthly = [];
-  for (let i = 0; i < 12; i++) monthly.push({ ferie: 0, permesso: 0, exFesta: 0, dFerie: 0, dPermesso: 0, dExFesta: 0 });
+  for (let i = 0; i < 12; i++) {
+    const m = {};
+    for (const c of CATEGORIES) { m[c.key] = 0; m['d_' + c.key] = 0; }
+    monthly.push(m);
+  }
 
   for (const dateKey in state.events) {
     const parts = dateKey.split('-');
@@ -2633,18 +2811,17 @@ function renderMonthlySummary() {
     const m = parseInt(parts[1]) - 1;
     if (year !== state.year) continue;
     const ev = state.events[dateKey];
-    monthly[m].ferie += ev.ferie || 0;
-    monthly[m].permesso += ev.permesso || 0;
-    monthly[m].exFesta += ev.exFesta || 0;
-    monthly[m].dFerie += ev.draftFerie || 0;
-    monthly[m].dPermesso += ev.draftPermesso || 0;
-    monthly[m].dExFesta += ev.draftExFesta || 0;
+    if (!ev) continue;
+    for (const c of CATEGORIES) {
+      monthly[m][c.key] += ev[c.key] || 0;
+      monthly[m]['d_' + c.key] += ev[c.draft] || 0;
+    }
   }
 
   const container = document.getElementById('monthly-summary');
   const table = document.getElementById('monthly-table');
 
-  const hasData = monthly.some(m => m.ferie || m.permesso || m.exFesta || m.dFerie || m.dPermesso || m.dExFesta);
+  const hasData = monthly.some(m => CATEGORIES.some(c => m[c.key] || m['d_' + c.key]));
   if (!hasData) {
     container.style.display = 'block';
     table.innerHTML = '';
@@ -2662,7 +2839,7 @@ function renderMonthlySummary() {
             </svg>
           </div>
           <div class="empty-month-title">Nessun evento registrato</div>
-          <div class="empty-month-sub">Clicca su un giorno del calendario per aggiungere ferie, permessi o ex festività in questo mese.</div>
+          <div class="empty-month-sub">Clicca su un giorno del calendario per aggiungere ferie, permessi, ex festività, malattia o malattia figlio in questo mese.</div>
         </div>`;
     }
     return;
@@ -2678,22 +2855,32 @@ function renderMonthlySummary() {
   }
   const realTable = container.querySelector('#monthly-table');
 
-  let html = `<tr><th>Mese</th><th style="color:var(--ferie)">Ferie</th><th style="color:var(--permesso)">Permesso</th><th style="color:var(--exfesta)">Ex fest.</th><th>Totale</th></tr>`;
-  let totalFerie = 0, totalPermesso = 0, totalEx = 0;
+  let html = '<tr><th>Mese</th>' +
+    CATEGORIES.map(c => `<th style="color:var(--${c.cls})">${c.short}</th>`).join('') +
+    '<th>Totale</th></tr>';
+  const totals = {};
+  for (const c of CATEGORIES) totals[c.key] = 0;
   for (let i = 0; i < 12; i++) {
     const m = monthly[i];
-    totalFerie += m.ferie; totalPermesso += m.permesso; totalEx += m.exFesta;
-    const rowTotal = m.ferie + m.permesso + m.exFesta;
-    const hasDraftRow = m.dFerie || m.dPermesso || m.dExFesta;
+    let rowTotal = 0;
+    let hasDraftRow = false;
+    for (const c of CATEGORIES) {
+      totals[c.key] += m[c.key];
+      rowTotal += m[c.key];
+      if (m['d_' + c.key]) hasDraftRow = true;
+    }
     if (rowTotal > 0 || hasDraftRow) {
-      const f = m.ferie + (m.dFerie ? `<span style="opacity:0.4">+${m.dFerie}</span>` : '');
-      const p = m.permesso + (m.dPermesso ? `<span style="opacity:0.4">+${m.dPermesso}</span>` : '');
-      const e = m.exFesta + (m.dExFesta ? `<span style="opacity:0.4">+${m.dExFesta}</span>` : '');
-      html += `<tr><td>${months[i]}</td><td>${f}h</td><td>${p}h</td><td>${e}h</td><td>${rowTotal}h</td></tr>`;
+      const cells = CATEGORIES.map(c => {
+        const v = m[c.key] + (m['d_' + c.key] ? `<span style="opacity:0.4">+${m['d_' + c.key]}</span>` : '');
+        return `<td>${v}h</td>`;
+      }).join('');
+      html += `<tr><td>${months[i]}</td>${cells}<td>${rowTotal}h</td></tr>`;
     }
   }
-  const grandTotal = totalFerie + totalPermesso + totalEx;
-  html += `<tr class="totale"><td>Totale</td><td>${totalFerie}h</td><td>${totalPermesso}h</td><td>${totalEx}h</td><td>${grandTotal}h</td></tr>`;
+  const grandTotal = CATEGORIES.reduce((s, c) => s + totals[c.key], 0);
+  html += `<tr class="totale"><td>Totale</td>` +
+    CATEGORIES.map(c => `<td>${totals[c.key]}h</td>`).join('') +
+    `<td>${grandTotal}h</td></tr>`;
   realTable.innerHTML = html;
 }
 
@@ -2754,25 +2941,25 @@ function renderAnnualView() {
       if (hName) cell.classList.add('holiday');
 
       // Event coloring
-      const hasConfirmed = ev && (ev.ferie || ev.permesso || ev.exFesta);
-      const hasDraftEv = ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta);
+      const hasConfirmed = ev && CATEGORIES.some(c => ev[c.key]);
+      const hasDraftEv = ev && CATEGORIES.some(c => ev[c.draft]);
 
       if (hasConfirmed || hasDraftEv) {
-        const hasF = (ev.ferie || 0) + (ev.draftFerie || 0) > 0;
-        const hasP = (ev.permesso || 0) + (ev.draftPermesso || 0) > 0;
-        const hasE = (ev.exFesta || 0) + (ev.draftExFesta || 0) > 0;
-        const count = (hasF ? 1 : 0) + (hasP ? 1 : 0) + (hasE ? 1 : 0);
+        const present = CATEGORIES.filter(c => (ev[c.key] || 0) + (ev[c.draft] || 0) > 0);
 
-        if (count > 1) {
-          if (hasF && hasP && hasE) cell.classList.add('multi-all');
-          else if (hasF && hasP) cell.classList.add('multi');
-          else if (hasF && hasE) cell.classList.add('multi-exfesta');
-          else if (hasP && hasE) {
-            cell.style.background = 'repeating-linear-gradient(45deg,var(--permesso) 0px,var(--permesso) 4px,var(--exfesta) 4px,var(--exfesta) 8px)';
-          }
-        } else if (hasF) cell.classList.add('ferie');
-        else if (hasP) cell.classList.add('permesso');
-        else if (hasE) cell.classList.add('exfesta');
+        if (present.length > 1) {
+          // Sfumatura a strisce con tutti i colori presenti nel giorno
+          const colors = present.map(c => `var(--${c.cls})`);
+          const stops = [];
+          const band = 3;
+          colors.forEach((col, i) => {
+            const from = i * band;
+            stops.push(`${col} ${from}px`, `${col} ${from + band}px`);
+          });
+          cell.style.background = `repeating-linear-gradient(45deg, ${stops.join(', ')})`;
+        } else if (present.length === 1) {
+          cell.classList.add(present[0].cls);
+        }
 
         // If only draft events, reduce opacity
         if (!hasConfirmed && hasDraftEv) {
@@ -2784,15 +2971,17 @@ function renderAnnualView() {
 
       // Tooltip
       const tipParts = [];
-      if (ev && ev.ferie) tipParts.push('Ferie: ' + ev.ferie + 'h');
-      if (ev && ev.permesso) tipParts.push('Permesso: ' + ev.permesso + 'h');
-      if (ev && ev.exFesta) tipParts.push('Ex festività: ' + ev.exFesta + 'h');
-      if (ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta)) {
-        const dParts = [];
-        if (ev.draftFerie) dParts.push('Ferie: ' + ev.draftFerie + 'h');
-        if (ev.draftPermesso) dParts.push('Permesso: ' + ev.draftPermesso + 'h');
-        if (ev.draftExFesta) dParts.push('Ex festività: ' + ev.draftExFesta + 'h');
-        tipParts.push('Bozza: ' + dParts.join(', '));
+      if (ev) {
+        for (const c of CATEGORIES) {
+          if (ev[c.key]) tipParts.push(c.label + ': ' + ev[c.key] + 'h');
+        }
+        if (CATEGORIES.some(c => ev[c.draft])) {
+          const dParts = [];
+          for (const c of CATEGORIES) {
+            if (ev[c.draft]) dParts.push(c.label + ': ' + ev[c.draft] + 'h');
+          }
+          tipParts.push('Bozza: ' + dParts.join(', '));
+        }
       }
       if (hName) tipParts.push(hName);
       if (tipParts.length) cell.title = `${d} ${months[m]} · ` + tipParts.join(' · ');
@@ -2859,21 +3048,21 @@ function renderCalendar() {
     }
 
     const ev = state.events[dateKey];
-    const hasEvents = ev && (ev.ferie || ev.permesso || ev.exFesta);
-    const hasDraft = ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta);
+    const hasEvents = ev && CATEGORIES.some(c => ev[c.key]);
+    const hasDraft = ev && CATEGORIES.some(c => ev[c.draft]);
 
     // Tooltip
     const tipParts = [];
     if (hasEvents) {
-      if (ev.ferie) tipParts.push('Ferie: ' + ev.ferie + 'h');
-      if (ev.permesso) tipParts.push('Permesso: ' + ev.permesso + 'h');
-      if (ev.exFesta) tipParts.push('Ex festività: ' + ev.exFesta + 'h');
+      for (const c of CATEGORIES) {
+        if (ev[c.key]) tipParts.push(c.label + ': ' + ev[c.key] + 'h');
+      }
     }
     if (hasDraft) {
       const dParts = [];
-      if (ev.draftFerie) dParts.push('Ferie: ' + ev.draftFerie + 'h');
-      if (ev.draftPermesso) dParts.push('Permesso: ' + ev.draftPermesso + 'h');
-      if (ev.draftExFesta) dParts.push('Ex festività: ' + ev.draftExFesta + 'h');
+      for (const c of CATEGORIES) {
+        if (ev[c.draft]) dParts.push(c.label + ': ' + ev[c.draft] + 'h');
+      }
       tipParts.push('Bozza: ' + dParts.join(', '));
     }
     if (hName) tipParts.push('🎉 ' + hName);
@@ -2894,11 +3083,7 @@ function renderCalendar() {
     }
 
     // Event background + pills
-    const catList = [
-      { key: 'ferie', dkey: 'draftFerie', cls: 'ferie', label: 'Ferie' },
-      { key: 'permesso', dkey: 'draftPermesso', cls: 'permesso', label: 'Perm.' },
-      { key: 'exFesta', dkey: 'draftExFesta', cls: 'exfesta', label: 'ExF' }
-    ];
+    const catList = CATEGORIES.map(c => ({ key: c.key, dkey: c.draft, cls: c.cls, label: c.short }));
     const confirmed = ev ? catList.filter(c => ev[c.key] > 0) : [];
     const draftOnly = ev ? catList.filter(c => !(ev[c.key] > 0) && ev[c.dkey] > 0) : [];
 
@@ -2957,7 +3142,7 @@ function renderCalendar() {
     if (!cell) continue;
     const ev = state.events[dateKey];
     if (!ev) continue;
-    const runCats = ['ferie', 'permesso', 'exFesta'];
+    const runCats = CATEGORIES.map(c => c.key);
     const mainCat = runCats.find(c => (ev[c]||0) > 0);
     if (!mainCat) continue;
     // Skip multi-category days
@@ -3002,25 +3187,20 @@ function openModal(dateKey) {
   const eventsDiv = document.getElementById('modal-events');
   eventsDiv.innerHTML = '';
 
-  const hasConfirmed = ev && (ev.ferie || ev.permesso || ev.exFesta);
-  const hasDraft = ev && (ev.draftFerie || ev.draftPermesso || ev.draftExFesta);
+  const hasConfirmed = ev && CATEGORIES.some(c => ev[c.key]);
+  const hasDraft = ev && CATEGORIES.some(c => ev[c.draft]);
 
   if (hasConfirmed || hasDraft) {
-    const types = [
-      { key: 'ferie', dkey: 'draftFerie', label: 'Ferie', cls: 'ferie', unit: 'ore' },
-      { key: 'permesso', dkey: 'draftPermesso', label: 'Permesso', cls: 'permesso', unit: 'ore' },
-      { key: 'exFesta', dkey: 'draftExFesta', label: 'Ex festività', cls: 'exfesta', unit: 'ore' },
-    ];
-    for (const t of types) {
+    for (const t of CATEGORIES) {
       const val = ev ? (ev[t.key] || 0) : 0;
-      const dval = ev ? (ev[t.dkey] || 0) : 0;
+      const dval = ev ? (ev[t.draft] || 0) : 0;
       if (val > 0) {
         const row = document.createElement('div');
         row.className = `modal-event ${t.cls}`;
         row.innerHTML = `
           <span class="modal-event-label">
             <span class="remaining-dot ${t.cls}"></span>
-            ${t.label}: ${val} ${t.unit}
+            ${t.label}: ${val} ore
           </span>
           <button class="modal-event-remove" onclick="removeEvent('${dateKey}','${t.key}')" title="Rimuovi">✕</button>
         `;
@@ -3033,9 +3213,9 @@ function openModal(dateKey) {
         row.innerHTML = `
           <span class="modal-event-label">
             <span class="remaining-dot ${t.cls}" style="opacity:0.5"></span>
-            ${t.label} (bozza): ${dval} ${t.unit}
+            ${t.label} (bozza): ${dval} ore
           </span>
-          <button class="modal-event-remove" onclick="removeEvent('${dateKey}','${t.dkey}')" title="Rimuovi">✕</button>
+          <button class="modal-event-remove" onclick="removeEvent('${dateKey}','${t.draft}')" title="Rimuovi">✕</button>
         `;
         eventsDiv.appendChild(row);
       }
@@ -3045,12 +3225,12 @@ function openModal(dateKey) {
   }
 
   // Reset inputs
-  document.getElementById('modal-ferie-input').value = '1';
-  document.getElementById('modal-permesso-input').value = '1';
-  document.getElementById('modal-exfesta-input').value = '1';
-  document.getElementById('modal-ferie-draft').checked = false;
-  document.getElementById('modal-permesso-draft').checked = false;
-  document.getElementById('modal-exfesta-draft').checked = false;
+  for (const c of CATEGORIES) {
+    const inp = document.getElementById('modal-' + c.id + '-input');
+    if (inp) inp.value = '1';
+    const chk = document.getElementById('modal-' + c.id + '-draft');
+    if (chk) chk.checked = false;
+  }
 
   document.getElementById('modal-overlay').classList.add('open');
 }
@@ -3073,31 +3253,33 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ─── Dettaglio categoria ───
-function showCategoryDetail(type, stateKey) {
+function showCategoryDetail(key) {
+  const cat = getCategory(key);
+  if (!cat) return;
+
   modalDate = null;
   document.getElementById('modal-event-view').style.display = 'none';
   document.getElementById('modal-category-detail').style.display = 'block';
   document.getElementById('modal-profiles').style.display = 'none';
 
-  const labels = { ferie: 'Ferie', permesso: 'Permesso', exfesta: 'Ex festività' };
-  const cssColor = { ferie: 'ferie', permesso: 'permesso', exfesta: 'exfesta' };
   const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
-  const label = labels[type];
-  const color = cssColor[type];
+  const label = cat.label;
+  const color = cat.cls;
 
   document.getElementById('modal-category-title').textContent = label;
 
   const items = [];
   let used = 0, draftUsed = 0;
-  const draftKey = 'draft' + stateKey.charAt(0).toUpperCase() + stateKey.slice(1);
   for (const dateKey in state.events) {
-    const val = state.events[dateKey][stateKey] || 0;
+    const ev = state.events[dateKey];
+    if (!ev) continue;
+    const val = ev[cat.key] || 0;
     if (val > 0) {
       const d = parseDate(dateKey);
       items.push({ date: d, val, draft: false });
       used += val;
     }
-    const dval = state.events[dateKey][draftKey] || 0;
+    const dval = ev[cat.draft] || 0;
     if (dval > 0) {
       const d = parseDate(dateKey);
       items.push({ date: d, val: dval, draft: true });
@@ -3107,20 +3289,29 @@ function showCategoryDetail(type, stateKey) {
   items.sort((a, b) => a.date - b.date || (a.draft ? 1 : 0) - (b.draft ? 1 : 0));
 
   // Stats
-  const init = state.initial[stateKey];
+  const init = getInitial(cat.key);
   const remain = init - used;
   const remainIpot = init - (used + draftUsed);
-  const gDay = 8;
   let statsHtml =
     `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--${color});margin-right:6px;vertical-align:middle"></span>` +
     `${label} &nbsp;·&nbsp; ` +
-    `Consumati: <strong>${(used/gDay).toFixed(1)}g</strong> (${used}h)`;
+    `Consumati: <strong>${(used/HOURS_PER_DAY).toFixed(1)}g</strong> (${used}h)`;
   if (draftUsed > 0) {
-    statsHtml += ` + <span style="opacity:0.5">${(draftUsed/gDay).toFixed(1)}g</span> bozza`;
+    statsHtml += ` + <span style="opacity:0.5">${(draftUsed/HOURS_PER_DAY).toFixed(1)}g</span> bozza`;
   }
-  statsHtml += ` &nbsp;·&nbsp; Rimanenti: <strong>${(remain/gDay).toFixed(1)}g</strong>`;
-  if (draftUsed > 0) {
-    statsHtml += ` <span style="color:var(--text-muted)">ip. ${(remainIpot/gDay).toFixed(1)}g</span>`;
+  if (init > 0) {
+    statsHtml += ` &nbsp;·&nbsp; Rimanenti: <strong>${(remain/HOURS_PER_DAY).toFixed(1)}g</strong>`;
+    if (draftUsed > 0) {
+      statsHtml += ` <span style="color:var(--text-muted)">con bozze: ${(remainIpot/HOURS_PER_DAY).toFixed(1)}g</span>`;
+    }
+  } else {
+    statsHtml += ` &nbsp;·&nbsp; <span style="color:var(--text-muted)">nessun totale impostato</span>`;
+  }
+  if (cat.key === 'malattiaFiglio') {
+    const over = (used + draftUsed) - MALATTIA_FIGLIO_MAX_H;
+    statsHtml += over > 0
+      ? ` &nbsp;·&nbsp; <span style="color:var(--festivo);font-weight:600">⚠️ limite 10 gg superato di ${(over/HOURS_PER_DAY).toFixed(1)}g</span>`
+      : ` &nbsp;·&nbsp; <span style="color:var(--text-muted)">limite 10 gg/anno</span>`;
   }
   document.getElementById('modal-category-stats').innerHTML = statsHtml;
 
@@ -3131,7 +3322,7 @@ function showCategoryDetail(type, stateKey) {
     list.innerHTML = '<div class="modal-empty">Nessun evento registrato</div>';
   } else {
     for (const item of items) {
-      const days = item.val / gDay;
+      const days = item.val / HOURS_PER_DAY;
       const row = document.createElement('div');
       row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:14px;border-bottom:1px solid var(--border)';
       if (item.draft) {
@@ -3148,38 +3339,43 @@ function showCategoryDetail(type, stateKey) {
     }
   }
 
-  let totalText = `Totale: ${(used/gDay).toFixed(1)}g (${used}h)`;
-  if (draftUsed > 0) totalText += ` · ${(draftUsed/gDay).toFixed(1)}g in bozza`;
+  let totalText = `Totale: ${(used/HOURS_PER_DAY).toFixed(1)}g (${used}h)`;
+  if (draftUsed > 0) totalText += ` · ${(draftUsed/HOURS_PER_DAY).toFixed(1)}g in bozza`;
   document.getElementById('modal-category-total').textContent = totalText;
 
   document.getElementById('modal-title').textContent = label;
   const totalItems = items.length;
   document.getElementById('modal-subtitle').textContent =
     `${totalItems} giorn${totalItems === 1 ? 'o' : 'i'} con ${label.toLowerCase()} · ` +
-    `${(used/gDay).toFixed(1)}g usati${draftUsed > 0 ? ` (+${(draftUsed/gDay).toFixed(1)}g bozza)` : ''}`;
+    `${(used/HOURS_PER_DAY).toFixed(1)}g usati${draftUsed > 0 ? ` (+${(draftUsed/HOURS_PER_DAY).toFixed(1)}g bozza)` : ''}`;
 
   document.getElementById('modal-overlay').classList.add('open');
 }
 
 // ─── Eventi ───
-const EMPTY_EVENT = () => ({ ferie: 0, permesso: 0, exFesta: 0, draftFerie: 0, draftPermesso: 0, draftExFesta: 0 });
+const EMPTY_EVENT = () => {
+  const o = {};
+  for (const c of CATEGORIES) { o[c.key] = 0; o[c.draft] = 0; }
+  return o;
+};
 
 function addFerie() { addToDay('ferie'); }
 function addPermesso() { addToDay('permesso'); }
 function addExFesta() { addToDay('exfesta'); }
+function addMalattia() { addToDay('malattia'); }
+function addMalattiaFiglio() { addToDay('malattiafiglio'); }
 
-// Unica logica di aggiunta. idPrefix (ferie|permesso|exfesta) coincide coi suffissi HTML minuscoli.
-// Il nome attributo evento resta: ferie / permesso / exFesta (con la maiuscola nell'ex festa).
+// Unica logica di aggiunta. idPrefix coincide con l'id HTML della categoria (CATEGORIES[].id).
 function addToDay(idPrefix) {
   if (!modalDate) return;
-  const attr = idPrefix === 'exfesta' ? 'exFesta' : idPrefix;
-  const cap = idPrefix === 'exfesta' ? 'ExFesta' : (idPrefix.charAt(0).toUpperCase() + idPrefix.slice(1));
+  const cat = getCategory(idPrefix);
+  if (!cat) return;
   const input = document.getElementById('modal-' + idPrefix + '-input');
   const draftChk = document.getElementById('modal-' + idPrefix + '-draft');
   const val = input ? (parseInt(input.value) || 0) : 0;
   if (val <= 0) return;
   const isDraft = draftChk ? draftChk.checked : false;
-  const target = isDraft ? 'draft' + cap : attr;
+  const target = isDraft ? cat.draft : cat.key;
   const keys = modalBulkKeys && modalBulkKeys.includes(modalDate) ? modalBulkKeys.slice() : [modalDate];
   pushUndo();
   for (const dk of keys) {
@@ -3189,9 +3385,18 @@ function addToDay(idPrefix) {
   saveState();
   renderAll();
   openModal(modalDate);
+
+  // Avviso limite malattia figlio (10 gg/anno): non blocca, segnala.
+  if (cat.key === 'malattiaFiglio') {
+    const rem = computeRemaining();
+    const tot = rem.used.malattiaFiglio + rem.draft.malattiaFiglio;
+    if (tot > MALATTIA_FIGLIO_MAX_H) {
+      showToast(`⚠️ Malattia figlio: ${(tot / HOURS_PER_DAY).toFixed(1)} g, oltre il limite di 10 g`, 'error');
+      return;
+    }
+  }
   if (keys.length > 1) {
-    const labels = { ferie: 'Ferie', permesso: 'Permesso', exfesta: 'Ex festività' };
-    showToast((isDraft ? 'Bozza ' : '') + labels[idPrefix] + ': aggiunte ' + val + 'h a ' + keys.length + ' giorni', 'success');
+    showToast((isDraft ? 'Bozza ' : '') + cat.label + ': aggiunte ' + val + 'h a ' + keys.length + ' giorni', 'success');
   }
 }
 
@@ -3201,11 +3406,9 @@ function removeEvent(dateKey, type) {
   for (const dk of keys) {
     if (!state.events[dk]) continue;
     state.events[dk][type] = 0;
-    // Clean up if all zero
-    if (!state.events[dk].ferie && !state.events[dk].permesso && !state.events[dk].exFesta &&
-        !state.events[dk].draftFerie && !state.events[dk].draftPermesso && !state.events[dk].draftExFesta) {
-      delete state.events[dk];
-    }
+    // Rimuovi il giorno se non resta nessun valore
+    const stillHas = Object.keys(state.events[dk]).some(k => state.events[dk][k]);
+    if (!stillHas) delete state.events[dk];
   }
   saveState();
   renderAll();
@@ -3239,16 +3442,14 @@ function changeYear(year) {
 
 function syncInputs() {
   document.getElementById('anno').value = state.year;
-  document.getElementById('ferie-iniziali').value = state.initial.ferie;
-  document.getElementById('permesso-iniziali').value = state.initial.permesso;
-  document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
+  for (const c of CATEGORIES) {
+    const el = document.getElementById(c.id + '-iniziali');
+    if (el) el.value = getInitial(c.key);
+  }
 }
 
 // ─── Aggiornamento saldo iniziale ───
 function updateInitial() {
-  const ferie = parseInt(document.getElementById('ferie-iniziali').value) || 0;
-  const permesso = parseInt(document.getElementById('permesso-iniziali').value) || 0;
-  const exFesta = parseInt(document.getElementById('exfesta-iniziali').value) || 0;
   const year = parseInt(document.getElementById('anno').value) || new Date().getFullYear();
 
   if (year !== state.year) {
@@ -3257,21 +3458,20 @@ function updateInitial() {
     return;
   }
 
-  state.initial.ferie = ferie;
-  state.initial.permesso = permesso;
-  state.initial.exFesta = exFesta;
+  for (const c of CATEGORIES) {
+    const el = document.getElementById(c.id + '-iniziali');
+    if (el) state.initial[c.key] = parseInt(el.value) || 0;
+  }
   saveState();
   renderRemaining();
 }
 
 function resetYear() {
   if (!confirm(`Azzerare tutti i dati per il ${state.year}?`)) return;
-  state.initial = { ferie: 0, permesso: 0, exFesta: 0 };
+  state.initial = defaultInitial();
   state.events = {};
   saveState();
-  document.getElementById('ferie-iniziali').value = 0;
-  document.getElementById('permesso-iniziali').value = 0;
-  document.getElementById('exfesta-iniziali').value = 0;
+  syncInputs();
   renderAll();
 }
 
@@ -3388,13 +3588,14 @@ function saveLocal() {
 }
 
 // ─── Input listeners ───
-document.getElementById('ferie-iniziali').addEventListener('input', updateInitial);
-document.getElementById('permesso-iniziali').addEventListener('input', updateInitial);
-document.getElementById('exfesta-iniziali').addEventListener('input', updateInitial);
+for (const c of CATEGORIES) {
+  const el = document.getElementById(c.id + '-iniziali');
+  if (el) {
+    el.addEventListener('input', updateInitial);
+    el.addEventListener('change', updateInitial);
+  }
+}
 document.getElementById('anno').addEventListener('change', updateInitial);
-document.getElementById('permesso-iniziali').addEventListener('change', updateInitial);
-document.getElementById('exfesta-iniziali').addEventListener('change', updateInitial);
-document.getElementById('ferie-iniziali').addEventListener('change', updateInitial);
 
 // ─── Selezione multipla (trascinamento) ───
 function posOf(el) {
@@ -3445,25 +3646,26 @@ function updateSelectionBar() {
   }
 }
 
-function applyToSelected(realField, draftField) {
+function applyToSelected(idPrefix) {
   if (selectedDates.length === 0) return;
-  const input = document.getElementById('bulk-input-' + realField);
+  const cat = getCategory(idPrefix);
+  if (!cat) return;
+  const input = document.getElementById('bulk-input-' + idPrefix);
   const val = parseInt(input.value) || 0;
   if (val <= 0) return;
   const isDraft = document.getElementById('bulk-draft').checked;
-  const field = isDraft ? draftField : realField;
+  const field = isDraft ? cat.draft : cat.key;
   pushUndo();
   for (const dk of selectedDates) {
     if (!state.events[dk]) state.events[dk] = EMPTY_EVENT();
     state.events[dk][field] = (state.events[dk][field] || 0) + val;
   }
   const n = selectedDates.length;
-  const labels = { ferie: 'Ferie', permesso: 'Permesso', exFesta: 'Ex festività' };
   saveState();
   renderAll();
   clearSelection();
   const prefix = isDraft ? 'Bozza ' : '';
-  showToast(prefix + labels[realField] + ': aggiunte ' + val + 'h a ' + n + (n === 1 ? ' giorno' : ' giorni'), 'success');
+  showToast(prefix + cat.label + ': aggiunte ' + val + 'h a ' + n + (n === 1 ? ' giorno' : ' giorni'), 'success');
 }
 
 // ─── Drag selection handlers (mouse + touch) ───
@@ -3583,10 +3785,7 @@ async function startApp() {
   curYear = now.getFullYear();
   curMonth = now.getMonth();
   loadState(curYear);
-  document.getElementById('anno').value = state.year;
-  document.getElementById('ferie-iniziali').value = state.initial.ferie;
-  document.getElementById('permesso-iniziali').value = state.initial.permesso;
-  document.getElementById('exfesta-iniziali').value = state.initial.exFesta;
+  syncInputs();
   renderAll();
   // Allinea a salire: spinge sul cloud eventuali dati locali piu' recenti
   scheduleCloudSync();

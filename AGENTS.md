@@ -1,6 +1,21 @@
 # Ferie Planner
 
-Pianificazione ferie, permessi ed ex festività con **login PIN a 6 cifre** e **sincronizzazione cloud su Supabase**.
+Pianificazione ferie, permessi, ex festività, malattia e malattia figlio con **login PIN a 6 cifre** e **sincronizzazione cloud su Supabase**.
+
+## Categorie evento
+Un registro centrale `CATEGORIES` in `index.html` è l'unica fonte di verità per le 5 categorie (chiave stato, chiave bozza, classe CSS, etichetta, id HTML):
+
+| Categoria | Chiave stato | Bozza | Colore | Note |
+|---|---|---|---|---|
+| Ferie | `ferie` | `draftFerie` | blu | — |
+| Permesso | `permesso` | `draftPermesso` | verde | — |
+| Ex festività | `exFesta` | `draftExFesta` | ambra | — |
+| Malattia | `malattia` | `draftMalattia` | rosso | nessun tetto |
+| Malattia figlio | `malattiaFiglio` | `draftMalattiaFiglio` | viola | **max 10 giorni/anno** (`MALATTIA_FIGLIO_MAX_H = 80` ore, 8h/giorno) |
+
+- **Limite malattia figlio**: avviso *soft* (toast + testo rosso nella sezione Rimanenza e nel dettaglio categoria). Non blocca mai l'inserimento.
+- **Retrocompatibilità**: `defaultInitial()` / `normalizeInitial()` aggiungono le chiavi mancanti ai dati vecchi. La malattia figlio viene precompilata a 80h quando la chiave è assente; uno `0` esplicito viene rispettato.
+- **Nessuna migrazione DB**: `initial` ed `events` sono JSONB, quindi le nuove chiavi viaggiano nel formato esistente.
 
 ## Struttura
 ```
