@@ -2286,6 +2286,7 @@ const CATEGORIES = [
 const HOURS_PER_DAY = 8;
 const MALATTIA_FIGLIO_MAX_H = 10 * HOURS_PER_DAY; // 10 giorni/anno
 const GENERIC_CHILD = 'Generico'; // attribuzione per ore non assegnate a un figlio
+const NEW_CHILD_OPTION = '__new_child__'; // voce "＋ Nuovo figlio…" nei selettori
 
 function getCategory(idOrKey) {
   return CATEGORIES.find(c => c.id === idOrKey || c.key === idOrKey) || null;
@@ -2411,7 +2412,7 @@ function renderChildrenConfig() {
   if (!list) return;
   const children = getChildren();
   if (children.length === 0) {
-    list.innerHTML = `<div class="children-empty">Nessun figlio configurato: gli inserimenti finiscono in “${GENERIC_CHILD}”.</div>`;
+    list.innerHTML = `<div class="children-empty">Nessun figlio configurato. Aggiungine uno qui oppure scegli “＋ Nuovo figlio…” nel modal.</div>`;
   } else {
     list.innerHTML = children.map((c, i) => `
       <div class="children-row">
@@ -2435,15 +2436,66 @@ function renderChildrenConfig() {
 }
 
 function renderChildOptions() {
-  const names = getChildNames();
-  const hasChildren = getChildren().length > 0;
+  const names = getChildNames(); // figli configurati + nomi presenti negli eventi + Generico
+  const real = getChildren().map(c => c.name);
   for (const id of ['modal-malattiafiglio-child', 'bulk-malattiafiglio-child']) {
     const sel = document.getElementById(id);
     if (!sel) continue;
     const prev = sel.value;
-    sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
-    sel.value = names.includes(prev) ? prev : names[0];
-    sel.style.display = hasChildren ? '' : 'none';
+    sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('') +
+      `<option value="${NEW_CHILD_OPTION}">＋ Nuovo figlio…</option>`;
+    // Mantieni la scelta solo se è un figlio reale (o "Generico" scelto a mano).
+    // Altrimenti passa al primo figlio: senza questo, dopo aver aggiunto il primo
+    // figlio il selettore resterebbe su "Generico" e le ore finirebbero lì.
+    if (real.includes(prev) || (prev === GENERIC_CHILD && sel.dataset.touched === '1')) {
+      sel.value = prev;
+    } else if (real.length > 0) {
+      sel.value = real[0];
+    } else {
+      sel.value = GENERIC_CHILD;
+    }
+    sel.style.display = ''; // sempre visibile: "Generico" o "＋ Nuovo figlio…"
+    if (sel.dataset.bound !== '1') {
+      sel.addEventListener('change', onChildPick);
+      sel.dataset.bound = '1';
+    }
+  }
+}
+
+// Crea al volo un figlio scelto dal selettore ("＋ Nuovo figlio…").
+function onChildPick(e) {
+  const sel = e.target;
+  if (sel.value !== NEW_CHILD_OPTION) {
+    sel.dataset.touched = '1'; // scelta esplicita dell'utente
+    return;
+  }
+  const name = (window.prompt('Nome del figlio') || '').trim();
+  if (!name) { renderChildOptions(); return; }
+  const children = getChildren().map(c => ({ name: c.name, days: c.days }));
+  const existing = children.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (existing) {
+    showToast('Esiste già un figlio chiamato “' + name + '”', 'error');
+    renderChildOptions();
+    selectChildInPickers(existing.name);
+    return;
+  }
+  const maxDays = MALATTIA_FIGLIO_MAX_H / HOURS_PER_DAY;
+  const assigned = children.reduce((s, c) => s + (Number(c.days) || 0), 0);
+  const left = Math.max(0, maxDays - assigned);
+  children.push({ name, days: left > 0 ? Math.min(5, left) : 0 });
+  state.children = children;
+  saveState();
+  renderChildrenConfig();
+  renderChildOptions();
+  selectChildInPickers(name);
+  renderRemaining();
+  showToast('Aggiunto ' + name + ': imposta i giorni spettanti', 'success');
+}
+
+function selectChildInPickers(name) {
+  for (const id of ['modal-malattiafiglio-child', 'bulk-malattiafiglio-child']) {
+    const sel = document.getElementById(id);
+    if (sel) { sel.value = name; sel.dataset.touched = '1'; }
   }
 }
 
@@ -2460,6 +2512,7 @@ function addChild() {
   saveState();
   renderChildrenConfig();
   renderChildOptions();
+  selectChildInPickers(name);
   renderRemaining();
   showToast('Aggiunto ' + name + ': imposta i giorni spettanti', 'success');
 }
@@ -2538,7 +2591,9 @@ function removeChild(index) {
 
 function getSelectedChild(selectId) {
   const sel = document.getElementById(selectId);
-  return (sel && sel.value) ? sel.value : GENERIC_CHILD;
+  const v = sel && sel.value;
+  if (!v || v === NEW_CHILD_OPTION) return GENERIC_CHILD;
+  return v;
 }
 
 // Testo tooltip per categoria: per malattia figlio mostra la ripartizione.
@@ -3613,6 +3668,7 @@ function renderAll() {
 function openModal(dateKey) {
   modalDate = dateKey;
   modalBulkKeys = (selectedDates.length > 1 && selectedDates.includes(dateKey)) ? selectedDates.slice() : null;
+  renderChildOptions();
   document.getElementById('modal-event-view').style.display = '';
   document.getElementById('modal-category-detail').style.display = 'none';
   document.getElementById('modal-profiles').style.display = 'none';

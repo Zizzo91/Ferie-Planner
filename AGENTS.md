@@ -22,6 +22,7 @@ Un registro centrale `CATEGORIES` in `index.html` è l'unica fonte di verità pe
 - Ogni evento mantiene il totale numerico `malattiaFiglio` / `draftMalattiaFiglio` (usato da calendario, riepiloghi e limite globale) **più** la mappa di attribuzione `malattiaFiglioBy` / `draftMalattiaFiglioBy` (`{ "Figlio 1": 8 }`).
 - I dati salvati prima dei tag vengono migrati automaticamente in `Generico` (`normalizeEventChildMaps`), senza perdere ore.
 - UI: selettore del figlio nel modal e nella barra di applicazione multipla; ripartizione con giorni spettanti nella Rimanenza e nel dettaglio; select per riassegnare le ore di un giorno a un altro figlio.
+- Il selettore è **sempre visibile**: elenca i figli configurati, `Generico` e `＋ Nuovo figlio…` (crea il figlio al volo). Con figli configurati parte dal primo figlio; `Generico` resta selezionato solo se scelto a mano.
 - La sync cloud e l'export/import includono `children` insieme a `initial`/`events`.
 
 ## Struttura
