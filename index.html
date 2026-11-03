@@ -806,6 +806,17 @@ header p {
   color: var(--text);
 }
 
+.bulk-select {
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--text);
+  background: var(--bg);
+  max-width: 104px;
+}
+
 .bulk-apply {
   background: var(--cat, var(--ferie));
   border: none;
@@ -1061,6 +1072,7 @@ header p {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .modal-add-row button {
@@ -1152,6 +1164,134 @@ header p {
 
 .modal-add-row input:focus {
   border-color: var(--text-muted);
+}
+
+.modal-add-row select.child-select {
+  padding: 6px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  max-width: 130px;
+}
+
+.modal-add-row select.child-select:focus {
+  border-color: var(--malattiafiglio);
+}
+
+/* ── Figli (ripartizione malattia figlio) ── */
+.children-config {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.children-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.children-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.children-title small {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.children-alloc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.children-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.children-row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+}
+
+.children-row input[type="number"] {
+  width: 64px;
+  padding: 6px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  text-align: center;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+}
+
+.children-row input:focus {
+  border-color: var(--malattiafiglio);
+}
+
+.children-unit {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.children-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.children-remove:hover {
+  color: var(--festivo);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.children-add {
+  background: var(--surface);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.children-add:hover {
+  border-color: var(--malattiafiglio);
+  color: var(--malattiafiglio);
+}
+
+.children-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
 }
 
 /* ── Reset ── */
@@ -1634,6 +1774,14 @@ header p {
         <span class="config-hint">Limite consigliato: 10 giorni/anno (80 ore)</span>
       </div>
     </div>
+    <div class="children-config">
+      <div class="children-head">
+        <span class="children-title">Figli <small>· ripartizione malattia figlio</small></span>
+        <span class="children-alloc" id="children-alloc"></span>
+      </div>
+      <div id="children-list"></div>
+      <button type="button" class="children-add" onclick="addChild()">+ Aggiungi figlio</button>
+    </div>
   </div>
 
   <!-- Rimanenza -->
@@ -1782,6 +1930,7 @@ header p {
         <label class="bulk-cat">
           <span class="bulk-cat-name malattiafiglio">Mal. figlio</span>
           <input type="number" id="bulk-input-malattiafiglio" class="bulk-input" min="0" max="24" value="8">
+          <select id="bulk-malattiafiglio-child" class="bulk-select" style="display:none" title="A quale figlio"></select>
           <button type="button" class="bulk-apply" style="--cat:var(--malattiafiglio)" onclick="applyToSelected('malattiafiglio')">Aggiungi</button>
         </label>
         <label class="bulk-draft"><input type="checkbox" id="bulk-draft"> Bozza</label>
@@ -1856,6 +2005,7 @@ header p {
         <div class="modal-add-row">
           <button class="btn-malattiafiglio" onclick="addMalattiaFiglio()">+ Malattia figlio</button>
           <input type="number" id="modal-malattiafiglio-input" min="0" max="24" value="1" placeholder="ore">
+          <select id="modal-malattiafiglio-child" class="child-select" style="display:none" title="A quale figlio"></select>
           <label style="font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
             <input type="checkbox" id="modal-malattiafiglio-draft"> Bozza
           </label>
@@ -2048,7 +2198,7 @@ function addProfile() {
   // Switch to new profile with empty state
   if (activeProfile) saveState();
   setActiveProfile(name);
-  state = { year: curYear, initial: defaultInitial(), events: {} };
+  state = { year: curYear, initial: defaultInitial(), events: {}, children: [] };
   saveState();
   renderProfileMgmt();
   renderProfileDropdown();
@@ -2081,7 +2231,7 @@ function deleteProfile(name) {
     profiles.push('Simone');
     saveProfiles(profiles);
     setActiveProfile('Simone');
-    state = { year: curYear, initial: defaultInitial(), events: {} };
+    state = { year: curYear, initial: defaultInitial(), events: {}, children: [] };
     saveState();
   } else if (name === activeProfile) {
     setActiveProfile(profiles[0]);
@@ -2135,9 +2285,23 @@ const CATEGORIES = [
 ];
 const HOURS_PER_DAY = 8;
 const MALATTIA_FIGLIO_MAX_H = 10 * HOURS_PER_DAY; // 10 giorni/anno
+const GENERIC_CHILD = 'Generico'; // attribuzione per ore non assegnate a un figlio
 
 function getCategory(idOrKey) {
   return CATEGORIES.find(c => c.id === idOrKey || c.key === idOrKey) || null;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function fmtDays(hours) {
+  return (hours / HOURS_PER_DAY).toFixed(1);
 }
 
 // Saldo iniziale di default per un anno nuovo. La malattia figlio parte dal limite di 10 gg.
@@ -2163,8 +2327,241 @@ function getInitial(key) {
   return (typeof v === 'number' && isFinite(v)) ? v : 0;
 }
 
+// ─── Figli (ripartizione malattia figlio) ───
+// state.children = [{ name, days }] con days = giorni spettanti nell'anno.
+function normalizeChildren(children) {
+  if (!Array.isArray(children)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const c of children) {
+    if (!c || typeof c !== 'object') continue;
+    const raw = String(c.name || '').trim();
+    if (!raw) continue;
+    let name = raw;
+    let n = 2;
+    while (seen.has(name.toLowerCase())) { name = raw + ' ' + n; n++; }
+    seen.add(name.toLowerCase());
+    let days = Number(c.days);
+    if (!isFinite(days) || days < 0) days = 0;
+    if (days > MALATTIA_FIGLIO_MAX_H / HOURS_PER_DAY) days = MALATTIA_FIGLIO_MAX_H / HOURS_PER_DAY;
+    out.push({ name, days });
+  }
+  return out;
+}
+
+function getChildren() {
+  return (state && Array.isArray(state.children)) ? state.children : [];
+}
+
+// Figli configurati + nomi presenti negli eventi (per non perdere dati vecchi).
+function getChildNames() {
+  const names = getChildren().map(c => c.name);
+  for (const dateKey in state.events) {
+    const ev = state.events[dateKey];
+    if (!ev) continue;
+    for (const mk of ['malattiaFiglioBy', 'draftMalattiaFiglioBy']) {
+      const map = ev[mk];
+      if (!map) continue;
+      for (const n of Object.keys(map)) {
+        if (!names.includes(n)) names.push(n);
+      }
+    }
+  }
+  if (!names.includes(GENERIC_CHILD)) names.push(GENERIC_CHILD);
+  return names;
+}
+
+function getChildAllocation(name) {
+  const c = getChildren().find(x => x.name === name);
+  return c ? (Number(c.days) || 0) * HOURS_PER_DAY : 0;
+}
+
+// Migra le ore di malattia figlio salvate prima dei tag: finiscono in "Generico".
+// Se la mappa per figlio esiste, il totale numerico viene riallineato alla somma.
+function normalizeEventChildMaps(events) {
+  if (!events || typeof events !== 'object') return;
+  for (const dateKey of Object.keys(events)) {
+    const ev = events[dateKey];
+    if (!ev || typeof ev !== 'object') continue;
+    for (const pair of [
+      { total: 'malattiaFiglio', map: 'malattiaFiglioBy' },
+      { total: 'draftMalattiaFiglio', map: 'draftMalattiaFiglioBy' }
+    ]) {
+      const total = Number(ev[pair.total]) || 0;
+      const map = ev[pair.map];
+      const hasMap = map && typeof map === 'object' && Object.keys(map).length > 0;
+      if (total > 0 && !hasMap) {
+        ev[pair.map] = { [GENERIC_CHILD]: total };
+      } else if (hasMap) {
+        let sum = 0;
+        for (const n of Object.keys(map)) {
+          const v = Number(map[n]) || 0;
+          if (v > 0) { map[n] = v; sum += v; }
+          else delete map[n];
+        }
+        if (sum > 0) ev[pair.total] = sum;
+        else { delete ev[pair.map]; ev[pair.total] = 0; }
+      }
+    }
+  }
+}
+
+function renderChildrenConfig() {
+  const list = document.getElementById('children-list');
+  if (!list) return;
+  const children = getChildren();
+  if (children.length === 0) {
+    list.innerHTML = `<div class="children-empty">Nessun figlio configurato: gli inserimenti finiscono in “${GENERIC_CHILD}”.</div>`;
+  } else {
+    list.innerHTML = children.map((c, i) => `
+      <div class="children-row">
+        <input type="text" value="${escapeHtml(c.name)}" maxlength="24" aria-label="Nome figlio" onchange="updateChild(${i},'name',this.value)">
+        <input type="number" value="${c.days}" min="0" max="10" step="0.5" aria-label="Giorni spettanti" onchange="updateChild(${i},'days',this.value)">
+        <span class="children-unit">g</span>
+        <button type="button" class="children-remove" onclick="removeChild(${i})" title="Rimuovi figlio">✕</button>
+      </div>
+    `).join('');
+  }
+
+  const alloc = document.getElementById('children-alloc');
+  if (!alloc) return;
+  if (children.length === 0) { alloc.textContent = ''; return; }
+  const maxDays = MALATTIA_FIGLIO_MAX_H / HOURS_PER_DAY;
+  const total = children.reduce((s, c) => s + (Number(c.days) || 0), 0);
+  const diff = Math.round((maxDays - total) * 10) / 10;
+  alloc.textContent = `Allocati ${total} di ${maxDays} g` +
+    (diff > 0 ? ` · ${diff} non assegnati` : (diff < 0 ? ` · ${Math.abs(diff)} oltre il limite` : ''));
+  alloc.style.color = diff < 0 ? 'var(--festivo)' : 'var(--text-muted)';
+}
+
+function renderChildOptions() {
+  const names = getChildNames();
+  const hasChildren = getChildren().length > 0;
+  for (const id of ['modal-malattiafiglio-child', 'bulk-malattiafiglio-child']) {
+    const sel = document.getElementById(id);
+    if (!sel) continue;
+    const prev = sel.value;
+    sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+    sel.value = names.includes(prev) ? prev : names[0];
+    sel.style.display = hasChildren ? '' : 'none';
+  }
+}
+
+function addChild() {
+  const children = getChildren().map(c => ({ name: c.name, days: c.days }));
+  let n = children.length + 1;
+  let name;
+  do { name = 'Figlio ' + n; n++; } while (children.some(c => c.name.toLowerCase() === name.toLowerCase()));
+  const maxDays = MALATTIA_FIGLIO_MAX_H / HOURS_PER_DAY;
+  const assigned = children.reduce((s, c) => s + (Number(c.days) || 0), 0);
+  const left = Math.max(0, maxDays - assigned);
+  children.push({ name, days: left > 0 ? Math.min(5, left) : 0 });
+  state.children = children;
+  saveState();
+  renderChildrenConfig();
+  renderChildOptions();
+  renderRemaining();
+  showToast('Aggiunto ' + name + ': imposta i giorni spettanti', 'success');
+}
+
+function renameChildInEvents(oldName, newName) {
+  for (const dateKey of Object.keys(state.events)) {
+    const ev = state.events[dateKey];
+    if (!ev) continue;
+    for (const mk of ['malattiaFiglioBy', 'draftMalattiaFiglioBy']) {
+      const map = ev[mk];
+      if (!map || !(oldName in map)) continue;
+      map[newName] = (map[newName] || 0) + map[oldName];
+      delete map[oldName];
+    }
+  }
+}
+
+function updateChild(index, field, value) {
+  const children = getChildren().map(c => ({ name: c.name, days: c.days }));
+  const child = children[index];
+  if (!child) return;
+
+  if (field === 'name') {
+    const newName = String(value || '').trim();
+    if (!newName) { renderChildrenConfig(); return; }
+    if (children.some((c, i) => i !== index && c.name.toLowerCase() === newName.toLowerCase())) {
+      showToast('Esiste già un figlio chiamato “' + newName + '”', 'error');
+      renderChildrenConfig();
+      return;
+    }
+    const oldName = child.name;
+    if (newName !== oldName) {
+      child.name = newName;
+      renameChildInEvents(oldName, newName);
+    }
+  } else if (field === 'days') {
+    let d = Number(value);
+    if (!isFinite(d) || d < 0) d = 0;
+    const maxDays = MALATTIA_FIGLIO_MAX_H / HOURS_PER_DAY;
+    if (d > maxDays) d = maxDays;
+    child.days = Math.round(d * 10) / 10;
+  }
+
+  state.children = children;
+  saveState();
+  renderChildrenConfig();
+  renderChildOptions();
+  renderRemaining();
+  if (modalDate) openModal(modalDate);
+}
+
+function removeChild(index) {
+  const children = getChildren().map(c => ({ name: c.name, days: c.days }));
+  const child = children[index];
+  if (!child) return;
+
+  let hours = 0;
+  for (const dateKey of Object.keys(state.events)) {
+    const ev = state.events[dateKey];
+    if (!ev) continue;
+    for (const mk of ['malattiaFiglioBy', 'draftMalattiaFiglioBy']) {
+      if (ev[mk] && ev[mk][child.name]) hours += ev[mk][child.name];
+    }
+  }
+  if (hours > 0 && !confirm(`Rimuovere “${child.name}”? Le ${fmtDays(hours)} g registrate resteranno come “${GENERIC_CHILD}”.`)) return;
+  if (hours > 0) renameChildInEvents(child.name, GENERIC_CHILD);
+
+  children.splice(index, 1);
+  state.children = children;
+  saveState();
+  renderChildrenConfig();
+  renderChildOptions();
+  renderRemaining();
+  if (modalDate) openModal(modalDate);
+}
+
+function getSelectedChild(selectId) {
+  const sel = document.getElementById(selectId);
+  return (sel && sel.value) ? sel.value : GENERIC_CHILD;
+}
+
+// Testo tooltip per categoria: per malattia figlio mostra la ripartizione.
+function categoryTip(cat, ev, isDraft) {
+  if (!ev) return '';
+  const key = isDraft ? cat.draft : cat.key;
+  const total = ev[key] || 0;
+  if (!total) return '';
+  if (cat.key === 'malattiaFiglio') {
+    const mapKey = isDraft ? 'draftMalattiaFiglioBy' : 'malattiaFiglioBy';
+    const map = ev[mapKey];
+    if (map) {
+      const parts = Object.keys(map)
+        .filter(n => (Number(map[n]) || 0) > 0)
+        .map(n => `${n} ${map[n]}h`);
+      if (parts.length) return cat.label + ': ' + parts.join(', ');
+    }
+  }
+  return cat.label + ': ' + total + 'h';
+}
+
 // ─── Stato ───
-let state = { year: 2026, initial: defaultInitial(), events: {} };
+let state = { year: 2026, initial: defaultInitial(), events: {}, children: [] };
 let curMonth = new Date().getMonth();
 let curYear = new Date().getFullYear();
 
@@ -2325,7 +2722,7 @@ function mergeYearFromCloud(key, val, ts) {
   if (!pk || !val || !val.initial || !val.events) return false;
   const localTs = getSyncTimestamp(key);
   if (isCloudNewer(localTs, ts)) {
-    localStorage.setItem(`ferie-planner-${pk.name}-${pk.year}`, JSON.stringify({ year: pk.year, initial: val.initial, events: val.events }));
+    localStorage.setItem(`ferie-planner-${pk.name}-${pk.year}`, JSON.stringify({ year: pk.year, initial: val.initial, events: val.events, children: val.children || [] }));
     setSyncTimestamp(key, ts);
     if (!getProfiles().includes(pk.name)) {
       const list = getProfiles();
@@ -2442,7 +2839,7 @@ async function syncCloudState(force) {
           const cloudTs = mergedTimestamps[key] || '';
           // Il locale prevale se non esiste sul cloud oppure ha timestamp piu' recente
           if (!mergedCloud[key] || !isCloudNewer(localTs, cloudTs)) {
-            mergedCloud[key] = { initial: parsed.initial, events: parsed.events };
+            mergedCloud[key] = { initial: parsed.initial, events: parsed.events, children: normalizeChildren(parsed.children) };
             mergedTimestamps[key] = now;
           }
         } catch (e) {}
@@ -2453,7 +2850,7 @@ async function syncCloudState(force) {
       const today = new Date();
       const key = `${activeProfile}-${today.getFullYear()}`;
       if (!mergedCloud[key]) {
-        mergedCloud[key] = { initial: defaultInitial(), events: {} };
+        mergedCloud[key] = { initial: defaultInitial(), events: {}, children: [] };
         mergedTimestamps[key] = now;
       }
     }
@@ -2486,7 +2883,7 @@ async function syncCloudState(force) {
       // Se il cloud vince (piu' recente del locale), riscrivi anche il mirror locale
       if (mergedTs && localTs && isCloudNewer(mergedTs, localTs)) {
         localStorage.setItem(`ferie-planner-${pk.name}-${pk.year}`, JSON.stringify({
-          year: pk.year, initial: mergedCloud[key].initial, events: mergedCloud[key].events
+          year: pk.year, initial: mergedCloud[key].initial, events: mergedCloud[key].events, children: mergedCloud[key].children || []
         }));
         if (key === currentKey) currentChanged = true;
       }
@@ -2654,6 +3051,8 @@ function loadState(year) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.initial && parsed.events) {
         parsed.initial = normalizeInitial(parsed.initial);
+        parsed.children = normalizeChildren(parsed.children);
+        normalizeEventChildMaps(parsed.events);
         state = parsed;
         state.year = year;
         return;
@@ -2663,7 +3062,8 @@ function loadState(year) {
   state = {
     year: year,
     initial: defaultInitial(),
-    events: {}
+    events: {},
+    children: []
   };
 }
 
@@ -2684,6 +3084,7 @@ function scheduleCloudSync() {
 function computeRemaining() {
   const used = {}, draft = {};
   for (const c of CATEGORIES) { used[c.key] = 0; draft[c.key] = 0; }
+  const childUsed = {}, childDraft = {};
   for (const dateKey in state.events) {
     const ev = state.events[dateKey];
     if (!ev) continue;
@@ -2691,8 +3092,15 @@ function computeRemaining() {
       used[c.key] += ev[c.key] || 0;
       draft[c.key] += ev[c.draft] || 0;
     }
+    for (const [mapKey, target] of [['malattiaFiglioBy', childUsed], ['draftMalattiaFiglioBy', childDraft]]) {
+      const map = ev[mapKey];
+      if (!map) continue;
+      for (const name of Object.keys(map)) {
+        target[name] = (target[name] || 0) + (Number(map[name]) || 0);
+      }
+    }
   }
-  const rem = { used, draft, draftTotal: 0 };
+  const rem = { used, draft, childUsed, childDraft, draftTotal: 0 };
   for (const c of CATEGORIES) {
     const init = getInitial(c.key);
     rem[c.key] = init - used[c.key];
@@ -2749,12 +3157,38 @@ function renderRemaining() {
       subHtml = 'non impostate';
     }
     // Limite per malattia figlio: 10 giorni/anno
-    if (c.key === 'malattiaFiglio' && (used > 0 || draftVal > 0)) {
+    if (c.key === 'malattiaFiglio' && (used > 0 || draftVal > 0 || getChildren().length > 0)) {
       const over = (used + draftVal) - MALATTIA_FIGLIO_MAX_H;
       if (over > 0) {
         subHtml += ` · <span style="color:var(--festivo);font-weight:600">⚠️ limite 10 gg superato di ${(over / HOURS_PER_DAY).toFixed(1)} g</span>`;
       } else {
         subHtml += ' · limite 10 gg';
+      }
+
+      // Ripartizione per figlio (solo se ci sono figli configurati o ore attribuite)
+      const names = [];
+      for (const n of getChildNames()) {
+        const u = rem.childUsed[n] || 0;
+        const d = rem.childDraft[n] || 0;
+        const alloc = getChildAllocation(n);
+        if (n === GENERIC_CHILD && u + d === 0) continue;
+        if (u + d === 0 && alloc === 0) continue;
+        names.push(n);
+      }
+      if (names.length) {
+        const parts = names.map(n => {
+          const u = rem.childUsed[n] || 0;
+          const d = rem.childDraft[n] || 0;
+          const alloc = getChildAllocation(n);
+          const overChild = alloc > 0 && (u + d) > alloc;
+          let s = `${escapeHtml(n)}: ${fmtDays(u)} g`;
+          if (alloc > 0) s += ` di ${fmtDays(alloc)} g`;
+          if (d > 0) s += ` (+${fmtDays(d)} g bozza)`;
+          return overChild
+            ? `<span style="color:var(--festivo);font-weight:600">⚠️ ${s}</span>`
+            : `<span style="white-space:nowrap">${s}</span>`;
+        });
+        subHtml += `<br><span style="color:var(--text-secondary)">${parts.join(' · ')}</span>`;
       }
     }
     sub.innerHTML = subHtml;
@@ -2973,12 +3407,14 @@ function renderAnnualView() {
       const tipParts = [];
       if (ev) {
         for (const c of CATEGORIES) {
-          if (ev[c.key]) tipParts.push(c.label + ': ' + ev[c.key] + 'h');
+          const t = categoryTip(c, ev, false);
+          if (t) tipParts.push(t);
         }
         if (CATEGORIES.some(c => ev[c.draft])) {
           const dParts = [];
           for (const c of CATEGORIES) {
-            if (ev[c.draft]) dParts.push(c.label + ': ' + ev[c.draft] + 'h');
+            const t = categoryTip(c, ev, true);
+            if (t) dParts.push(t);
           }
           tipParts.push('Bozza: ' + dParts.join(', '));
         }
@@ -3055,13 +3491,15 @@ function renderCalendar() {
     const tipParts = [];
     if (hasEvents) {
       for (const c of CATEGORIES) {
-        if (ev[c.key]) tipParts.push(c.label + ': ' + ev[c.key] + 'h');
+        const t = categoryTip(c, ev, false);
+        if (t) tipParts.push(t);
       }
     }
     if (hasDraft) {
       const dParts = [];
       for (const c of CATEGORIES) {
-        if (ev[c.draft]) dParts.push(c.label + ': ' + ev[c.draft] + 'h');
+        const t = categoryTip(c, ev, true);
+        if (t) dParts.push(t);
       }
       tipParts.push('Bozza: ' + dParts.join(', '));
     }
@@ -3192,6 +3630,10 @@ function openModal(dateKey) {
 
   if (hasConfirmed || hasDraft) {
     for (const t of CATEGORIES) {
+      if (t.key === 'malattiaFiglio') {
+        appendMalattiaFiglioRows(ev, dateKey, eventsDiv);
+        continue;
+      }
       const val = ev ? (ev[t.key] || 0) : 0;
       const dval = ev ? (ev[t.draft] || 0) : 0;
       if (val > 0) {
@@ -3235,6 +3677,68 @@ function openModal(dateKey) {
   document.getElementById('modal-overlay').classList.add('open');
 }
 
+// Righe di malattia figlio: una per figlio (confermata e bozza), con selettore per riassegnare.
+function appendMalattiaFiglioRows(ev, dateKey, container) {
+  if (!ev) return;
+  const by = ev.malattiaFiglioBy || {};
+  const dby = ev.draftMalattiaFiglioBy || {};
+  const names = [];
+  for (const n of Object.keys(by)) if ((Number(by[n]) || 0) > 0 && !names.includes(n)) names.push(n);
+  for (const n of Object.keys(dby)) if ((Number(dby[n]) || 0) > 0 && !names.includes(n)) names.push(n);
+  const showSelect = getChildren().length > 0;
+  for (const name of names) {
+    const val = Number(by[name]) || 0;
+    const dval = Number(dby[name]) || 0;
+    if (val > 0) container.appendChild(buildMalattiaFiglioRow(dateKey, name, val, false, showSelect));
+    if (dval > 0) container.appendChild(buildMalattiaFiglioRow(dateKey, name, dval, true, showSelect));
+  }
+}
+
+function buildMalattiaFiglioRow(dateKey, name, val, isDraft, showSelect) {
+  const row = document.createElement('div');
+  row.className = 'modal-event malattiafiglio';
+  if (isDraft) row.style.opacity = '0.5';
+
+  const label = document.createElement('span');
+  label.className = 'modal-event-label';
+  const dot = document.createElement('span');
+  dot.className = 'remaining-dot malattiafiglio';
+  if (isDraft) dot.style.opacity = '0.5';
+  const text = document.createElement('span');
+  text.textContent = `Malattia figlio${isDraft ? ' (bozza)' : ''} · ${name}: ${val} ore`;
+  label.appendChild(dot);
+  label.appendChild(text);
+
+  const controls = document.createElement('span');
+  controls.style.cssText = 'display:flex;align-items:center;gap:6px';
+
+  if (showSelect) {
+    const sel = document.createElement('select');
+    sel.className = 'child-select';
+    sel.title = 'Sposta a un altro figlio';
+    for (const n of getChildNames()) {
+      const opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = n;
+      if (n === name) opt.selected = true;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener('change', () => reassignChild(dateKey, name, sel.value, isDraft));
+    controls.appendChild(sel);
+  }
+
+  const btn = document.createElement('button');
+  btn.className = 'modal-event-remove';
+  btn.title = 'Rimuovi';
+  btn.textContent = '✕';
+  btn.addEventListener('click', () => removeChildEvent(dateKey, name, isDraft));
+  controls.appendChild(btn);
+
+  row.appendChild(label);
+  row.appendChild(controls);
+  return row;
+}
+
 function closeModal() {
   document.getElementById('modal-profiles').style.display = 'none';
   document.getElementById('modal-overlay').classList.remove('open');
@@ -3270,9 +3774,31 @@ function showCategoryDetail(key) {
 
   const items = [];
   let used = 0, draftUsed = 0;
+  const childUsed = {}, childDraft = {};
   for (const dateKey in state.events) {
     const ev = state.events[dateKey];
     if (!ev) continue;
+    if (cat.key === 'malattiaFiglio') {
+      const by = ev.malattiaFiglioBy || {};
+      const dby = ev.draftMalattiaFiglioBy || {};
+      for (const name of Object.keys(by)) {
+        const val = Number(by[name]) || 0;
+        if (val > 0) {
+          items.push({ date: parseDate(dateKey), val, draft: false, child: name });
+          used += val;
+          childUsed[name] = (childUsed[name] || 0) + val;
+        }
+      }
+      for (const name of Object.keys(dby)) {
+        const val = Number(dby[name]) || 0;
+        if (val > 0) {
+          items.push({ date: parseDate(dateKey), val, draft: true, child: name });
+          draftUsed += val;
+          childDraft[name] = (childDraft[name] || 0) + val;
+        }
+      }
+      continue;
+    }
     const val = ev[cat.key] || 0;
     if (val > 0) {
       const d = parseDate(dateKey);
@@ -3312,6 +3838,26 @@ function showCategoryDetail(key) {
     statsHtml += over > 0
       ? ` &nbsp;·&nbsp; <span style="color:var(--festivo);font-weight:600">⚠️ limite 10 gg superato di ${(over/HOURS_PER_DAY).toFixed(1)}g</span>`
       : ` &nbsp;·&nbsp; <span style="color:var(--text-muted)">limite 10 gg/anno</span>`;
+
+    // Ripartizione per figlio con giorni spettanti
+    const names = getChildNames().filter(n => n !== GENERIC_CHILD || (childUsed[n] || 0) + (childDraft[n] || 0) > 0);
+    const childParts = [];
+    for (const n of names) {
+      const u = childUsed[n] || 0;
+      const d = childDraft[n] || 0;
+      const alloc = getChildAllocation(n);
+      if (u + d === 0 && alloc === 0) continue;
+      let s = `<strong>${escapeHtml(n)}</strong>: ${fmtDays(u)} g`;
+      if (alloc > 0) {
+        s += ` di ${fmtDays(alloc)} g (rimasti ${fmtDays(Math.max(0, alloc - u - d))} g)`;
+      }
+      if (d > 0) s += ` <span style="opacity:0.6">+${fmtDays(d)} g bozza</span>`;
+      const overChild = alloc > 0 && (u + d) > alloc;
+      childParts.push(overChild ? `<span style="color:var(--festivo)">⚠️ ${s}</span>` : s);
+    }
+    if (childParts.length) {
+      statsHtml += `<br>${childParts.join(' &nbsp;·&nbsp; ')}`;
+    }
   }
   document.getElementById('modal-category-stats').innerHTML = statsHtml;
 
@@ -3323,16 +3869,17 @@ function showCategoryDetail(key) {
   } else {
     for (const item of items) {
       const days = item.val / HOURS_PER_DAY;
+      const childTxt = item.child ? ` · <span style="color:var(--text-muted)">${escapeHtml(item.child)}</span>` : '';
       const row = document.createElement('div');
       row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:14px;border-bottom:1px solid var(--border)';
       if (item.draft) {
         row.style.opacity = '0.5';
         row.innerHTML =
-          `<span>${item.date.getDate()} ${months[item.date.getMonth()]} ${item.date.getFullYear()} <span style="color:var(--text-muted);font-size:11px">(bozza)</span></span>` +
+          `<span>${item.date.getDate()} ${months[item.date.getMonth()]} ${item.date.getFullYear()}${childTxt} <span style="color:var(--text-muted);font-size:11px">(bozza)</span></span>` +
           `<span style="font-weight:600;color:var(--${color})">${days.toFixed(1)}g (${item.val}h)</span>`;
       } else {
         row.innerHTML =
-          `<span>${item.date.getDate()} ${months[item.date.getMonth()]} ${item.date.getFullYear()}</span>` +
+          `<span>${item.date.getDate()} ${months[item.date.getMonth()]} ${item.date.getFullYear()}${childTxt}</span>` +
           `<span style="font-weight:600;color:var(--${color})">${days.toFixed(1)}g (${item.val}h)</span>`;
       }
       list.appendChild(row);
@@ -3376,11 +3923,17 @@ function addToDay(idPrefix) {
   if (val <= 0) return;
   const isDraft = draftChk ? draftChk.checked : false;
   const target = isDraft ? cat.draft : cat.key;
+  const child = cat.key === 'malattiaFiglio' ? getSelectedChild('modal-malattiafiglio-child') : null;
   const keys = modalBulkKeys && modalBulkKeys.includes(modalDate) ? modalBulkKeys.slice() : [modalDate];
   pushUndo();
   for (const dk of keys) {
     if (!state.events[dk]) state.events[dk] = EMPTY_EVENT();
     state.events[dk][target] = (state.events[dk][target] || 0) + val;
+    if (child) {
+      const mapKey = isDraft ? 'draftMalattiaFiglioBy' : 'malattiaFiglioBy';
+      const map = state.events[dk][mapKey] || (state.events[dk][mapKey] = {});
+      map[child] = (map[child] || 0) + val;
+    }
   }
   saveState();
   renderAll();
@@ -3394,10 +3947,30 @@ function addToDay(idPrefix) {
       showToast(`⚠️ Malattia figlio: ${(tot / HOURS_PER_DAY).toFixed(1)} g, oltre il limite di 10 g`, 'error');
       return;
     }
+    if (child) {
+      const alloc = getChildAllocation(child);
+      const totChild = (rem.childUsed[child] || 0) + (rem.childDraft[child] || 0);
+      if (alloc > 0 && totChild > alloc) {
+        showToast(`⚠️ ${child}: ${fmtDays(totChild)} g, oltre i ${fmtDays(alloc)} g assegnati`, 'error');
+        return;
+      }
+    }
   }
   if (keys.length > 1) {
-    showToast((isDraft ? 'Bozza ' : '') + cat.label + ': aggiunte ' + val + 'h a ' + keys.length + ' giorni', 'success');
+    showToast((isDraft ? 'Bozza ' : '') + cat.label + (child ? ' · ' + child : '') + ': aggiunte ' + val + 'h a ' + keys.length + ' giorni', 'success');
   }
+}
+
+function eventIsEmpty(ev) {
+  if (!ev) return true;
+  for (const k of Object.keys(ev)) {
+    const v = ev[k];
+    if (typeof v === 'number') { if (v) return false; }
+    else if (v && typeof v === 'object') {
+      if (Object.keys(v).some(x => Number(v[x]) || 0)) return false;
+    }
+  }
+  return true;
 }
 
 function removeEvent(dateKey, type) {
@@ -3406,9 +3979,57 @@ function removeEvent(dateKey, type) {
   for (const dk of keys) {
     if (!state.events[dk]) continue;
     state.events[dk][type] = 0;
-    // Rimuovi il giorno se non resta nessun valore
-    const stillHas = Object.keys(state.events[dk]).some(k => state.events[dk][k]);
-    if (!stillHas) delete state.events[dk];
+    // Se si rimuove tutta la malattia figlio, elimina anche la ripartizione per figlio
+    if (type === 'malattiaFiglio') delete state.events[dk].malattiaFiglioBy;
+    if (type === 'draftMalattiaFiglio') delete state.events[dk].draftMalattiaFiglioBy;
+    if (eventIsEmpty(state.events[dk])) delete state.events[dk];
+  }
+  saveState();
+  renderAll();
+  if (modalDate === dateKey) openModal(dateKey);
+}
+
+// Rimuove solo le ore di un figlio (confermate o in bozza) in un giorno.
+function removeChildEvent(dateKey, childName, isDraft) {
+  const mapKey = isDraft ? 'draftMalattiaFiglioBy' : 'malattiaFiglioBy';
+  const totalKey = isDraft ? 'draftMalattiaFiglio' : 'malattiaFiglio';
+  const keys = modalBulkKeys && modalBulkKeys.includes(dateKey) ? modalBulkKeys.slice() : [dateKey];
+  pushUndo();
+  let removed = 0;
+  for (const dk of keys) {
+    const ev = state.events[dk];
+    if (!ev || !ev[mapKey] || !(childName in ev[mapKey])) continue;
+    const h = Number(ev[mapKey][childName]) || 0;
+    delete ev[mapKey][childName];
+    ev[totalKey] = Math.max(0, (ev[totalKey] || 0) - h);
+    removed += h;
+    if (Object.keys(ev[mapKey]).length === 0) delete ev[mapKey];
+    if (eventIsEmpty(ev)) delete state.events[dk];
+  }
+  if (!removed) return;
+  saveState();
+  renderAll();
+  if (modalDate === dateKey) openModal(dateKey);
+}
+
+// Sposta le ore di un figlio su un altro (usato anche per riassegnare "Generico").
+function reassignChild(dateKey, fromName, toName, isDraft) {
+  if (!toName || fromName === toName) return;
+  const mapKey = isDraft ? 'draftMalattiaFiglioBy' : 'malattiaFiglioBy';
+  const keys = modalBulkKeys && modalBulkKeys.includes(dateKey) ? modalBulkKeys.slice() : [dateKey];
+  let moved = 0;
+  const pending = [];
+  for (const dk of keys) {
+    const ev = state.events[dk];
+    if (!ev || !ev[mapKey] || !(fromName in ev[mapKey])) continue;
+    pending.push({ ev, h: Number(ev[mapKey][fromName]) || 0 });
+    moved += Number(ev[mapKey][fromName]) || 0;
+  }
+  if (!moved) return;
+  pushUndo();
+  for (const p of pending) {
+    p.ev[mapKey][toName] = (p.ev[mapKey][toName] || 0) + p.h;
+    delete p.ev[mapKey][fromName];
   }
   saveState();
   renderAll();
@@ -3446,6 +4067,8 @@ function syncInputs() {
     const el = document.getElementById(c.id + '-iniziali');
     if (el) el.value = getInitial(c.key);
   }
+  renderChildrenConfig();
+  renderChildOptions();
 }
 
 // ─── Aggiornamento saldo iniziale ───
@@ -3540,7 +4163,8 @@ function importJSON(event) {
         localStorage.setItem('ferie-planner-' + pName + '-' + data.year, JSON.stringify({
           year: data.year,
           initial: data.initial,
-          events: data.events
+          events: data.events,
+          children: data.children || []
         }));
         activeProfile = pName;
         localStorage.setItem('ferie-planner-active-profile', pName);
@@ -3655,17 +4279,42 @@ function applyToSelected(idPrefix) {
   if (val <= 0) return;
   const isDraft = document.getElementById('bulk-draft').checked;
   const field = isDraft ? cat.draft : cat.key;
+  const child = cat.key === 'malattiaFiglio' ? getSelectedChild('bulk-malattiafiglio-child') : null;
   pushUndo();
   for (const dk of selectedDates) {
     if (!state.events[dk]) state.events[dk] = EMPTY_EVENT();
     state.events[dk][field] = (state.events[dk][field] || 0) + val;
+    if (child) {
+      const mapKey = isDraft ? 'draftMalattiaFiglioBy' : 'malattiaFiglioBy';
+      const map = state.events[dk][mapKey] || (state.events[dk][mapKey] = {});
+      map[child] = (map[child] || 0) + val;
+    }
   }
   const n = selectedDates.length;
   saveState();
   renderAll();
   clearSelection();
+
+  // Avviso soft: limite globale 10 gg e quota del singolo figlio
+  if (cat.key === 'malattiaFiglio') {
+    const rem = computeRemaining();
+    const tot = rem.used.malattiaFiglio + rem.draft.malattiaFiglio;
+    if (tot > MALATTIA_FIGLIO_MAX_H) {
+      showToast(`⚠️ Malattia figlio: ${fmtDays(tot)} g, oltre il limite di 10 g`, 'error');
+      return;
+    }
+    if (child) {
+      const alloc = getChildAllocation(child);
+      const totChild = (rem.childUsed[child] || 0) + (rem.childDraft[child] || 0);
+      if (alloc > 0 && totChild > alloc) {
+        showToast(`⚠️ ${child}: ${fmtDays(totChild)} g, oltre i ${fmtDays(alloc)} g assegnati`, 'error');
+        return;
+      }
+    }
+  }
+
   const prefix = isDraft ? 'Bozza ' : '';
-  showToast(prefix + cat.label + ': aggiunte ' + val + 'h a ' + n + (n === 1 ? ' giorno' : ' giorni'), 'success');
+  showToast(prefix + cat.label + (child ? ' · ' + child : '') + ': aggiunte ' + val + 'h a ' + n + (n === 1 ? ' giorno' : ' giorni'), 'success');
 }
 
 // ─── Drag selection handlers (mouse + touch) ───

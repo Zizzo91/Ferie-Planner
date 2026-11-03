@@ -5,6 +5,7 @@ Pianificazione ferie, permessi, ex festività, malattia e malattia figlio, con *
 - **Calendario interattivo**: clicca un giorno per assegnare/rimuovere ferie, permessi, ex festività, malattia e malattia figlio.
 - **Saldi parziali**: ore consumate per categoria e residui, divisi per la giornata lavorativa (8 ore).
 - **Malattia figlio**: massimo 10 giorni per anno (80 ore). Oltre il limite compare un avviso, ma l'inserimento non viene bloccato.
+- **Ripartizione per figlio**: nella card “Saldo Iniziale → Figli” puoi creare i figli con i giorni spettanti (es. 5 + 5). Nel modal scegli a quale figlio assegnare le ore; la Rimanenza e il dettaglio mostrano il conteggio per ciascuno, con avviso se superi la sua quota.
 - **Riepilogo mensile** e **vista annuale** (12×31) con colori per stato.
 - **Dark mode**, **undo** (5 livelli), **export/import JSON**, festività italiane e tooltip.
 - **Profilo multiplo** (Simone, Michela, …): ogni profilo salva i propri dati per anno.

@@ -17,6 +17,13 @@ Un registro centrale `CATEGORIES` in `index.html` è l'unica fonte di verità pe
 - **Retrocompatibilità**: `defaultInitial()` / `normalizeInitial()` aggiungono le chiavi mancanti ai dati vecchi. La malattia figlio viene precompilata a 80h quando la chiave è assente; uno `0` esplicito viene rispettato.
 - **Nessuna migrazione DB**: `initial` ed `events` sono JSONB, quindi le nuove chiavi viaggiano nel formato esistente.
 
+## Ripartizione malattia figlio per figlio
+- Configurazione in `state.children = [{ name, days }]` (per profilo-anno), editabile nella card **Saldo Iniziale → Figli**. `days` = giorni spettanti nell'anno (default 5 al primo figlio, 5 al secondo).
+- Ogni evento mantiene il totale numerico `malattiaFiglio` / `draftMalattiaFiglio` (usato da calendario, riepiloghi e limite globale) **più** la mappa di attribuzione `malattiaFiglioBy` / `draftMalattiaFiglioBy` (`{ "Figlio 1": 8 }`).
+- I dati salvati prima dei tag vengono migrati automaticamente in `Generico` (`normalizeEventChildMaps`), senza perdere ore.
+- UI: selettore del figlio nel modal e nella barra di applicazione multipla; ripartizione con giorni spettanti nella Rimanenza e nel dettaglio; select per riassegnare le ore di un giorno a un altro figlio.
+- La sync cloud e l'export/import includono `children` insieme a `initial`/`events`.
+
 ## Struttura
 ```
 Ferie-Planner/
