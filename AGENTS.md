@@ -22,13 +22,30 @@ Un registro centrale `CATEGORIES` in `index.html` è l'unica fonte di verità pe
 - Ogni evento mantiene il totale numerico `malattiaFiglio` / `draftMalattiaFiglio` (usato da calendario, riepiloghi e limite globale) **più** la mappa di attribuzione `malattiaFiglioBy` / `draftMalattiaFiglioBy` (`{ "Figlio 1": 8 }`).
 - I dati salvati prima dei tag vengono migrati automaticamente in `Generico` (`normalizeEventChildMaps`), senza perdere ore.
 - UI: selettore del figlio nel modal e nella barra di applicazione multipla; ripartizione con giorni spettanti nella Rimanenza e nel dettaglio; select per riassegnare le ore di un giorno a un altro figlio.
-- Il selettore è **sempre visibile**: elenca i figli configurati, `Generico` e `＋ Nuovo figlio…` (crea il figlio al volo). Con figli configurati parte dal primo figlio; `Generico` resta selezionato solo se scelto a mano.
+- Il selettore è **sempre visibile**: elenca i figli configurati, `Generico`, `＋ Nuovo figlio…` (crea il figlio al volo) e `✎ Rinomina figlio…`. Con figli configurati parte dal primo figlio; `Generico` resta selezionato solo se scelto a mano.
 - La sync cloud e l'export/import includono `children` insieme a `initial`/`events`.
+
+### Nomi dei figli personalizzabili
+- Il nome è modificabile in due punti: campo di testo nella card **Saldo Iniziale → Figli** (`updateChild(index, 'name', value)` su `change`) e voce `✎ Rinomina figlio…` nel selettore del modal/bulk (`onChildPick`).
+- `renameChildInEvents(oldName, newName)` migra le ore già registrate: rinomina la chiave in `malattiaFiglioBy` e `draftMalattiaFiglioBy` su tutti gli eventi, sommando eventuali collisioni. Nessuna ora va persa.
+- Nomi unici case-insensitive: un duplicato viene rifiutato con toast e la UI torna al valore precedente. Un nome vuoto annulla la modifica.
+- Rimuovere un figlio con ore registrate chiede conferma e sposta le ore su `Generico` (non le cancella).
+- Il selettore conserva la scelta anche dopo la rinomina (`selectChildInPickers`).
+
+## Card comprimibili
+Le card **Saldo Iniziale**, **Rimanenza**, **Calendario** e **Riepilogo Mensile** possono essere chiuse/aperte singolarmente.
+
+- Markup: `div.card[data-card="saldo|rimanenza|calendario|riepilogo"]` con header `.card-head` (o `.cal-header` + `.cal-tools` per il calendario), pulsante `.card-collapse[data-card-toggle]` e corpo `[data-card-body]`.
+- CSS: `[data-card].collapsed > [data-card-body] { display:none }`; il chevron ruota e l'etichetta passa da “Comprimi” a “Espandi” (nascosta sotto 600px, resta il chevron).
+- Stato persistito in `localStorage` (`ferie-planner-card-state`, mappa `{ card: collapsed }`) tramite `getCardState` / `setCardCollapsed` / `toggleCard`; `applyCardState()` riapplica lo stato all'avvio dopo `renderAll()`.
+- Da chiusa, l'header mostra un riepilogo compatto (`#saldo-compact`, `#remaining-compact`) calcolato da `renderCompactSummaries()` e aggiornato da `renderAll()` e `updateInitial()`.
+- Il **Riepilogo Mensile** è una card autonoma (`#monthly-summary`) dopo il Calendario, con collapse indipendente. `renderMonthlySummary()` non riscrive più l'intero `innerHTML`: mostra/nasconde `#monthly-table-wrap` e `#monthly-empty`, così header e pulsante restano intatti.
+- La **Vista Annuale** resta una card separata (`#annual-card`) con il suo pulsante di chiusura.
 
 ## Struttura
 ```
 Ferie-Planner/
-├── index.html                    — App completa (calendario, saldi, vista annuale, dark mode, login PIN)
+├── index.html                    — App completa (calendario, saldi, vista annuale, card comprimibili, dark mode, login PIN)
 ├── manifest.json                 — PWA manifest
 ├── sw.js                         — Service Worker pass-through
 ├── config/

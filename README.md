@@ -5,8 +5,9 @@ Pianificazione ferie, permessi, ex festività, malattia e malattia figlio, con *
 - **Calendario interattivo**: clicca un giorno per assegnare/rimuovere ferie, permessi, ex festività, malattia e malattia figlio.
 - **Saldi parziali**: ore consumate per categoria e residui, divisi per la giornata lavorativa (8 ore).
 - **Malattia figlio**: massimo 10 giorni per anno (80 ore). Oltre il limite compare un avviso, ma l'inserimento non viene bloccato.
-- **Ripartizione per figlio**: nella card “Saldo Iniziale → Figli” puoi creare i figli con i giorni spettanti (es. 5 + 5). Nel modal scegli a quale figlio assegnare le ore (il selettore è sempre visibile e puoi creare un figlio al volo con “＋ Nuovo figlio…”); la Rimanenza e il dettaglio mostrano il conteggio per ciascuno, con avviso se superi la sua quota.
+- **Ripartizione per figlio**: nella card “Saldo Iniziale → Figli” puoi creare i figli con i giorni spettanti (es. 5 + 5) e **assegnare a ciascuno il proprio nome**. Nel modal scegli a quale figlio assegnare le ore (il selettore è sempre visibile e puoi creare un figlio al volo con “＋ Nuovo figlio…” o rinominarlo con “✎ Rinomina figlio…”); la Rimanenza e il dettaglio mostrano il conteggio per ciascuno, con avviso se superi la sua quota.
 - **Riepilogo mensile** e **vista annuale** (12×31) con colori per stato.
+- **Card comprimibili**: Saldo Iniziale, Rimanenza, Calendario e Riepilogo Mensile si chiudono con il pulsante in alto a destra. Lo stato resta memorizzato e, da chiusa, la card mostra un riepilogo compatto nell'intestazione.
 - **Dark mode**, **undo** (5 livelli), **export/import JSON**, festività italiane e tooltip.
 - **Profilo multiplo** (Simone, Michela, …): ogni profilo salva i propri dati per anno.
 - **Cloud**: ogni salvataggio aggiorna Supabase (schema `ferie`); all'apertura i dati vengono ripresi dal cloud dopo il login.

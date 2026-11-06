@@ -398,6 +398,92 @@ header p {
   margin-bottom: 16px;
 }
 
+/* ── Card comprimibili ── */
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.card-head h2 {
+  margin-bottom: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.card-compact {
+  display: none;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+[data-card].collapsed .card-compact {
+  display: inline-block;
+  max-width: 100%;
+}
+
+[data-card].collapsed > [data-card-body] {
+  display: none !important;
+}
+
+.card-collapse {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.card-collapse:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.card-collapse .chev {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform var(--transition);
+}
+
+[data-card].collapsed .card-collapse .chev {
+  transform: rotate(-90deg);
+}
+
+.cal-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+}
+
 /* ── Config ── */
 .config-grid {
   display: grid;
@@ -1529,6 +1615,7 @@ header p {
 @media (max-width: 600px) {
   body { padding: 12px 8px; }
   .card { padding: 16px; }
+  .card-collapse .collapse-label { display: none; }
   .config-grid { grid-template-columns: repeat(2, 1fr); }
   .remaining-label { min-width: 70px; font-size: 13px; }
   .remaining-fraction { min-width: 70px; font-size: 13px; }
@@ -1745,8 +1832,12 @@ header p {
   </header>
 
   <!-- Saldo Iniziale -->
-  <div class="card">
-    <h2>Saldo Iniziale</h2>
+  <div class="card" data-card="saldo">
+    <div class="card-head">
+      <h2>Saldo Iniziale <span class="card-compact" id="saldo-compact"></span></h2>
+      <button type="button" class="card-collapse" data-card-toggle="saldo" onclick="toggleCard('saldo')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
+    </div>
+    <div class="card-body" data-card-body="saldo">
     <div class="config-grid">
       <div class="config-field">
         <label for="anno">Anno</label>
@@ -1776,20 +1867,25 @@ header p {
     </div>
     <div class="children-config">
       <div class="children-head">
-        <span class="children-title">Figli <small>· ripartizione malattia figlio</small></span>
+        <span class="children-title">Figli <small>· clicca sul nome per rinominarlo</small></span>
         <span class="children-alloc" id="children-alloc"></span>
       </div>
       <div id="children-list"></div>
       <button type="button" class="children-add" onclick="addChild()">+ Aggiungi figlio</button>
     </div>
+    </div>
   </div>
 
   <!-- Rimanenza -->
-  <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <h2 style="margin-bottom:0">Rimanenza</h2>
-      <button class="btn-undo" id="undo-btn" onclick="undo()" title="Annulla ultima azione" style="display:none">↩ Annulla</button>
+  <div class="card" data-card="rimanenza">
+    <div class="card-head">
+      <h2>Rimanenza <span class="card-compact" id="remaining-compact"></span></h2>
+      <div class="card-head-right">
+        <button class="btn-undo" id="undo-btn" onclick="undo()" title="Annulla ultima azione" style="display:none">↩ Annulla</button>
+        <button type="button" class="card-collapse" data-card-toggle="rimanenza" onclick="toggleCard('rimanenza')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
+      </div>
     </div>
+    <div class="card-body" data-card-body="rimanenza">
     <div id="remaining-container">
       <div class="remaining-row" data-type="ferie">
         <div class="remaining-main">
@@ -1856,6 +1952,7 @@ header p {
       <input type="file" id="file-input" accept=".json" style="display:none" onchange="importJSON(event)">
       <button class="btn-reset" onclick="resetYear()" style="margin-left:auto">Azzera anno</button>
     </div>
+    </div>
   </div>
 
   <!-- Vista Annuale -->
@@ -1881,7 +1978,7 @@ header p {
   </div>
 
   <!-- Calendario -->
-  <div class="card">
+  <div class="card" data-card="calendario">
     <div class="cal-header">
       <div class="cal-nav">
         <button onclick="navMonth(-1)" title="Mese precedente" class="nav-btn">
@@ -1901,9 +1998,11 @@ header p {
         </button>
       </div>
     </div>
-    <div style="text-align:right;margin-top:-8px;margin-bottom:10px">
+    <div class="cal-tools">
       <button class="annual-toggle" onclick="toggleAnnualView()">🗓 Annuale</button>
+      <button type="button" class="card-collapse" data-card-toggle="calendario" onclick="toggleCard('calendario')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
     </div>
+    <div class="card-body" data-card-body="calendario">
     <div id="selection-bar" class="selection-bar" style="visibility:hidden">
       <span id="selection-count" class="selection-count">— giorni selezionati</span>
       <div class="bulk-applicator">
@@ -1952,10 +2051,31 @@ header p {
       <span class="legend-item"><span class="legend-dot fest"></span> Festività</span>
       <span class="legend-item"><span class="legend-dot bozza"></span> Bozza</span>
     </div>
-    <div id="monthly-summary" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:none">
-      <h2 style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Riepilogo Mensile</h2>
-      <div style="overflow-x:auto">
+    </div>
+  </div>
+
+  <!-- Riepilogo Mensile -->
+  <div class="card" id="monthly-summary" data-card="riepilogo" style="display:none">
+    <div class="card-head">
+      <h2>Riepilogo Mensile</h2>
+      <button type="button" class="card-collapse" data-card-toggle="riepilogo" onclick="toggleCard('riepilogo')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
+    </div>
+    <div class="card-body" data-card-body="riepilogo">
+      <div id="monthly-table-wrap" style="overflow-x:auto">
         <table id="monthly-table" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+      </div>
+      <div class="empty-month-state" id="monthly-empty" style="display:none">
+        <div class="empty-month-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-width="2"></path>
+          </svg>
+        </div>
+        <div class="empty-month-title">Nessun evento registrato</div>
+        <div class="empty-month-sub">Clicca su un giorno del calendario per aggiungere ferie, permessi, ex festività, malattia o malattia figlio in questo mese.</div>
       </div>
     </div>
   </div>
@@ -2287,6 +2407,7 @@ const HOURS_PER_DAY = 8;
 const MALATTIA_FIGLIO_MAX_H = 10 * HOURS_PER_DAY; // 10 giorni/anno
 const GENERIC_CHILD = 'Generico'; // attribuzione per ore non assegnate a un figlio
 const NEW_CHILD_OPTION = '__new_child__'; // voce "＋ Nuovo figlio…" nei selettori
+const RENAME_CHILD_OPTION = '__rename_child__'; // voce "✎ Rinomina figlio…" nei selettori
 
 function getCategory(idOrKey) {
   return CATEGORIES.find(c => c.id === idOrKey || c.key === idOrKey) || null;
@@ -2416,8 +2537,8 @@ function renderChildrenConfig() {
   } else {
     list.innerHTML = children.map((c, i) => `
       <div class="children-row">
-        <input type="text" value="${escapeHtml(c.name)}" maxlength="24" aria-label="Nome figlio" onchange="updateChild(${i},'name',this.value)">
-        <input type="number" value="${c.days}" min="0" max="10" step="0.5" aria-label="Giorni spettanti" onchange="updateChild(${i},'days',this.value)">
+        <input type="text" value="${escapeHtml(c.name)}" maxlength="24" placeholder="Nome figlio" title="Clicca per rinominare" aria-label="Nome figlio" onchange="updateChild(${i},'name',this.value)">
+        <input type="number" value="${c.days}" min="0" max="10" step="0.5" title="Giorni spettanti" aria-label="Giorni spettanti" onchange="updateChild(${i},'days',this.value)">
         <span class="children-unit">g</span>
         <button type="button" class="children-remove" onclick="removeChild(${i})" title="Rimuovi figlio">✕</button>
       </div>
@@ -2443,7 +2564,8 @@ function renderChildOptions() {
     if (!sel) continue;
     const prev = sel.value;
     sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('') +
-      `<option value="${NEW_CHILD_OPTION}">＋ Nuovo figlio…</option>`;
+      `<option value="${NEW_CHILD_OPTION}">＋ Nuovo figlio…</option>` +
+      (real.length > 0 ? `<option value="${RENAME_CHILD_OPTION}">✎ Rinomina figlio…</option>` : '');
     // Mantieni la scelta solo se è un figlio reale (o "Generico" scelto a mano).
     // Altrimenti passa al primo figlio: senza questo, dopo aver aggiunto il primo
     // figlio il selettore resterebbe su "Generico" e le ore finirebbero lì.
@@ -2454,6 +2576,9 @@ function renderChildOptions() {
     } else {
       sel.value = GENERIC_CHILD;
     }
+    // Ricorda l'ultimo figlio reale scelto, per la voce "Rinomina".
+    if (real.includes(sel.value)) sel.dataset.lastChild = sel.value;
+    else if (!real.includes(sel.dataset.lastChild || '')) sel.dataset.lastChild = real[0] || '';
     sel.style.display = ''; // sempre visibile: "Generico" o "＋ Nuovo figlio…"
     if (sel.dataset.bound !== '1') {
       sel.addEventListener('change', onChildPick);
@@ -2462,11 +2587,35 @@ function renderChildOptions() {
   }
 }
 
-// Crea al volo un figlio scelto dal selettore ("＋ Nuovo figlio…").
+// Crea o rinomina un figlio direttamente dal selettore.
 function onChildPick(e) {
   const sel = e.target;
+  const real = getChildren().map(c => c.name);
+
+  // "✎ Rinomina figlio…": rinomina l'ultimo figlio scelto.
+  if (sel.value === RENAME_CHILD_OPTION) {
+    const old = sel.dataset.lastChild || real[0];
+    if (!old) { renderChildOptions(); return; }
+    const input = window.prompt('Nuovo nome per “' + old + '”', old);
+    if (input === null) { renderChildOptions(); selectChildInPickers(old); return; }
+    const name = input.trim();
+    if (!name || name === old) { renderChildOptions(); selectChildInPickers(old); return; }
+    if (real.some(n => n.toLowerCase() === name.toLowerCase())) {
+      showToast('Esiste già un figlio chiamato “' + name + '”', 'error');
+      renderChildOptions();
+      selectChildInPickers(old);
+      return;
+    }
+    const idx = getChildren().findIndex(c => c.name === old);
+    updateChild(idx, 'name', name); // migra anche le ore già registrate
+    renderChildOptions();
+    selectChildInPickers(name);
+    return;
+  }
+
   if (sel.value !== NEW_CHILD_OPTION) {
     sel.dataset.touched = '1'; // scelta esplicita dell'utente
+    sel.dataset.lastChild = sel.value;
     return;
   }
   const name = (window.prompt('Nome del figlio') || '').trim();
@@ -2495,7 +2644,7 @@ function onChildPick(e) {
 function selectChildInPickers(name) {
   for (const id of ['modal-malattiafiglio-child', 'bulk-malattiafiglio-child']) {
     const sel = document.getElementById(id);
-    if (sel) { sel.value = name; sel.dataset.touched = '1'; }
+    if (sel) { sel.value = name; sel.dataset.touched = '1'; sel.dataset.lastChild = name; }
   }
 }
 
@@ -2514,7 +2663,14 @@ function addChild() {
   renderChildOptions();
   selectChildInPickers(name);
   renderRemaining();
-  showToast('Aggiunto ' + name + ': imposta i giorni spettanti', 'success');
+  // Porta subito il cursore sul nome, così puoi scriverlo senza cercare il campo.
+  const inputs = document.querySelectorAll('#children-list input[type="text"]');
+  const lastInput = inputs && inputs.length ? inputs[inputs.length - 1] : null;
+  if (lastInput && typeof lastInput.focus === 'function') {
+    lastInput.focus();
+    if (typeof lastInput.select === 'function') lastInput.select();
+  }
+  showToast('Aggiunto ' + name + ': scrivi il nome e i giorni spettanti', 'success');
 }
 
 function renameChildInEvents(oldName, newName) {
@@ -3309,40 +3465,20 @@ function renderMonthlySummary() {
 
   const container = document.getElementById('monthly-summary');
   const table = document.getElementById('monthly-table');
+  const wrap = document.getElementById('monthly-table-wrap');
+  const empty = document.getElementById('monthly-empty');
+  if (!container || !table) return;
 
   const hasData = monthly.some(m => CATEGORIES.some(c => m[c.key] || m['d_' + c.key]));
+  container.style.display = 'block';
   if (!hasData) {
-    container.style.display = 'block';
     table.innerHTML = '';
-    if (!container.querySelector('.empty-month-state')) {
-      container.innerHTML = `
-        <h2 style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Riepilogo Mensile</h2>
-        <div class="empty-month-state">
-          <div class="empty-month-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-width="2"></path>
-            </svg>
-          </div>
-          <div class="empty-month-title">Nessun evento registrato</div>
-          <div class="empty-month-sub">Clicca su un giorno del calendario per aggiungere ferie, permessi, ex festività, malattia o malattia figlio in questo mese.</div>
-        </div>`;
-    }
+    if (wrap) wrap.style.display = 'none';
+    if (empty) empty.style.display = '';
     return;
   }
-  container.style.display = 'block';
-  // Ripristina struttura tabella se avevamo mostrato l'empty state
-  if (container.querySelector('.empty-month-state')) {
-      container.innerHTML = `
-        <h2 style="font-size:13px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Riepilogo Mensile</h2>
-        <div style="overflow-x:auto">
-          <table id="monthly-table" style="width:100%;border-collapse:collapse;font-size:13px"></table>
-        </div>`;
-  }
-  const realTable = container.querySelector('#monthly-table');
+  if (wrap) wrap.style.display = '';
+  if (empty) empty.style.display = 'none';
 
   let html = '<tr><th>Mese</th>' +
     CATEGORIES.map(c => `<th style="color:var(--${c.cls})">${c.short}</th>`).join('') +
@@ -3370,7 +3506,7 @@ function renderMonthlySummary() {
   html += `<tr class="totale"><td>Totale</td>` +
     CATEGORIES.map(c => `<td>${totals[c.key]}h</td>`).join('') +
     `<td>${grandTotal}h</td></tr>`;
-  realTable.innerHTML = html;
+  table.innerHTML = html;
 }
 
 // ─── Vista Annuale ───
@@ -3657,11 +3793,75 @@ function renderCalendar() {
   lucide.createIcons();
 }
 
+// ─── Card comprimibili (Saldo, Rimanenza, Calendario, Riepilogo) ───
+const CARD_STATE_KEY = 'ferie-planner-card-state';
+const CARD_NAMES = ['saldo', 'rimanenza', 'calendario', 'riepilogo'];
+
+function getCardState() {
+  try {
+    const raw = localStorage.getItem(CARD_STATE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) { return {}; }
+}
+
+function setCardCollapsed(name, collapsed, persist) {
+  const card = document.querySelector(`[data-card="${name}"]`);
+  if (!card) return;
+  card.classList.toggle('collapsed', collapsed);
+  const btn = card.querySelector(`[data-card-toggle="${name}"]`);
+  if (btn) {
+    btn.setAttribute('aria-expanded', String(!collapsed));
+    btn.title = collapsed ? 'Espandi sezione' : 'Comprimi sezione';
+    const label = btn.querySelector('.collapse-label');
+    if (label) label.textContent = collapsed ? 'Espandi' : 'Comprimi';
+  }
+  if (persist) {
+    const map = getCardState();
+    map[name] = collapsed;
+    try { localStorage.setItem(CARD_STATE_KEY, JSON.stringify(map)); } catch (e) {}
+  }
+}
+
+function toggleCard(name) {
+  const card = document.querySelector(`[data-card="${name}"]`);
+  if (!card) return;
+  setCardCollapsed(name, !card.classList.contains('collapsed'), true);
+}
+
+function applyCardState() {
+  const map = getCardState();
+  for (const name of CARD_NAMES) setCardCollapsed(name, !!map[name], false);
+}
+
+// Riepilogo compatto mostrato nell'intestazione quando la card è chiusa.
+function renderCompactSummaries() {
+  const saldoEl = document.getElementById('saldo-compact');
+  if (saldoEl) {
+    const parts = [];
+    for (const c of CATEGORIES) {
+      const v = getInitial(c.key);
+      if (v > 0) parts.push(`${c.short} ${fmtDays(v)} g`);
+    }
+    saldoEl.textContent = parts.length ? parts.join(' · ') : 'nessun saldo';
+  }
+  const remEl = document.getElementById('remaining-compact');
+  if (remEl) {
+    const rem = computeRemaining();
+    const parts = [];
+    for (const c of CATEGORIES) {
+      const init = getInitial(c.key);
+      if (init > 0) parts.push(`${c.short} ${fmtDays(Math.max(0, rem[c.key]))} g`);
+    }
+    remEl.textContent = parts.length ? parts.join(' · ') : 'nessun saldo';
+  }
+}
+
 function renderAll() {
   renderCalendar();
   renderRemaining();
   renderYearProgress();
   renderMonthlySummary();
+  renderCompactSummaries();
 }
 
 // ─── Modal ───
@@ -4143,6 +4343,7 @@ function updateInitial() {
   }
   saveState();
   renderRemaining();
+  renderCompactSummaries();
 }
 
 function resetYear() {
@@ -4492,6 +4693,7 @@ async function startApp() {
   loadState(curYear);
   syncInputs();
   renderAll();
+  applyCardState();
   // Allinea a salire: spinge sul cloud eventuali dati locali piu' recenti
   scheduleCloudSync();
 }
