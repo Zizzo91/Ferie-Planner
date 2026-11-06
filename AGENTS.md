@@ -41,6 +41,13 @@ Le card **Saldo Iniziale**, **Rimanenza**, **Calendario** e **Riepilogo Mensile*
 - Da chiusa, l'header mostra un riepilogo compatto (`#saldo-compact`, `#remaining-compact`) calcolato da `renderCompactSummaries()` e aggiornato da `renderAll()` e `updateInitial()`.
 - Il **Riepilogo Mensile** è una card autonoma (`#monthly-summary`) dopo il Calendario, con collapse indipendente. `renderMonthlySummary()` non riscrive più l'intero `innerHTML`: mostra/nasconde `#monthly-table-wrap` e `#monthly-empty`, così header e pulsante restano intatti.
 - La **Vista Annuale** resta una card separata (`#annual-card`) con il suo pulsante di chiusura.
+- **Mobile (<600px)**: da chiuse, il titolo e il riepilogo compatto sono in colonna (`.card-head h2` diventa `flex-direction: column`) e il riepilogo va a capo invece di essere troncato. Le parti del riepilogo usano spazi non-breaking (`\u00A0`, es. `Ferie\u00A025.0\u00A0g`) per non spezzare numero e unità.
+
+## Selezione multipla (barra bulk)
+- `#selection-bar` è nascosta con `display:none` e appare solo con `.visible` (classe aggiunta da `updateSelectionBar()`), quindi non riserva più ~300px di spazio vuoto sopra il calendario su mobile.
+- Durante il drag `moveDrag()` chiama `updateSelectionBar(true)`: aggiorna il contatore ma non mostra la barra. La barra compare al rilascio (`endDrag`), così il calendario non si sposta sotto il dito mentre si seleziona.
+- Importante: non reintrodurre `visibility:hidden` inline sull'elemento (il vecchio markup lo aveva e rendeva la barra invisibile anche con `.visible`, perché lo stile inline vince sulla classe). La vecchia `transition: visibility` è stata rimossa insieme allo spazio riservato.
+- Su mobile (<600px) le celle calendario hanno `aspect-ratio: auto`: con `aspect-ratio: 1` e `min-height: 46px` la griglia forzava 7 colonne da 46px e andava in overflow orizzontale a 320px.
 
 ## Struttura
 ```

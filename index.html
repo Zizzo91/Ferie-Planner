@@ -831,7 +831,7 @@ header p {
 
 /* ── Selezione multipla ── */
 .selection-bar {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
@@ -839,15 +839,13 @@ header p {
   padding: 8px 14px;
   margin: 0 0 12px;
   box-sizing: border-box;
-  visibility: hidden;
   background: var(--ferie-bg);
   border: 1px solid var(--ferie);
   border-radius: var(--radius-sm);
-  transition: visibility 0.2s;
 }
 
 .selection-bar.visible {
-  visibility: visible;
+  display: flex;
 }
 
 .bulk-applicator {
@@ -1734,6 +1732,27 @@ header p {
   /* Saldo iniziale: 2 colonne */
   .config-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
 
+  /* Riepilogo compatto delle card chiuse: va a capo invece di troncarsi */
+  [data-card].collapsed .card-head { align-items: flex-start; }
+  [data-card].collapsed .card-head h2 {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    overflow: visible;
+  }
+  [data-card].collapsed .card-compact {
+    display: block;
+    margin-left: 0;
+    max-width: none;
+    font-size: 11.5px;
+    line-height: 1.35;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  [data-card].collapsed .card-head .card-collapse { margin-top: 1px; }
+
   /* Rimanenza compatta */
   .remaining-bar-wrap { display: none; }
   .remaining-label { min-width: 76px; font-size: 13px; }
@@ -1747,7 +1766,7 @@ header p {
   .cal-nav button { padding: 6px 10px; font-size: 13px; }
 
   /* Celle calendario */
-  .cal-day { min-height: 46px; padding: 3px 1px; font-size: 11px; }
+  .cal-day { aspect-ratio: auto; min-height: 46px; padding: 3px 1px; font-size: 11px; }
   .day-number { font-size: 11px; }
   .day-pill { font-size: 8px; padding: 1px 4px; }
   .day-holiday-name { display: none; }
@@ -2003,7 +2022,7 @@ header p {
       <button type="button" class="card-collapse" data-card-toggle="calendario" onclick="toggleCard('calendario')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
     </div>
     <div class="card-body" data-card-body="calendario">
-    <div id="selection-bar" class="selection-bar" style="visibility:hidden">
+    <div id="selection-bar" class="selection-bar">
       <span id="selection-count" class="selection-count">— giorni selezionati</span>
       <div class="bulk-applicator">
         <label class="bulk-cat">
@@ -3840,7 +3859,7 @@ function renderCompactSummaries() {
     const parts = [];
     for (const c of CATEGORIES) {
       const v = getInitial(c.key);
-      if (v > 0) parts.push(`${c.short} ${fmtDays(v)} g`);
+      if (v > 0) parts.push(`${c.short}\u00A0${fmtDays(v)}\u00A0g`);
     }
     saldoEl.textContent = parts.length ? parts.join(' · ') : 'nessun saldo';
   }
@@ -3850,7 +3869,7 @@ function renderCompactSummaries() {
     const parts = [];
     for (const c of CATEGORIES) {
       const init = getInitial(c.key);
-      if (init > 0) parts.push(`${c.short} ${fmtDays(Math.max(0, rem[c.key]))} g`);
+      if (init > 0) parts.push(`${c.short}\u00A0${fmtDays(Math.max(0, rem[c.key]))}\u00A0g`);
     }
     remEl.textContent = parts.length ? parts.join(' · ') : 'nessun saldo';
   }
@@ -4516,12 +4535,14 @@ function clearSelection() {
   applySelectionVisual();
 }
 
-function updateSelectionBar() {
+function updateSelectionBar(deferShow) {
   const bar = document.getElementById('selection-bar');
   const count = document.getElementById('selection-count');
   if (selectedDates.length > 0) {
-    bar.classList.add('visible');
     count.textContent = selectedDates.length + (selectedDates.length === 1 ? ' giorno selezionato' : ' giorni selezionati');
+    // Durante il drag la barra resta nascosta (deferShow): mostrarla sposterebbe
+    // il calendario sotto il dito. Compare al rilascio.
+    if (!deferShow) bar.classList.add('visible');
   } else {
     bar.classList.remove('visible');
   }
@@ -4603,7 +4624,7 @@ function moveDrag(clientX, clientY) {
   currentDrag.pos = posOf(day);
   selectedDates = datesInRange();
   applySelectionVisual();
-  updateSelectionBar();
+  updateSelectionBar(true);
 }
 
 function endDrag(clientX, clientY) {
