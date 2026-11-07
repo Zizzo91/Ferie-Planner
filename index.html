@@ -1657,6 +1657,27 @@ header p {
 @media (max-width: 480px) {
   .nav-label { display: none; }
   .nav-btn-year { display: none; }
+
+  /* Header calendario: titolo davvero centrato (nav a sinistra, spazio a destra) */
+  .cal-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+  }
+  .cal-nav:first-child { justify-self: start; }
+  .cal-nav:last-child { justify-self: end; }
+
+  /* Calendario chiuso: header compatto su una riga, chevron in alto a destra */
+  .card[data-card="calendario"].collapsed { position: relative; }
+  .card[data-card="calendario"].collapsed .cal-header { margin-bottom: 0; }
+  .card[data-card="calendario"].collapsed .cal-tools {
+    position: absolute;
+    top: 16px;
+    right: 14px;
+    margin: 0;
+    padding: 0;
+  }
+  .card[data-card="calendario"].collapsed .cal-tools .annual-toggle { display: none; }
 }
 
 /* ── Stato vuoto mese animato ── */
@@ -1763,7 +1784,7 @@ header p {
   .cal-header { flex-wrap: nowrap; gap: 4px; }
   .cal-header h3 { font-size: 15px; text-align: center; flex: 1; }
   .cal-nav { gap: 4px; }
-  .cal-nav button { padding: 6px 10px; font-size: 13px; }
+  .cal-nav button { padding: 5px 7px; font-size: 13px; }
 
   /* Celle calendario */
   .cal-day { aspect-ratio: auto; min-height: 46px; padding: 3px 1px; font-size: 11px; }
