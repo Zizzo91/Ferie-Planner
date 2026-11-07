@@ -2,6 +2,24 @@
 
 Pianificazione ferie, permessi, ex festività, malattia e malattia figlio con **login PIN a 6 cifre** e **sincronizzazione cloud su Supabase**.
 
+## Tema Apple / reverse-brand (UI)
+L'interfaccia usa i token Apple estratti in `../reverse-brand/out/www.apple.com/tokens.css` e i componenti di `../reverse-brand/out/www.apple.com/brand-guide.html`. Non è un clone: i token sono riadattati all'app mantenendo struttura e funzioni esistenti.
+
+- **Font**: stack di sistema `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif` (nessun font remoto; `Inter` rimosso).
+- **Colori base**: azione `#0071e3` (dark `#2997ff`), superfici `#f5f5f7` / `#ffffff`, testo `#1d1d1f`, secondario `#6e6e73`, muted `#86868b`, bordo `#d2d2d7`.
+- **Categorie** (mappate sui colori di sistema Apple): ferie `#0071e3`, permesso `#34c759`, ex festività `#ff9f0a`, malattia `#ff3b30`, malattia figlio `#af52de`. Le varianti `-bg` / `-light` sono tinte soft per le celle del calendario.
+- **Forma**: card `--radius: 28px`, controlli/input `12px`, bottoni e pill `--radius-pill: 980px`, modali `28px` (bottom-sheet `24px` sotto 600px).
+- **Superfici**: card bianche con bordo quasi invisibile (`--card-border`) e ombra minima; niente ombre pesanti. Vetro (`--glass`, `backdrop-filter: saturate(180%) blur(24px)`) per header sticky, dropdown profilo e login.
+- **Header**: barra sticky in vetro con `.app-header-text` (titolo + sottotitolo) a sinistra e `.app-header-actions` (profilo, Salva, sync badge, Esci, tema) a destra. Sotto 760px va a capo; il sottotitolo sparisce sotto 760px.
+- **Sfondo calendario**: markup `.app-bg` fisso (`z-index:0`, `pointer-events:none`) con due bagliori radiali (blu/ambra), un calendario decorativo ruotato (barra gradiente, griglia di puntini, barrette evento) e una griglia di puntini. `.container` sta a `z-index:1`; il login resta sopra (`z-index:99999`). Il calendario decorativo è nascosto sotto 600px (restano glow e puntini).
+- **Input**: sfondo `--surface-2`, bordo trasparente, radius 12, focus con bordo `--action` e ring `0 0 0 4px rgba(0,113,227,.16)`.
+- **Calendario**: celle `border-radius: 14px` (10px mobile), hover su `--surface-2`, domenica con tinta rossa soft, oggi con bordo `--action`, selezione con outline blu e fondo `rgba(0,113,227,.12)`. Gli eventi usano fondo `*-light` e barra sinistra 3px del colore categoria.
+- **Altri componenti**: barra selezione con superficie + ombra, modal con overlay blur, toast pill scuro, tabelle con header maiuscoletto e bordi `--border`, login con card in vetro e tastierino pill.
+- **Dark mode**: `[data-theme="dark"]` ricalibra le stesse variabili su nero/`#1d1d1f`/`#2c2c2e`, con accenti più luminosi (`#2997ff`, `#30d158`, `#ff453a`, `#bf5af2`). `color-scheme` è impostato su `light`/`dark` per i controlli nativi.
+- **theme-color**: `toggleTheme()` e `initTheme()` aggiornano il meta `theme-color` (`#f5f5f7` light, `#000000` dark); il manifest usa `background_color`/`theme_color` `#f5f5f7` e un'icona calendario blu.
+- **Dove sta il CSS**: il grosso del restyle è in un blocco di override in fondo al `<style>`, dopo le media query originali, con proprie media query (900/760/599/400px) e `prefers-reduced-motion`. Non rimuoverlo: molti selettori originali restano e vengono sovrascritti qui.
+- **Vincoli**: gli ID e le funzioni JS esistenti sono invariati (`#theme-toggle`, `#logoutBtn`, `#btn-sync`, `#sync-badge`, `toggleCard`, `moveCardBy`, `applyToSelected`, …). `#logoutBtn` e `.btn-sync` sono stati riportati da `position:absolute` a `static` dentro l'header flessibile.
+
 ## Categorie evento
 Un registro centrale `CATEGORIES` in `index.html` è l'unica fonte di verità per le 5 categorie (chiave stato, chiave bozza, classe CSS, etichetta, id HTML):
 
@@ -64,7 +82,7 @@ Tutte e cinque le card sono spostabili: Saldo Iniziale, Rimanenza, Vista Annuale
 ## Struttura
 ```
 Ferie-Planner/
-├── index.html                    — App completa (calendario, saldi, vista annuale, card comprimibili, dark mode, login PIN)
+├── index.html                    — App completa (tema Apple, sfondo calendario, calendario, saldi, vista annuale, card comprimibili, dark mode, login PIN)
 ├── manifest.json                 — PWA manifest
 ├── sw.js                         — Service Worker pass-through
 ├── config/

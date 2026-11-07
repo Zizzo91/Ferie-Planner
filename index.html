@@ -6,75 +6,95 @@
 <title>Pianificazione Ferie</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#f5f5f7">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="config/supabase-config.js"></script>
 <style>
 :root {
-  --ferie: #3b82f6;
-  --ferie-bg: #dbeafe;
-  --ferie-light: #eff6ff;
-  --permesso: #10b981;
-  --permesso-bg: #d1fae5;
-  --permesso-light: #ecfdf5;
-  --exfesta: #f59e0b;
-  --exfesta-bg: #fde68a;
-  --exfesta-light: #fffbeb;
-  --malattia: #e11d48;
-  --malattia-bg: #ffe4e6;
-  --malattia-light: #fff1f2;
-  --malattiafiglio: #8b5cf6;
-  --malattiafiglio-bg: #ede9fe;
-  --malattiafiglio-light: #f5f3ff;
-  --sabato-bg: #f8faff;
-  --domenica-bg: #fef5f5;
-  --festivo: #ef4444;
-  --festivo-bg: #fef2f2;
-  --bg: #f0f2f5;
+  color-scheme: light;
+  /* ── Palette categorie (Apple system colours) ── */
+  --ferie: #0071e3;
+  --ferie-bg: #e5f1ff;
+  --ferie-light: #f2f8ff;
+  --permesso: #34c759;
+  --permesso-bg: #e4f8ea;
+  --permesso-light: #f2fcf5;
+  --exfesta: #ff9f0a;
+  --exfesta-bg: #fff1dc;
+  --exfesta-light: #fff9f0;
+  --malattia: #ff3b30;
+  --malattia-bg: #ffe9e8;
+  --malattia-light: #fff5f5;
+  --malattiafiglio: #af52de;
+  --malattiafiglio-bg: #f4e8fb;
+  --malattiafiglio-light: #faf4fe;
+  --sabato-bg: #f5f7fa;
+  --domenica-bg: #fff5f5;
+  --festivo: #ff3b30;
+  --festivo-bg: #fff0ef;
+
+  /* ── Superfici e testo (reverse-brand tokens) ── */
+  --bg: #f5f5f7;
   --surface: #ffffff;
-  --text: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --border: #e2e8f0;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
-  --transition: 0.2s ease;
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --surface-2: #f5f5f7;
+  --text: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-muted: #86868b;
+  --border: #d2d2d7;
+  --action: #0071e3;
+  --action-alt: #2997ff;
+
+  /* ── Forma, ombre, movimento ── */
+  --radius: 28px;
+  --radius-sm: 12px;
+  --radius-pill: 980px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.18);
+  --transition: 0.3s cubic-bezier(0, 0, 0.5, 1);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* ── Vetro e sfondo ── */
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(0, 0, 0, 0.045);
 }
 
 [data-theme="dark"] {
-  --ferie: #60a5fa;
-  --ferie-bg: #1e3a5f;
-  --ferie-light: #172554;
-  --permesso: #34d399;
-  --permesso-bg: #064e3b;
-  --permesso-light: #022c22;
-  --exfesta: #fbbf24;
-  --exfesta-bg: #713f12;
-  --exfesta-light: #451a03;
-  --malattia: #fb7185;
-  --malattia-bg: #4c0519;
-  --malattia-light: #2b0a13;
-  --malattiafiglio: #a78bfa;
-  --malattiafiglio-bg: #2e1065;
-  --malattiafiglio-light: #221a3d;
-  --sabato-bg: #0f172a;
-  --domenica-bg: #2d1b1b;
-  --festivo: #f87171;
-  --festivo-bg: #3b1212;
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --text: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --border: #2d3140;
-  --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.4);
+  color-scheme: dark;
+  --ferie: #2997ff;
+  --ferie-bg: #0a2a47;
+  --ferie-light: #071c30;
+  --permesso: #30d158;
+  --permesso-bg: #0c2f1a;
+  --permesso-light: #071f12;
+  --exfesta: #ff9f0a;
+  --exfesta-bg: #3a2604;
+  --exfesta-light: #241803;
+  --malattia: #ff453a;
+  --malattia-bg: #3a1210;
+  --malattia-light: #24100e;
+  --malattiafiglio: #bf5af2;
+  --malattiafiglio-bg: #2e1438;
+  --malattiafiglio-light: #1e0d25;
+  --sabato-bg: #141416;
+  --domenica-bg: #1c1213;
+  --festivo: #ff453a;
+  --festivo-bg: #3a1210;
+  --bg: #000000;
+  --surface: #1d1d1f;
+  --surface-2: #2c2c2e;
+  --text: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --text-muted: #86868b;
+  --border: #38383a;
+  --action: #2997ff;
+  --action-alt: #64d2ff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.65);
+  --glass: rgba(29, 29, 31, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --card-border: rgba(255, 255, 255, 0.07);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1881,12 +1901,405 @@ body.card-dragging * {
 #sync-badge.ok { background:#22c55e; }
 #sync-badge.err { background:#ef4444; color:#fff; }
 #sync-badge.syncing { background:#0ea5e9; }
+
+/* ══════════════════════════════════════════════════════════════
+   Tema Apple / reverse-brand — UI refresh + sfondo calendario
+   ══════════════════════════════════════════════════════════════ */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  padding: 24px 16px 40px;
+}
+
+::selection { background: var(--action); color: #fff; }
+
+.container { position: relative; z-index: 1; max-width: 860px; }
+
+/* ── Sfondo decorativo: calendario ── */
+.app-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.app-bg-glow { position: absolute; border-radius: 50%; filter: blur(90px); }
+.app-bg-glow-a { width: 620px; height: 620px; top: -260px; right: -180px; background: radial-gradient(circle, rgba(0,113,227,.30), rgba(0,113,227,0) 68%); }
+.app-bg-glow-b { width: 520px; height: 520px; bottom: -220px; left: -180px; background: radial-gradient(circle, rgba(255,159,10,.20), rgba(255,159,10,0) 70%); }
+.app-bg-calendar { position: absolute; top: 150px; right: max(-150px, calc(50% - 760px)); width: 400px; height: 340px; border-radius: 34px; background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 44px 100px rgba(0,0,0,.08); transform: rotate(7deg); overflow: hidden; }
+.app-bg-calendar-bar { position: relative; height: 56px; background: linear-gradient(115deg, #0071e3 0%, #2997ff 55%, #64d2ff 100%); }
+.app-bg-calendar-bar::before,
+.app-bg-calendar-bar::after { content: ""; position: absolute; top: 14px; width: 10px; height: 30px; border-radius: 6px; background: rgba(255,255,255,.85); }
+.app-bg-calendar-bar::before { left: 64px; }
+.app-bg-calendar-bar::after { right: 64px; }
+.app-bg-calendar-grid { position: absolute; inset: 84px 26px 26px; background-image: radial-gradient(circle, rgba(0,113,227,.20) 0 5px, rgba(0,113,227,0) 5.6px); background-size: 46px 46px; background-position: 4px 4px; border-radius: 16px; }
+.app-bg-event { position: absolute; height: 11px; border-radius: 6px; }
+.app-bg-event.e1 { width: 74px; left: 66px; top: 128px; background: rgba(0,113,227,.42); }
+.app-bg-event.e2 { width: 54px; left: 172px; top: 174px; background: rgba(52,199,89,.48); }
+.app-bg-event.e3 { width: 64px; left: 96px; top: 220px; background: rgba(255,159,10,.52); }
+.app-bg-dots { position: absolute; left: 28px; bottom: 26px; width: 240px; height: 150px; background-image: radial-gradient(circle, rgba(0,0,0,.10) 0 1.6px, rgba(0,0,0,0) 2.1px); background-size: 18px 18px; opacity: .7; }
+
+[data-theme="dark"] .app-bg-calendar { background: rgba(29,29,31,.55); border-color: rgba(255,255,255,.10); box-shadow: 0 44px 110px rgba(0,0,0,.6); }
+[data-theme="dark"] .app-bg-calendar-grid { background-image: radial-gradient(circle, rgba(41,151,255,.30) 0 5px, rgba(41,151,255,0) 5.6px); }
+[data-theme="dark"] .app-bg-glow-a { background: radial-gradient(circle, rgba(41,151,255,.28), rgba(41,151,255,0) 68%); }
+[data-theme="dark"] .app-bg-glow-b { background: radial-gradient(circle, rgba(255,159,10,.10), rgba(255,159,10,0) 70%); }
+[data-theme="dark"] .app-bg-dots { background-image: radial-gradient(circle, rgba(255,255,255,.12) 0 1.6px, rgba(255,255,255,0) 2.1px); }
+
+/* ── Header in vetro ── */
+header {
+  position: sticky;
+  top: 12px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  text-align: left;
+  margin: 0 0 22px;
+  padding: 14px 18px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(0,0,0,.08);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+header h1 { font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.025em; color: var(--text); }
+header p { font-size: 13px; color: var(--text-secondary); margin-top: 3px; max-width: 54ch; line-height: 1.4; }
+.app-header-text { min-width: 0; }
+.app-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* ── Controlli header: pill ── */
+.btn-sync, .theme-toggle, #logoutBtn {
+  position: static;
+  top: auto;
+  right: auto;
+  height: 38px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  box-shadow: none;
+  font-family: var(--font);
+  transition: var(--transition);
+}
+.btn-sync { padding: 0 15px; gap: 6px; font-size: 13px; font-weight: 500; }
+.theme-toggle, #logoutBtn { width: 38px; font-size: 16px; }
+.btn-sync:hover, .theme-toggle:hover, #logoutBtn:hover { background: var(--border); color: var(--text); border-color: transparent; }
+
+.profile-select {
+  margin-top: 0;
+  height: 38px;
+  padding: 0 15px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.profile-select:hover { background: var(--border); color: var(--text); border-color: transparent; }
+
+.profile-dropdown {
+  min-width: 200px;
+  padding: 6px;
+  border-radius: 18px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+.profile-dropdown-item { border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.profile-dropdown-item:hover { background: var(--surface-2); }
+.profile-dropdown-item.active { color: var(--action); }
+.profile-dropdown-divider { background: var(--border); }
+
+#sync-badge { position: static; top: auto; right: auto; font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: var(--radius-pill); box-shadow: none; }
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 18px;
+}
+.card h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  color: var(--text);
+}
+.card-head { margin-bottom: 18px; }
+.card-compact { color: var(--text-muted); font-weight: 400; font-size: 12px; letter-spacing: 0; }
+
+/* ── Pulsanti secondari ── */
+.card-collapse, .annual-toggle, .btn-undo, .btn-file, .children-add, .btn-reset, .modal-close {
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  transition: var(--transition);
+}
+.card-collapse:hover, .annual-toggle:hover, .btn-undo:hover, .btn-file:hover, .children-add:hover, .btn-reset:hover, .modal-close:hover { background: var(--border); color: var(--text); border-color: transparent; }
+.card-drag { width: 30px; height: 30px; border-radius: var(--radius-pill); background: transparent; color: var(--text-muted); }
+.card-drag:hover { background: var(--surface-2); border-color: transparent; color: var(--text); }
+.card-drag:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+.children-add { border: 1px dashed var(--border); background: transparent; }
+.children-add:hover { border-color: var(--malattiafiglio); color: var(--malattiafiglio); background: transparent; }
+
+/* ── Input ── */
+.config-field label { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.01em; }
+.config-field input,
+.children-row input[type="text"],
+.children-row input[type="number"],
+.profile-add-row input,
+.modal-add-row input,
+.modal-add-row select.child-select,
+.bulk-input,
+.bulk-select {
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--text);
+  font-family: var(--font);
+  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+.config-field input, .children-row input[type="text"], .profile-add-row input { height: 40px; padding: 0 12px; font-size: 15px; }
+.config-field input:focus,
+.children-row input:focus,
+.profile-add-row input:focus,
+.modal-add-row input:focus,
+.modal-add-row select.child-select:focus,
+.bulk-input:focus,
+.bulk-select:focus {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--action);
+  box-shadow: 0 0 0 4px rgba(0,113,227,.16);
+}
+.config-hint { color: var(--text-muted); }
+
+/* ── Rimanenza ── */
+.remaining-row { border-radius: 12px; }
+.remaining-row:hover { background: var(--surface-2); }
+.remaining-label { font-weight: 500; }
+.remaining-bar-wrap { height: 7px; background: var(--surface-2); border-radius: var(--radius-pill); }
+.remaining-bar { border-radius: var(--radius-pill); }
+.remaining-pct { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.remaining-fraction { font-variant-numeric: tabular-nums; }
+
+/* ── Calendario ── */
+.cal-header { margin-bottom: 14px; }
+.cal-header h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.cal-nav button {
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.cal-nav button:hover { background: var(--border); color: var(--text); border-color: transparent; }
+.cal-tools { margin-top: -4px; margin-bottom: 12px; }
+.cal-grid { gap: 4px; }
+.cal-day-header { font-size: 11px; letter-spacing: 0.08em; color: var(--text-muted); padding: 8px 0; }
+.cal-day {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  min-height: 68px;
+  padding: 6px 3px;
+  font-size: 15px;
+  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+.cal-day:hover { background: var(--surface-2); border-color: transparent; }
+.cal-day.sabato { background: transparent; }
+.cal-day.sabato:hover { background: var(--surface-2); }
+.cal-day.domenica { background: rgba(255,59,48,.045); }
+.cal-day.domenica:hover { background: rgba(255,59,48,.09); }
+.cal-day.oggi { border-color: var(--action); border-width: 2px; }
+.cal-day.selected { outline: 2px solid var(--action); outline-offset: -2px; background: rgba(0,113,227,.12); }
+.cal-day.has-ferie { background: var(--ferie-light); border-left: 3px solid var(--ferie); }
+.cal-day.has-permesso { background: var(--permesso-light); border-left: 3px solid var(--permesso); }
+.cal-day.has-exfesta { background: var(--exfesta-light); border-left: 3px solid var(--exfesta); }
+.cal-day.has-malattia { background: var(--malattia-light); border-left: 3px solid var(--malattia); }
+.cal-day.has-malattiafiglio { background: var(--malattiafiglio-light); border-left: 3px solid var(--malattiafiglio); }
+.cal-day.has-multi { background: var(--surface-2); border-left: 3px solid; border-image: linear-gradient(180deg, var(--ferie), var(--permesso), var(--exfesta), var(--malattia), var(--malattiafiglio)) 1; }
+.cal-day.run-start { border-radius: 14px 0 0 14px; }
+.cal-day.run-end { border-radius: 0 14px 14px 0; }
+.cal-day.run-inner { border-radius: 0; }
+.cal-day.run-single { border-radius: 14px; }
+.day-pill { border-radius: 6px; font-weight: 600; }
+.legend { border-top: 1px solid var(--border); }
+.legend-dot { border-radius: 5px; }
+
+/* ── Barra selezione ── */
+.selection-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.08);
+  padding: 10px 14px;
+}
+.bulk-cat { background: var(--surface-2); border-color: transparent; border-radius: 12px; }
+.bulk-apply { border-radius: var(--radius-pill); padding: 6px 12px; }
+.bulk-input, .bulk-select { background: var(--surface); }
+.selection-count { color: var(--action); }
+
+/* ── Modal ── */
+.modal-overlay { background: rgba(0,0,0,.30); backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
+.modal { border-radius: 28px; box-shadow: var(--shadow-lg); padding: 28px; }
+.modal-header h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.modal-section-title { font-size: 11px; letter-spacing: 0.08em; color: var(--text-muted); }
+.modal-event { border-radius: 12px; }
+.modal-close { width: 32px; height: 32px; padding: 0; font-size: 15px; }
+.modal-add-row button { border-radius: var(--radius-pill); border-width: 1px; }
+.modal-add-row input, .modal-add-row select.child-select { border-radius: 12px; }
+
+/* ── Toast ── */
+.toast {
+  border-radius: var(--radius-pill);
+  background: rgba(29,29,31,.92);
+  color: #fff;
+  padding: 12px 20px;
+  box-shadow: 0 14px 40px rgba(0,0,0,.28);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.toast.success { background: rgba(29,29,31,.92); }
+.toast.error { background: rgba(150, 22, 16, .94); }
+
+/* ── Tabelle ── */
+#monthly-table th { font-size: 11px; letter-spacing: 0.06em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+#monthly-table th, #monthly-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+#monthly-table .totale { border-top: 1px solid var(--border); }
+#annual-grid .annual-cell { border-radius: 4px; }
+
+/* ── Login ── */
+#loginScreen {
+  background:
+    radial-gradient(60% 80% at 18% 8%, rgba(41,151,255,.50), rgba(41,151,255,0) 62%),
+    radial-gradient(55% 70% at 88% 92%, rgba(255,159,10,.26), rgba(255,159,10,0) 62%),
+    linear-gradient(160deg, #0b0b0f 0%, #101a2b 55%, #05070c 100%);
+}
+[data-theme="dark"] #loginScreen {
+  background:
+    radial-gradient(60% 80% at 18% 8%, rgba(41,151,255,.34), rgba(41,151,255,0) 62%),
+    radial-gradient(55% 70% at 88% 92%, rgba(255,159,10,.16), rgba(255,159,10,0) 62%),
+    linear-gradient(160deg, #050507 0%, #0b1220 55%, #000 100%);
+}
+#loginCard {
+  background: rgba(255,255,255,.84);
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: 30px;
+  box-shadow: 0 40px 100px rgba(0,0,0,.42);
+  backdrop-filter: saturate(180%) blur(30px);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+  padding: 32px 28px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+[data-theme="dark"] #loginCard { background: rgba(29,29,31,.84); border-color: rgba(255,255,255,.12); }
+.login-mark {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0071e3, #64d2ff);
+  box-shadow: 0 12px 30px rgba(0,113,227,.32);
+}
+#loginCard h2 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+#loginCard p { font-size: 13px; color: var(--text-secondary); }
+.pin-dot { width: 12px; height: 12px; border: 1.5px solid var(--text-muted); }
+.pin-dot.filled { background: var(--action); border-color: var(--action); }
+.pin-btn {
+  border: 1px solid transparent;
+  background: var(--surface-2);
+  border-radius: 14px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+.pin-btn:hover { background: var(--border); border-color: transparent; }
+.pin-btn:active { transform: scale(.96); }
+
+/* ── Scrollbar ── */
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .app-bg-calendar { width: 320px; height: 280px; right: -150px; top: 120px; opacity: .8; }
+  .app-bg-calendar-grid { inset: 72px 22px 22px; background-size: 38px 38px; }
+  .app-bg-event.e1 { top: 112px; left: 52px; width: 58px; }
+  .app-bg-event.e2 { top: 150px; left: 136px; width: 44px; }
+  .app-bg-event.e3 { top: 188px; left: 76px; width: 50px; }
+}
+
+@media (max-width: 760px) {
+  header { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
+  header p { display: none; }
+  .app-header-actions { width: 100%; justify-content: flex-start; }
+}
+
+@media (max-width: 599px) {
+  body { padding: 10px 8px 24px; }
+  .card { padding: 18px 16px; border-radius: 22px; margin-bottom: 14px; }
+  header { top: 8px; border-radius: 18px; margin-bottom: 16px; }
+  header h1 { font-size: 19px; }
+  .app-header-actions { gap: 6px; }
+  .btn-sync, .theme-toggle, #logoutBtn, .profile-select { height: 34px; }
+  .theme-toggle, #logoutBtn { width: 34px; }
+  .profile-select { padding: 0 12px; font-size: 12px; }
+  .cal-header h3 { font-size: 16px; }
+  .cal-nav button { padding: 6px 9px; font-size: 12px; }
+  .cal-day { min-height: 46px; padding: 3px 1px; border-radius: 10px; font-size: 12px; }
+  .cal-day.run-start { border-radius: 10px 0 0 10px; }
+  .cal-day.run-end { border-radius: 0 10px 10px 0; }
+  .cal-day.run-single { border-radius: 10px; }
+  .cal-grid { gap: 3px; }
+  .modal { border-radius: 24px 24px 0 0; padding: 22px 16px; }
+  .app-bg-calendar { display: none; }
+  .app-bg-dots { width: 160px; height: 110px; opacity: .5; }
+}
+
+@media (max-width: 400px) {
+  .app-header-actions { gap: 5px; }
+  .profile-select { padding: 0 9px; }
+  .card { padding: 16px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
 </style>
 </head>
 <body>
+<div class="app-bg" aria-hidden="true">
+  <div class="app-bg-glow app-bg-glow-a"></div>
+  <div class="app-bg-glow app-bg-glow-b"></div>
+  <div class="app-bg-calendar">
+    <div class="app-bg-calendar-bar"></div>
+    <div class="app-bg-calendar-grid"></div>
+    <span class="app-bg-event e1"></span>
+    <span class="app-bg-event e2"></span>
+    <span class="app-bg-event e3"></span>
+  </div>
+  <div class="app-bg-dots"></div>
+</div>
 <div id="loginScreen">
   <div id="loginCard">
-    <h2>🔒 Ferie Planner</h2>
+    <div class="login-mark" aria-hidden="true">🗓</div>
+    <h2>Ferie Planner</h2>
     <p>Inserisci il PIN per accedere</p>
     <div id="loginError"></div>
     <div id="loginStatus"></div>
@@ -1913,16 +2326,20 @@ body.card-dragging * {
 <div class="container">
 
   <header>
-    <h1>Pianificazione Ferie</h1>
-    <p>Gestisci ferie, permessi, ex festività, malattia e malattia figlio sul calendario</p>
-    <button class="theme-toggle" id="logoutBtn" onclick="logout()" title="Esci" style="display:none">🚪</button>
-    <div class="profile-select" id="profile-select" onclick="toggleProfileDropdown(event)">
-      <span>👤</span><span id="profile-name">—</span><span style="font-size:10px;margin-left:2px">▼</span>
-      <div class="profile-dropdown" id="profile-dropdown"></div>
+    <div class="app-header-text">
+      <h1>Pianificazione Ferie</h1>
+      <p>Gestisci ferie, permessi, ex festività, malattia e malattia figlio sul calendario</p>
     </div>
-    <button class="btn-sync" id="btn-sync" onclick="saveLocal()" title="Salva localmente"><span id="sync-icon">💾</span><span id="sync-label">Salva</span></button>
-    <span id="sync-badge" title="" style="display:none"></span>
-    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
+    <div class="app-header-actions">
+      <div class="profile-select" id="profile-select" onclick="toggleProfileDropdown(event)">
+        <span>👤</span><span id="profile-name">—</span><span style="font-size:10px;margin-left:2px">▼</span>
+        <div class="profile-dropdown" id="profile-dropdown"></div>
+      </div>
+      <button class="btn-sync" id="btn-sync" onclick="saveLocal()" title="Salva localmente"><span id="sync-icon">💾</span><span id="sync-label">Salva</span></button>
+      <span id="sync-badge" title="" style="display:none"></span>
+      <button class="theme-toggle" id="logoutBtn" onclick="logout()" title="Esci" style="display:none">🚪</button>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
+    </div>
   </header>
 
   <div id="cards-stack">
@@ -2296,12 +2713,18 @@ console.log('Ferie Planner loaded');
 })();
 
 // ── Dark Mode ──
+function syncThemeColor(isDark) {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', isDark ? '#000000' : '#f5f5f7');
+}
+
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
   html.setAttribute('data-theme', isDark ? '' : 'dark');
   localStorage.setItem('ferie-planner-theme', isDark ? '' : 'dark');
   document.getElementById('theme-toggle').textContent = isDark ? '🌙' : '☀️';
+  syncThemeColor(!isDark);
 }
 
 function initTheme() {
@@ -2309,6 +2732,7 @@ function initTheme() {
   if (saved === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
     document.getElementById('theme-toggle').textContent = '☀️';
+    syncThemeColor(true);
   }
 }
 

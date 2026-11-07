@@ -2,6 +2,7 @@
 
 Pianificazione ferie, permessi, ex festività, malattia e malattia figlio, con **login PIN a 6 cifre** e **sincronizzazione cloud su Supabase** (cross-device).
 
+- **Interfaccia Apple**: tema ispirato ai componenti Apple (font di sistema SF Pro, blu `#0071e3`, card arrotondate, bottoni pill, header in vetro), con uno sfondo decorativo a tema calendario e animazioni discrete.
 - **Calendario interattivo**: clicca un giorno per assegnare/rimuovere ferie, permessi, ex festività, malattia e malattia figlio.
 - **Saldi parziali**: ore consumate per categoria e residui, divisi per la giornata lavorativa (8 ore).
 - **Malattia figlio**: massimo 10 giorni per anno (80 ore). Oltre il limite compare un avviso, ma l'inserimento non viene bloccato.
@@ -10,7 +11,7 @@ Pianificazione ferie, permessi, ex festività, malattia e malattia figlio, con *
 - **Card comprimibili**: Saldo Iniziale, Rimanenza, Calendario e Riepilogo Mensile si chiudono con il pulsante in alto a destra. Lo stato resta memorizzato e, da chiusa, la card mostra un riepilogo compatto nell'intestazione (su mobile va a capo senza troncarsi; il calendario chiuso resta su una sola riga).
 - **Card riposizionabili**: trascina la maniglia `⠿` nell'intestazione di una card (anche su touch/PWA) per spostarla sopra o sotto le altre — ad esempio il Calendario sopra il Saldo Iniziale o il Riepilogo Mensile in cima. L'ordine resta memorizzato sul dispositivo; da tastiera puoi selezionare la maniglia e usare le frecce ↑/↓.
 - **Selezione multipla**: trascina sui giorni del calendario per selezionarli e applicare le ore in blocco; la barra con i contatori compare al rilascio della selezione.
-- **Dark mode**, **undo** (5 livelli), **export/import JSON**, festività italiane e tooltip.
+- **Dark mode coordinata al tema**, **undo** (5 livelli), **export/import JSON**, festività italiane e tooltip.
 - **Profilo multiplo** (Simone, Michela, …): ogni profilo salva i propri dati per anno.
 - **Cloud**: ogni salvataggio aggiorna Supabase (schema `ferie`); all'apertura i dati vengono ripresi dal cloud dopo il login.
 
