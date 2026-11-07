@@ -44,6 +44,17 @@ Le card **Saldo Iniziale**, **Rimanenza**, **Calendario** e **Riepilogo Mensile*
 - **Mobile (<600px)**: da chiuse, il titolo e il riepilogo compatto sono in colonna (`.card-head h2` diventa `flex-direction: column`) e il riepilogo va a capo invece di essere troncato. Le parti del riepilogo usano spazi non-breaking (`\u00A0`, es. `Ferie\u00A025.0\u00A0g`) per non spezzare numero e unità.
 - **Calendario chiuso (<480px)**: header compatto su una riga. `.cal-tools` diventa `position: absolute` in alto a destra, `.annual-toggle` è nascosto e `.cal-header` perde il margine inferiore (card ~57px invece di ~110px). Il titolo del mese è centrato con una griglia `minmax(0,1fr) auto minmax(0,1fr)` e i pulsanti mese hanno padding `5px 7px` per non sovrapporsi al titolo a 320px.
 
+## Card riposizionabili (drag & drop)
+Tutte e cinque le card sono spostabili: Saldo Iniziale, Rimanenza, Vista Annuale, Calendario e Riepilogo Mensile.
+
+- Markup: le card stanno dentro `#cards-stack` e ognuna ha `data-sortable="saldo|rimanenza|annuale|calendario|riepilogo"`. Ogni header espone un handle `.card-drag[data-card-drag]` (`⠿`) separato dai pulsanti collapse/nav, così trascinare non attiva altri comandi.
+- Ordine default: `['saldo','rimanenza','annuale','calendario','riepilogo']`. L'ordine corrente è persistito in `localStorage` con chiave `ferie-planner-card-order` (array di nomi, solo locale: non fa parte dello stato cloud/Supabase).
+- `getCardOrder()` normalizza l'array salvato (scarta nomi ignoti/duplicati e appende i mancanti), `applyCardOrder()` riordina i nodi con `appendChild` in quell'ordine e `saveCardOrder()` riscrive l'array leggendo il DOM. `applyCardOrder()` è invocato nell'init (IIFE `initCardReorder`), quindi l'ordine è applicato al primo render.
+- Drag con **Pointer Events** (`pointerdown` su `#cards-stack` con delegation, poi `pointermove`/`pointerup`/`pointercancel`/`blur` su `window`): si evita `setPointerCapture` perché il riordino sposta i nodi nel DOM e il capture sul nodo spostato è fragile. `touch-action: none` sull'handle abilita il drag touch su PWA iPhone.
+- Riordino live durante il drag confrontando la `clientY` con il midpoint delle card visibili (`visibleSortableCards`, filtra `display:none` come Vista Annuale/Riepilogo chiusi). Auto-scroll quando si trascina a meno di 70px dai bordi.
+- Accessibilità: con l'handle a fuoco le frecce `↑`/`↓` spostano la card di una posizione (`moveCardBy`), con `aria-label` e `title` descrittivi.
+- `body.card-dragging` disabilita la selezione del testo e forza il cursore `grabbing`; `.card.dragging` alza `z-index` e mostra l'ombra.
+
 ## Selezione multipla (barra bulk)
 - `#selection-bar` è nascosta con `display:none` e appare solo con `.visible` (classe aggiunta da `updateSelectionBar()`), quindi non riserva più ~300px di spazio vuoto sopra il calendario su mobile.
 - Durante il drag `moveDrag()` chiama `updateSelectionBar(true)`: aggiorna il contatore ma non mostra la barra. La barra compare al rilascio (`endDrag`), così il calendario non si sposta sotto il dito mentre si seleziona.

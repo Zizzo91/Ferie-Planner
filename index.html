@@ -420,6 +420,60 @@ header p {
   flex-shrink: 0;
 }
 
+/* ── Card riposizionabili ── */
+.card-drag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1;
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.card-drag:hover {
+  color: var(--text);
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.card-drag:active {
+  cursor: grabbing;
+}
+
+.card-drag:focus-visible {
+  outline: 2px solid var(--ferie);
+  outline-offset: 2px;
+}
+
+.card.dragging {
+  position: relative;
+  z-index: 5;
+  opacity: 0.92;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+}
+
+body.card-dragging {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.card-dragging * {
+  cursor: grabbing !important;
+}
+
 .card-compact {
   display: none;
   margin-left: 8px;
@@ -1871,11 +1925,16 @@ header p {
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
   </header>
 
+  <div id="cards-stack">
+
   <!-- Saldo Iniziale -->
-  <div class="card" data-card="saldo">
+  <div class="card" data-card="saldo" data-sortable="saldo">
     <div class="card-head">
       <h2>Saldo Iniziale <span class="card-compact" id="saldo-compact"></span></h2>
-      <button type="button" class="card-collapse" data-card-toggle="saldo" onclick="toggleCard('saldo')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
+      <div class="card-head-right">
+        <button type="button" class="card-drag" data-card-drag="saldo" aria-label="Sposta card Saldo Iniziale" title="Trascina per spostare · frecce ↑/↓"><span aria-hidden="true">⠿</span></button>
+        <button type="button" class="card-collapse" data-card-toggle="saldo" onclick="toggleCard('saldo')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
+      </div>
     </div>
     <div class="card-body" data-card-body="saldo">
     <div class="config-grid">
@@ -1917,10 +1976,11 @@ header p {
   </div>
 
   <!-- Rimanenza -->
-  <div class="card" data-card="rimanenza">
+  <div class="card" data-card="rimanenza" data-sortable="rimanenza">
     <div class="card-head">
       <h2>Rimanenza <span class="card-compact" id="remaining-compact"></span></h2>
       <div class="card-head-right">
+        <button type="button" class="card-drag" data-card-drag="rimanenza" aria-label="Sposta card Rimanenza" title="Trascina per spostare · frecce ↑/↓"><span aria-hidden="true">⠿</span></button>
         <button class="btn-undo" id="undo-btn" onclick="undo()" title="Annulla ultima azione" style="display:none">↩ Annulla</button>
         <button type="button" class="card-collapse" data-card-toggle="rimanenza" onclick="toggleCard('rimanenza')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
       </div>
@@ -1996,10 +2056,11 @@ header p {
   </div>
 
   <!-- Vista Annuale -->
-  <div class="card" id="annual-card" style="display:none">
+  <div class="card" id="annual-card" data-sortable="annuale" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <h2 style="margin-bottom:0">Vista Annuale</h2>
       <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" class="card-drag" data-card-drag="annuale" aria-label="Sposta card Vista Annuale" title="Trascina per spostare · frecce ↑/↓"><span aria-hidden="true">⠿</span></button>
         <span style="font-size:13px;font-weight:600;color:var(--text-secondary)" id="annual-year-label"></span>
         <button class="annual-toggle" onclick="toggleAnnualView()" title="Chiudi vista annuale">✕</button>
       </div>
@@ -2018,7 +2079,7 @@ header p {
   </div>
 
   <!-- Calendario -->
-  <div class="card" data-card="calendario">
+  <div class="card" data-card="calendario" data-sortable="calendario">
     <div class="cal-header">
       <div class="cal-nav">
         <button onclick="navMonth(-1)" title="Mese precedente" class="nav-btn">
@@ -2039,6 +2100,7 @@ header p {
       </div>
     </div>
     <div class="cal-tools">
+      <button type="button" class="card-drag" data-card-drag="calendario" aria-label="Sposta card Calendario" title="Trascina per spostare · frecce ↑/↓"><span aria-hidden="true">⠿</span></button>
       <button class="annual-toggle" onclick="toggleAnnualView()">🗓 Annuale</button>
       <button type="button" class="card-collapse" data-card-toggle="calendario" onclick="toggleCard('calendario')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
     </div>
@@ -2095,10 +2157,13 @@ header p {
   </div>
 
   <!-- Riepilogo Mensile -->
-  <div class="card" id="monthly-summary" data-card="riepilogo" style="display:none">
+  <div class="card" id="monthly-summary" data-card="riepilogo" data-sortable="riepilogo" style="display:none">
     <div class="card-head">
       <h2>Riepilogo Mensile</h2>
-      <button type="button" class="card-collapse" data-card-toggle="riepilogo" onclick="toggleCard('riepilogo')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
+      <div class="card-head-right">
+        <button type="button" class="card-drag" data-card-drag="riepilogo" aria-label="Sposta card Riepilogo Mensile" title="Trascina per spostare · frecce ↑/↓"><span aria-hidden="true">⠿</span></button>
+        <button type="button" class="card-collapse" data-card-toggle="riepilogo" onclick="toggleCard('riepilogo')" aria-expanded="true" title="Comprimi sezione"><span class="chev">▾</span><span class="collapse-label">Comprimi</span></button>
+      </div>
     </div>
     <div class="card-body" data-card-body="riepilogo">
       <div id="monthly-table-wrap" style="overflow-x:auto">
@@ -2119,6 +2184,8 @@ header p {
       </div>
     </div>
   </div>
+
+  </div><!-- /cards-stack -->
 
 </div>
 
@@ -3872,6 +3939,143 @@ function applyCardState() {
   const map = getCardState();
   for (const name of CARD_NAMES) setCardCollapsed(name, !!map[name], false);
 }
+
+// ─── Card riposizionabili (drag & drop + frecce) ───
+const CARD_ORDER_KEY = 'ferie-planner-card-order';
+const CARD_ORDER_DEFAULT = ['saldo', 'rimanenza', 'annuale', 'calendario', 'riepilogo'];
+
+function getCardsStack() {
+  return document.getElementById('cards-stack');
+}
+
+function getCardOrder() {
+  let saved = [];
+  try {
+    const raw = localStorage.getItem(CARD_ORDER_KEY);
+    saved = raw ? JSON.parse(raw) : [];
+  } catch (e) { saved = []; }
+  if (!Array.isArray(saved)) saved = [];
+  const order = [];
+  for (const name of saved) {
+    if (CARD_ORDER_DEFAULT.includes(name) && !order.includes(name)) order.push(name);
+  }
+  for (const name of CARD_ORDER_DEFAULT) {
+    if (!order.includes(name)) order.push(name);
+  }
+  return order;
+}
+
+function applyCardOrder() {
+  const stack = getCardsStack();
+  if (!stack) return;
+  for (const name of getCardOrder()) {
+    const card = stack.querySelector(`[data-sortable="${name}"]`);
+    if (card) stack.appendChild(card);
+  }
+}
+
+function saveCardOrder() {
+  const stack = getCardsStack();
+  if (!stack) return;
+  const order = [...stack.querySelectorAll('[data-sortable]')].map(el => el.dataset.sortable);
+  try { localStorage.setItem(CARD_ORDER_KEY, JSON.stringify(order)); } catch (e) {}
+}
+
+function visibleSortableCards(stack) {
+  return [...stack.querySelectorAll('[data-sortable]')].filter(el => el.getClientRects().length > 0);
+}
+
+let cardDrag = null;
+
+function startCardDrag(e, handle) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  const card = handle.closest('[data-sortable]');
+  const stack = getCardsStack();
+  if (!card || !stack) return;
+  e.preventDefault();
+  handle.focus({ preventScroll: true });
+  cardDrag = { card, handle, pointerId: e.pointerId };
+  card.classList.add('dragging');
+  document.body.classList.add('card-dragging');
+  window.addEventListener('pointermove', moveCardDrag, { passive: false });
+  window.addEventListener('pointerup', endCardDrag);
+  window.addEventListener('pointercancel', endCardDrag);
+  window.addEventListener('blur', endCardDrag);
+}
+
+function moveCardDrag(e) {
+  if (!cardDrag || e.pointerId !== cardDrag.pointerId) return;
+  e.preventDefault();
+  const stack = getCardsStack();
+  const card = cardDrag.card;
+  const y = e.clientY;
+  // Auto-scroll quando si trascina vicino ai bordi dello schermo
+  if (y < 70) window.scrollBy(0, -12);
+  else if (y > window.innerHeight - 70) window.scrollBy(0, 12);
+  const siblings = visibleSortableCards(stack).filter(el => el !== card);
+  let target = null;
+  for (const el of siblings) {
+    const r = el.getBoundingClientRect();
+    if (y < r.top + r.height / 2) { target = el; break; }
+  }
+  if (target) {
+    if (card.nextElementSibling !== target) stack.insertBefore(card, target);
+  } else {
+    const last = siblings[siblings.length - 1];
+    if (last && card !== last) {
+      const after = last.nextElementSibling;
+      if (after !== card) stack.insertBefore(card, after);
+    }
+  }
+}
+
+function endCardDrag(e) {
+  if (!cardDrag) return;
+  if (e && e.pointerId !== undefined && e.pointerId !== cardDrag.pointerId) return;
+  const { card } = cardDrag;
+  card.classList.remove('dragging');
+  document.body.classList.remove('card-dragging');
+  window.removeEventListener('pointermove', moveCardDrag);
+  window.removeEventListener('pointerup', endCardDrag);
+  window.removeEventListener('pointercancel', endCardDrag);
+  window.removeEventListener('blur', endCardDrag);
+  cardDrag = null;
+  saveCardOrder();
+}
+
+function moveCardBy(name, dir) {
+  const stack = getCardsStack();
+  if (!stack) return;
+  const card = stack.querySelector(`[data-sortable="${name}"]`);
+  if (!card) return;
+  const cards = visibleSortableCards(stack);
+  const idx = cards.indexOf(card);
+  if (idx === -1) return;
+  const target = cards[idx + dir];
+  if (!target) return;
+  if (dir < 0) stack.insertBefore(card, target);
+  else stack.insertBefore(card, target.nextElementSibling);
+  saveCardOrder();
+  const handle = card.querySelector('.card-drag');
+  if (handle) handle.focus({ preventScroll: true });
+}
+
+(function initCardReorder() {
+  const stack = getCardsStack();
+  if (!stack) return;
+  stack.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('.card-drag');
+    if (handle) startCardDrag(e, handle);
+  });
+  stack.addEventListener('keydown', (e) => {
+    const handle = e.target.closest('.card-drag');
+    if (!handle) return;
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    moveCardBy(handle.dataset.cardDrag, e.key === 'ArrowUp' ? -1 : 1);
+  });
+  applyCardOrder();
+})();
 
 // Riepilogo compatto mostrato nell'intestazione quando la card è chiusa.
 function renderCompactSummaries() {
